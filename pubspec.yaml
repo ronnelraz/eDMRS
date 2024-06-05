@@ -1,0 +1,138 @@
+name: edmrs
+description: "CPF Electornic Doctor Management Records"
+publish_to: 'none'
+version: 1.0.0+1
+
+environment:
+  sdk: '>=3.3.3 <4.0.0'
+
+dependencies:
+  flutter:
+    sdk: flutter
+  cupertino_icons: ^1.0.6
+  flutter_svg: ^2.0.10+1
+  fluttertoast: ^8.2.5
+  http: ^1.2.1
+  flutter_spinkit: ^5.2.1
+  art_sweetalert: ^0.0.5
+  shared_preferences: ^2.2.3
+  animations: ^2.0.11
+  flutter_animated_dialog: ^2.0.1
+  location: ^6.0.1
+  nominatim_geocoding: ^0.0.6
+  alert_dialog: ^1.0.2
+  animated_custom_dropdown: ^3.0.0
+  toastification: ^2.0.0
+  theme_mode_handler: ^3.0.0
+  lottie: ^3.1.2
+  localstorage: ^5.0.0
+  encrypt: ^5.0.3
+  intl: ^0.19.0
+  responsive_grid: ^2.4.4
+  provider: ^6.1.2
+  file_picker: ^8.0.3
+  sized_icon_button: ^0.0.2
+ 
+
+  
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^4.0.0
+  flutter_launcher_icons: "^0.13.1"
+
+
+flutter_launcher_icons:
+  android: "launcher_icon"
+  ios: true
+  image_path: "assets/logo.png"
+  min_sdk_android: 21 # android min sdk min:16, default 21
+  web:
+    generate: true
+    image_path: "assets/logo.png"
+  windows:
+    generate: true
+    image_path: "assets/logo.png"
+    icon_size: 48 # min:48, max:256, default: 48
+  macos:
+    generate: true
+    image_path: "assets/logo.png"    
+
+flutter:
+  uses-material-design: true
+
+  assets:
+    - assets/clip.svg
+    - assets/icon_small.png
+    - assets/user.svg
+    - assets/password.svg
+    - assets/login.svg
+    - assets/food.png
+    - assets/flutter_create.svg
+    - assets/flutter_edit.svg
+    - assets/flutter_confirm.svg
+    - assets/flutter_document.svg
+    - assets/flutter_sync.svg
+    - assets/smoke.svg
+    - assets/logo.png
+    - assets/icon_toast/check-circle.svg
+    - assets/icon_toast/circle-xmark.svg
+    - assets/icon_toast/info.svg
+    - assets/icon_toast/triangle-warning.svg
+    - assets/lottie/area.json
+    - assets/icon_toast/logout.svg
+    - assets/menu/admission.png
+    - assets/menu/reimbursement.png
+    - assets/menu/appointment.png
+    - assets/menu/history.png
+   
+
+  fonts:
+    - family: Urbanist
+      fonts:
+        - asset: assets/fonts/Urbanist-Black.ttf
+          weight: 900
+        - asset: assets/fonts/Urbanist-BlackItalic.ttf
+          weight: 900
+          style: italic
+        - asset: assets/fonts/Urbanist-ExtraBold.ttf
+          weight: 800
+        - asset: assets/fonts/Urbanist-ExtraBoldItalic.ttf
+          weight: 800
+          style: italic
+        - asset: assets/fonts/Urbanist-Bold.ttf
+          weight: 700
+        - asset: assets/fonts/Urbanist-BoldItalic.ttf
+          weight: 700
+          style: italic
+        - asset: assets/fonts/Urbanist-SemiBold.ttf
+          weight: 600
+        - asset: assets/fonts/Urbanist-SemiBoldItalic.ttf
+          weight: 600
+          style: italic
+        - asset: assets/fonts/Urbanist-Medium.ttf
+          weight: 500
+        - asset: assets/fonts/Urbanist-MediumItalic.ttf
+          weight: 500
+          style: italic
+        - asset: assets/fonts/Urbanist-Regular.ttf
+          weight: 400
+        - asset: assets/fonts/Urbanist-Italic.ttf
+          weight: 400
+          style: italic
+        - asset: assets/fonts/Urbanist-Light.ttf
+          weight: 300
+        - asset: assets/fonts/Urbanist-LightItalic.ttf
+          weight: 300
+          style: italic
+        - asset: assets/fonts/Urbanist-ExtraLight.ttf
+          weight: 200
+        - asset: assets/fonts/Urbanist-ExtraLightItalic.ttf
+          weight: 200
+          style: italic
+        - asset: assets/fonts/Urbanist-Thin.ttf
+          weight: 100
+        - asset: assets/fonts/Urbanist-ThinItalic.ttf
+          weight: 100
+          style: italic    

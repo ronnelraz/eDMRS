@@ -1,0 +1,330 @@
+// ignore_for_file: avoid_print, use_build_context_synchronously, sized_box_for_whitespace, use_key_in_widget_constructors, prefer_const_constructors_in_immutables, use_super_parameters, unused_import
+import 'dart:convert';
+import 'package:art_sweetalert/art_sweetalert.dart';
+import 'package:edmrs/API/api_service.dart';
+import 'package:edmrs/components/config.dart';
+import 'package:edmrs/pages/area.dart';
+import 'package:edmrs/pages/menu.dart';
+
+import 'package:flutter/material.dart';
+
+import 'package:flutter_svg/flutter_svg.dart';
+import 'package:http/http.dart' as http;
+import 'dart:async';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:toastification/toastification.dart';
+
+import '../components/custom_button.dart';
+import '../components/custom_text_field.dart';
+import '../sharedpref/sharedpref.dart';
+
+
+
+void main() async {
+  
+  WidgetsFlutterBinding.ensureInitialized();  // Ensure all bindings are initialized
+
+  bool isLoggedIn = await getLoginStatus();
+  
+  runApp(MyApp(isLoggedIn: isLoggedIn));
+}
+
+
+class MyApp extends StatelessWidget {
+ 
+
+  final bool isLoggedIn;
+  const MyApp({required this.isLoggedIn, Key? key}) : super(key: key);
+
+
+
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      title: App.title,
+      debugShowCheckedModeBanner: false,
+      theme: ThemeData(
+        primaryColor: App.primaryColor,
+      ),
+      home: isLoggedIn ? Menu() : MyHomePage(title: App.title), 
+    );
+  }
+}
+
+class MyHomePage extends StatefulWidget {
+  final String title;
+  MyHomePage({required this.title});
+  
+  @override
+  LoginPage createState() => LoginPage();
+}
+
+class LoginPage extends State<MyHomePage> {
+  final TextEditingController username = TextEditingController();
+  final TextEditingController password = TextEditingController();
+  final FocusNode usernameFocus = FocusNode();
+  final FocusNode passwordFocus = FocusNode();
+  
+ 
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+       resizeToAvoidBottomInset: false, 
+      body: Center(
+        child: SingleChildScrollView( 
+           child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: <Widget>[
+            buildImage('assets/logo.png', 100, 100, Alignment.center),
+            const SizedBox(height: 20),
+            Text(
+              widget.title,
+              style: builderStyle(30,const Color.fromARGB(255, 0, 0, 0)),
+            ),
+            const SizedBox(height: 20),
+          Container(
+            width: 350, // Set the desired width
+            height: 50,
+            child: CustomTextField(
+              customerRadius: 10.0,
+              controller: username,
+              hintText: "Username",
+              cursorColor: const Color.fromRGBO(43, 42, 42, 1),
+              focusNode: usernameFocus,
+              prefixIcon: Align(
+                  widthFactor: 2.0,
+                  heightFactor: 2.0,
+                  child: buildSvgPicture('assets/user.svg',BoxFit.scaleDown,width: 25,height: 25, color: App.iconColor),
+                  
+                ),
+            ),
+          ),
+          const SizedBox(height: 20),
+            Container(
+            width: 350, // Set the desired width
+            height: 50,
+            child: CustomTextField(
+               customerRadius: 10.0,
+              controller: password,
+              hintText: "Password",
+              cursorColor: const Color.fromRGBO(43, 42, 42, 1),
+              isPassword: true, 
+              focusNode: passwordFocus,
+              prefixIcon: Align(
+                  widthFactor: 2.0,
+                  heightFactor: 2.0,
+                  child: buildSvgPicture('assets/password.svg',BoxFit.scaleDown,width: 25,height: 25,color: App.iconColor),
+                  
+                ),
+            ),
+          ),
+          const SizedBox(height: 20),
+          Container(
+            width: 350, // Set the desired width
+            child: CustomButtonWithIcon(
+              icon: 'assets/login.svg',
+              label: 'Login',
+              onPressed: () async {
+                  String enteredUsername = username.text;
+                  String enteredPassword = password.text;
+
+                  if (enteredUsername.isEmpty) {
+                   
+                     await notification_toast(
+                            context,
+                            "Username",
+                            "Please enter valid username", 
+                            toastificationType: ToastificationType.error, 
+                            toastificationStyle: ToastificationStyle.fillColored, 
+                            descTextColor: Colors.white,
+                            icon: const Icon(Icons.error)
+                        );
+
+                    FocusScope.of(context).requestFocus(usernameFocus);
+                  } else if (enteredPassword.isEmpty) {
+                    // toast("Please Enter your Password");
+                    //  alert("Invalid","Please enter your password", context);
+                     await notification_toast(
+                            context,
+                            "Password",
+                            "Please enter valid password", 
+                            toastificationType: ToastificationType.error, 
+                            toastificationStyle: ToastificationStyle.fillColored, 
+                            descTextColor: Colors.white,
+                            icon: const Icon(Icons.error)
+                        );
+                    FocusScope.of(context).requestFocus(passwordFocus);
+                  } else {
+                  
+
+                loading(context,"Please wait...");
+                    Map<String, String> body = {
+                      'username': enteredUsername,
+                      'password': enteredPassword,
+                    };
+
+                    try {
+                      var response = await postData('login', body);
+                      // ignore: unnecessary_null_comparison
+                      if (response != null) {
+                        if (response.statusCode == 200) {
+                          closeDialog(context);
+                          Map<String, dynamic> responseData = json.decode(response.body);
+                          if (responseData['success'] == 0) {
+
+                             await notification_toast(
+                                  context,
+                                  "Logged In",
+                                  responseData['message'], 
+                                  toastificationType: ToastificationType.success, 
+                                  toastificationStyle: ToastificationStyle.fillColored, 
+                                  descTextColor: Colors.white,
+                                  icon: const Icon(Icons.check)
+                              );
+                            
+                            bool saved = await setLoginStatus(true);
+                              if (saved) {
+                                print('Login status saved successfully.');
+                              } else {
+                                print('Failed to save login status.');
+                              }
+
+                            Navigator.of(context, rootNavigator: true).pop();
+                              intent(context, Area());  
+                           
+                            //  DialogSelectArea(
+                            //             "Area",
+                            //             "Please select an area:",
+                            //             context,
+                            //             ['Feedmill 1', 'Feedmill 2'],
+                            //             // initialItem: 'Area 1', // Optional: Set initial selection
+                            //             onConfirm: (selectedValue) async {
+                            //               // Handle the selected value here
+                            //               print('Selected area: $selectedValue');
+
+                            //               if(selectedValue == null){
+                            //                 await notification_toast(
+                            //                   context,
+                            //                   "Area Needed!",
+                            //                   "Please Select Area", 
+                            //                   toastificationType: ToastificationType.error, 
+                            //                   toastificationStyle: ToastificationStyle.fillColored, 
+                            //                   descTextColor: Colors.white,
+                            //                   icon: const Icon(Icons.error));
+                            //               }
+                            //               else{
+                            //               //    Map<String, dynamic> userInfo = responseData['user_info'];
+                            //               //     String fullname = userInfo['fullname'];
+                            //               //     String islandCode = userInfo['island_code'];
+                            //               //     String islandShortName = userInfo['island_short_name'];
+                            //               //     String islandName = userInfo['island_name'];
+                            //               //     String isArea = selectedValue;
+                                            
+                            //               //     setFullName(fullname);
+                            //               //     setIslandCode(islandCode);
+                            //               //     setIslandShortName( islandShortName);
+                            //               //     setIslandName(islandName);
+                            //               //     setIslandName(isArea);
+
+
+                            //               //   List<dynamic> operationsData = responseData['operation'];
+                            //               //   List<Map<String, String>> operationsList = [];
+                            //               //     for (var operation in operationsData) {
+                            //               //       String operationCode = operation['operation_code'];
+                            //               //       String operationName = operation['operation_name'];
+                            //               //       String activeFlag = operation['active_flag'];
+                            //               //       operationsList.add({
+                            //               //         'operation_code': operationCode,
+                            //               //         'operation_name': operationName,
+                            //               //         'active_flag': activeFlag,
+                            //               //         'isArea': isArea
+                            //               //       });
+                            //               //   }
+
+                            //               //  bool saveSuccess = await operations(operationsList);
+                            //               //   if (saveSuccess) {
+                            //               //     print('Operations data saved successfully!');
+                            //               //   } else {
+                            //               //     print('Failed to save operations data.');
+                            //               //   }
+
+                            //                bool saved = await setLoginStatus(true);
+                            //                 if (saved) {
+                            //                   print('Login status saved successfully.');
+                            //                 } else {
+                            //                   print('Failed to save login status.');
+                            //                 }
+
+                            //               Navigator.of(context, rootNavigator: true).pop();
+                            //                intent(context, Menu());  
+
+                            //               }
+                                          
+                            //             },
+                            //           );
+                            
+                            //  Timer(const Duration(seconds: 3), () {
+                            //     Navigator.of(context, rootNavigator: true).pop();
+                            //     intent(context, Menu());  
+                            //   });
+                            
+                          
+
+                          } else {
+                          
+                                await notification_toast(
+                                  context,
+                                  "Invalid username/password",
+                                   responseData['message'], 
+                                  toastificationType: ToastificationType.error, 
+                                  toastificationStyle: ToastificationStyle.fillColored, 
+                                  descTextColor: Colors.white,
+                                  icon: const Icon(Icons.error)
+                              );
+                          }
+                        
+                        } else {
+                          
+                              await notification_toast(
+                                  context,
+                                  "Invalid username/password",
+                                   response.statusCode.toString(), 
+                                  toastificationType: ToastificationType.error, 
+                                  toastificationStyle: ToastificationStyle.fillColored, 
+                                  descTextColor: Colors.white,
+                                  icon: const Icon(Icons.error)
+                              );
+                          print('Request failed with status: ${response.statusCode}');
+                        }
+                      } else {
+                           
+                          await notification_toast(
+                              context,
+                              "Login", 
+                                "Invalid Response", 
+                              toastificationType: ToastificationType.error, 
+                              toastificationStyle: ToastificationStyle.fillColored, 
+                              descTextColor: Colors.white,
+                              icon: const Icon(Icons.error)
+                          );
+                      }
+                    } catch (e) {
+                      // Handle exceptions
+                      print('Exception occurred: $e');
+                    }
+                  }
+                },
+              color: App.primaryButton,
+              iconColor: Colors.white,
+            ),
+          ),
+        ],
+        ),
+
+        )
+       
+      ),
+    );
+  }
+}
+
