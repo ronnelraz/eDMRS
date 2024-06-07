@@ -4,9 +4,11 @@ import 'package:card_loading/card_loading.dart';
 import 'package:edmrs/API/api_service.dart';
 import 'package:edmrs/sharedpref/sharedpref.dart';
 import 'package:flutter/material.dart';
+import 'package:wolt_modal_sheet/wolt_modal_sheet.dart';
 import '../components/config.dart';
 import 'package:intl/intl.dart';
 import 'package:animated_custom_dropdown/custom_dropdown.dart';
+import '../components/custom_previewdata.dart';
 import '../components/custom_text_area.dart';
 import '../components/custom_text_field.dart';
 import '../components/custom_button.dart';
@@ -65,6 +67,8 @@ class _AdmissionState extends State<Admission> {
    List<String> HOSPITAL_LNAME = [];
    List<String> hospital_code = [];
    List<String> HOSPITAL_SNAME = [];
+   String uploadFile_name = "";
+   String uploadFile = "";
    bool _isLoadings = true;
    
 
@@ -161,6 +165,9 @@ class _AdmissionState extends State<Admission> {
     super.dispose();
   }
 
+  ScrollController _scrollController = new ScrollController();
+    bool _keyboardVisible = false;
+
 
   @override
   Widget build(BuildContext context) {
@@ -174,9 +181,6 @@ class _AdmissionState extends State<Admission> {
             IconButton(
               icon: Icon(Icons.arrow_back),
               onPressed: () {
-                
-                // Navigator.of(context).pop(); // Navigate back to the previous screen
-                // Navigator.pushNamed(context, '/Menu');
                 Navigator.pushNamed(context, '/Menu');
               },
             ),
@@ -191,7 +195,7 @@ class _AdmissionState extends State<Admission> {
               style: TextStyle(fontSize: 19, fontWeight: FontWeight.w700),
             ),
             Text(
-              'ACCREDITED HOSPITAL REQUEST',
+              'Request Form',
               style: TextStyle(fontSize: 11, fontWeight: FontWeight.w400),
             ),
           ],
@@ -244,6 +248,9 @@ class _AdmissionState extends State<Admission> {
         child: Form(
           key: _formKey,
           child: ListView(
+            controller: _scrollController,
+            reverse: false,
+            shrinkWrap: true,
             children: [
                SizedBox(height: 5),
               CustomTextField(
@@ -364,41 +371,53 @@ class _AdmissionState extends State<Admission> {
                     controller: syntom,
                     focusNode: syntomFocus,
                     cursorColor: const Color.fromRGBO(43, 42, 42, 1),
+                    onTapx: () {
+                        setState(() {
+                              _keyboardVisible = MediaQuery.of(context).viewInsets.bottom > 0;
+                              if (_keyboardVisible) {
+                                // Scroll to the bottom when the keyboard is shown
+                                _scrollController.animateTo(
+                                  _scrollController.position.maxScrollExtent,
+                                  duration: Duration(milliseconds: 300),
+                                  curve: Curves.easeOut,
+                                );
+                              }
+                            });
+                    },
                   ),
                 ),
 
-              SizedBox(height: 20),
-              if (_selectedFiles.isEmpty)
-                CustomButtonWithIcon(
-                  icon: 'assets/clip.svg',
-                  label: 'Attach File ',
-                  onPressed:_pickFiles,
-                  color: Color.fromARGB(255, 46, 83, 218),
-                  iconColor: Colors.white,
-                ),
-              SizedBox(height: 20),
-              if (_selectedFiles.isNotEmpty)
-              SingleChildScrollView(
-                scrollDirection: Axis.horizontal,
-                child: Row(
-                  children: [
-                    SizedIconButton(
-                      color: const Color.fromARGB(255, 243, 33, 33),
-                      icon: Icon(
-                        Icons.delete,
-                        color: Colors.white,
-                        size: 15,
-                      ),
-                      onPressed: () {
-                         setState(() {
-                            _selectedFiles = "";
-                         });
-                      },
-                    ),
-                    Text(' Selected Files: ${_selectedFiles}'),
-                  ],
-                ),
-              ),
+              // SizedBox(height: 20),
+              // if (_selectedFiles.isEmpty)
+              //   CustomButtonWithIcon(
+              //     icon: 'assets/clip.svg',
+              //     label: 'Attach File ',
+              //     onPressed:_pickFiles,
+              //     color: Color.fromARGB(255, 46, 83, 218),
+              //     iconColor: Colors.white,
+              //   ),
+              // SizedBox(height: 20),
+              // if (_selectedFiles.isNotEmpty)
+              // SingleChildScrollView(
+              //   scrollDirection: Axis.horizontal,
+              //   child: Row(
+              //     children: [
+              //       SizedIconButton(
+              //         color: const Color.fromARGB(255, 243, 33, 33),
+              //         icon: Icon(
+              //           Icons.delete,
+              //           color: Colors.white,
+              //           size: 15,
+              //         ),
+              //         onPressed: _remove,
+              //         // onPressed: () {
+              //         //   // 
+              //         // },
+              //       ),
+              //       Text(' Selected Files: ${_selectedFiles}'),
+              //     ],
+              //   ),
+              // ),
 
               SizedBox(height: 20),
               // Save, Submit, and Cancel Buttons
@@ -410,26 +429,9 @@ class _AdmissionState extends State<Admission> {
                       width: MediaQuery.of(context).size.width * 0.25, // Adjust the width as needed
                       padding: const EdgeInsets.all(8.0),
                       child: CustomButtonWithIcon(
-                        icon: 'assets/icon_toast/logout.svg',
-                        label: 'Save',
-                        onPressed: () async {
-                          saveData("save");
-                        },
-                        color: Colors.green,
-                        iconColor: Colors.white,
-                      ),
-                    ),
-                  ),
-                  Expanded(
-                    child: Container(
-                      width: MediaQuery.of(context).size.width * 0.25, // Adjust the width as needed
-                      padding: const EdgeInsets.all(8.0),
-                      child: CustomButtonWithIcon(
                         icon: 'assets/icon_toast/check-circle.svg',
                         label: 'Submit',
-                        onPressed: () async {
-                          saveData("save");
-                        },
+                        onPressed: saveData,
                         color: Colors.blue,
                         iconColor: Colors.white,
                       ),
@@ -443,8 +445,7 @@ class _AdmissionState extends State<Admission> {
                         icon: 'assets/icon_toast/circle-xmark.svg',
                         label: 'Cancel',
                         onPressed: () async {
-                          Navigator.of(context).pop(); // Navigate back to the previous screen
-                          locStorage("page", "menu");
+                          Navigator.pushNamed(context, '/Menu');
                         },
                         color: Colors.red,
                         iconColor: Colors.white,
@@ -460,38 +461,81 @@ class _AdmissionState extends State<Admission> {
     );
   }
 
-  void _pickFiles() async {
-    try {
-      FilePickerResult? result = await FilePicker.platform.pickFiles(
-        type: FileType.custom,
-        allowedExtensions: ['jpg', 'pdf', 'doc'],
-        withData: !kIsWeb
-      );
 
+  void _remove() async {
+      alert(
+      "Remove",
+      "Are you sure you want to remove this file?", 
+      context,
+      onConfirm: () async {
+         setState(() {
+          Navigator.of(context).pop();
+          _selectedFiles = "";
+            uploadFile_name = "";
+            uploadFile = "";
+        }); 
+      });
+   
+  }
+
+  void _pickFiles() async {
+   
       if(kIsWeb){
-        print("s");
+         try {
+          FilePickerResult? result = await FilePicker.platform.pickFiles(
+             type: FileType.custom,
+              allowedExtensions: ['jpg', 'pdf', 'doc'],
+            );
+            if (result != null) {
+              PlatformFile file = result.files.first;
+              String filename = file.name;
+              String base64Data = base64Encode(file.bytes!);
+              setState(() {
+                 uploadFile_name = filename;
+                 uploadFile = base64Data;
+                _selectedFiles = filename;
+            });
+         
+            } else {
+              // User canceled the picker
+          }
+        } catch (e) {
+          print('Error picking files: $e');
+          // Handle any errors that occur during file picking
+        }
       }
       else{
+         try {
+          FilePickerResult? result = await FilePicker.platform.pickFiles(
+            type: FileType.custom,
+            allowedExtensions: ['jpg', 'pdf', 'doc'],
+            withData: true
+          );
+
           if (result != null && result.files.single.path != null) {
             PlatformFile file = result.files.first;
             String base64Data = base64Encode(file.bytes!);
+            String filename = file.name;
             log(base64Data);
             setState(() {
+               uploadFile_name = filename;
+               uploadFile = base64Data;
                 _selectedFiles = file.name;
             });
           } else {
             // User canceled the picker
             print("error talga");
           }
+          } catch (e) {
+            print('Error picking files: $e');
+            // Handle any errors that occur during file picking
+          }
       }
-    } catch (e) {
-      print('Error picking files: $e');
-      // Handle any errors that occur during file picking
-    }
+  
 }
   
 
-  void saveData(String type){
+  void saveData(){
     String requestDate = request_date.text;
     String empname = emp_name.text;
     String dept = department.text;
@@ -500,6 +544,8 @@ class _AdmissionState extends State<Admission> {
     String businessUnit = bu.text;
     String admit_date = admitdate.text;
     String synt = syntom.text;
+    String file_name = uploadFile_name;
+    String file_data = uploadFile;
     
     if(empname.isEmpty){
       //  FocusScope.of(con).requestFocus(empNameFocus);
@@ -545,10 +591,59 @@ class _AdmissionState extends State<Admission> {
         );
     }
     else{
-
+      Map<String, String> userData = {
+        'requestDate': requestDate,
+        'empname': empname,
+        'dept': dept,
+        'hostpital': hostpital,
+        'pos': pos,
+        'businessUnit': businessUnit,
+        'admit_date': admit_date,
+        'synt': synt,
+        'file_name': file_name,
+        'file_data': file_data,
+      };
+      showPreviewModal(userData);
     }
 
-
-    
   }
+
+void showPreviewModal(Map<String, String> userData) {
+  showDialog(
+    context: context,
+    builder: (BuildContext context) {
+      return AlertDialog(
+        title: const Text('Preview Data'),
+        content: SingleChildScrollView(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              CustomPreviewData(labelText:'Request Date :',  data: userData['requestDate'] ?? ''),
+              CustomPreviewData(labelText:'Employee Name :',  data: userData['empname'] ?? ''),
+              CustomPreviewData(labelText:'Department :',  data: userData['dept'] ?? ''),
+              CustomPreviewData(labelText:'Hospital :',  data: userData['hostpital'] ?? ''),
+              CustomPreviewData(labelText:'Position :',  data: userData['pos'] ?? ''),
+              CustomPreviewData(labelText:'Business Unit :',  data: userData['businessUnit'] ?? ''),
+              CustomPreviewData(labelText:'Admission Date :',  data: userData['admit_date'] ?? ''),
+              CustomPreviewData(labelText:'Symptoms :',  data: userData['synt'] ?? ''),
+            ],
+          ),
+        ),
+        actions: <Widget>[
+         CustomButtonWithIcon(
+            // icon: 'assets/icon_toast/check-circle.svg',
+            label: 'OK',
+            onPressed: () async {
+               Navigator.pop(context);
+            },
+          
+          )
+        ],
+      );
+    },
+  );
+}
+
+
+
 }

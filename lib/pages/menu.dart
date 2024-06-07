@@ -6,6 +6,7 @@ import 'package:card_loading/card_loading.dart';
 import 'package:edmrs/API/api_service.dart';
 import 'package:edmrs/components/custom_rich_text.dart';
 import 'package:edmrs/pages/admission.dart';
+import 'package:edmrs/pages/sample.dart';
 import 'package:edmrs/sharedpref/sharedpref.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
@@ -40,7 +41,7 @@ class _MenuState extends State<Menu> {
    List<String> _bal_name = [];
    List<String> _bal_amount = [];
    bool _isloadingBal = true;
-   late Timer _timer;
+   late Timer _timer = Timer(Duration(seconds: 0), () {});
     int _counter = 0;
    
    
@@ -48,45 +49,64 @@ class _MenuState extends State<Menu> {
    @override
   void initState() {
     super.initState();
-    
-    _loadEmployeeInfo();
-    dataLoadFunction();
+    _initializeData();;
+  }
 
-    
+ @override
+  void dispose() {
+    _timer.cancel();  
+    super.dispose();
+  }
+
+  Future<void> _initializeData() async {
+    await _loadEmployeeInfo();
+    await dataLoadFunction();
+    _startBalanceLoading();
+  }
+
+  Future<void> _loadEmployeeInfo() async {
+    try {
+      Map<String, String> info = await getEmployeeInfo();
+      setState(() {
+        _employeeInfo = info;
+         _isLoading = false;
+      });
+    } catch (e) {
+      print('Error loading employee info: $e');
+    }
+  }
+
+  Future<void> dataLoadFunction() async {
+   
+
+    await Future.delayed(const Duration(seconds: 3));  
+
+    setState(() {
+      _isLoadingScreen = false; 
+    });
+  }
+
+  void _startBalanceLoading() {
     Future.delayed(Duration(seconds: 5), () {
       _LoadBalance();
-       _timer = Timer.periodic(Duration(seconds: 1), (timer) {
-        setState(() {
-            _LoadBalance();
-          });
+      _timer = Timer.periodic(const Duration(seconds: 1), (timer) {
+        if (mounted) {
+           _LoadBalance();
+        } else {
+          timer.cancel();
+        }
       });
     });
-    
-    // if (kIsWeb) {
-    //     pages().then((page) {
-    //         if (page != null) {
-    //           if(page == 'admission'){
-    //               intent(context, Admission(toggleTheme: widget.toggleTheme, isDarkMode: widget.isDarkMode));
-    //           }
-    //         } 
-    //         else {
-    //             callLocStorage();
-    //         }
-    //       });
-    // } else {
-      
-    // }
   }
 
   Future<void> _LoadBalance() async {
     try {
-
       Map<String, String> body = {
         'year': '2024',
-        'empid': _employeeInfo[EMPID] ?? '',
+        'empid': _employeeInfo['EMPID'] ?? '',
       };
-      
-      var response = await balance('getBalance',body);
+
+      var response = await balance('getBalance', body);
       if (response.statusCode == 200) {
         Map<String, dynamic> responseData = json.decode(response.body);
         bool success = responseData['success'];
@@ -95,60 +115,40 @@ class _MenuState extends State<Menu> {
           List<dynamic> data = responseData['data'];
           List<String> bal_name = data.map((item) => item['BAL_NAME'].toString()).toList();
           List<String> bal_amount = data.map((item) => item['BAL_AMOUNT'].toString()).toList();
-          setState(() {
-            
+          if (mounted) {
+            setState(() {
             _bal_name = bal_name;
             _bal_amount = bal_amount;
             _isloadingBal = false;
-   
           });
-         
+          }
+        
         } else {
-          print('Login not successful. Response data: ${response.body}');
+          print('Loading balance not successful. Response data: ${response.body}');
+          if (mounted) {
+            setState(() {
+              _isloadingBal = false;
+            });
+          }
+        }
+      } else {
+        print('Loading balance failed: ${response.statusCode} ${response.body}');
+        if (mounted) {
           setState(() {
             _isloadingBal = false;
           });
         }
-      } else {
-        print('Login failed: ${response.statusCode} ${response.body}');
+      }
+    } catch (e) {
+      print('An error occurred while loading balance: $e');
+      if (mounted) {
         setState(() {
           _isloadingBal = false;
         });
       }
-    } catch (e) {
-      print('An error occurred: $e');
-      setState(() {
-        _isloadingBal = false;
-      });
     }
   }
 
-   dataLoadFunction() async {
-    setState(() {
-      _isLoadingScreen = true; // your loader has started to load
-    });
-   
-   await Future.delayed(Duration(seconds: 3));
-
-    Map<String, String> info = await getEmployeeInfo();
-
-    setState(() {
-      _employeeInfo = info;
-      _isLoadingScreen = false; // your loder will stop to finish after the data fetch
-    });
-  }
-
-   Future<void> _loadEmployeeInfo() async {
-    Map<String, String> info = await getEmployeeInfo();
-    setState(() {
-      _employeeInfo = info;
-      _isLoading = false;
-    });
-  }
-
-   void callLocStorage() {
-    locStorage("page", "menu");
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -161,19 +161,31 @@ class _MenuState extends State<Menu> {
         title: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(App.title,
-                style: const TextStyle(
-                    fontSize: 19,
-                    fontWeight: FontWeight.w700
-                )
-            ), // Title
-            const Text(
-              App.Subtitle, // Subtitle
-              style: TextStyle(
-                  fontSize: 13,
-                  fontWeight: FontWeight.w400
+            FittedBox(
+            fit: BoxFit.scaleDown, // or BoxFit.contain, BoxFit.cover, etc. depending on your needs
+            child: Text.rich(
+              TextSpan(
+                children: [
+                  TextSpan(
+                    text: getGreeting(),
+                    style: TextStyle(
+                      fontSize: 20,
+                      fontWeight: FontWeight.w400,
+                    ),
+                  ),
+                  TextSpan(
+                    text: ' ${_employeeInfo[EMPL_NAME]!.split(" ")[1]}', // Assuming you want to display the second part after splitting by space
+                    style: TextStyle(
+                      fontSize: 20,
+                      fontWeight: FontWeight.bold, // You can set different styles for different parts of the text
+                    ),
+                  ),
+                ],
               ),
             ),
+          ),
+
+
           ],
         ),
         leading: buildImage('assets/logo.png', 40, 40, Alignment.centerRight), // Icon
@@ -222,8 +234,8 @@ class _MenuState extends State<Menu> {
       
       body: LayoutBuilder(
               builder: (context, constraints) {
-                if (constraints.maxWidth > 802) {
-                  return buildWideLayout(context,constraints,400.0);
+                if (constraints.maxWidth > 500) {
+                  return buildWideLayout(context,constraints,280.0);
                 } else {
                   return buildNarrowLayout(context,constraints,700.0);
                 }
@@ -312,7 +324,7 @@ Widget buildFourColumnGrid(BoxConstraints constraints, double cardWidth, int cro
                     splashColor: Colors.blue.withOpacity(0.5),
                     highlightColor: Colors.blue.withOpacity(0.5),
                     onTap: () {
-                      if (index == 0) {
+                     if (index == 0) {
                       alert(
                         "IMPORTANT NOTICE",
                         "This accredited hospital request form is specifically designed for employees who have availed the hospitalization benefit at our affiliated hospitals. Please do not use this form for your Medical Expense Reimbursement.",
@@ -323,6 +335,10 @@ Widget buildFourColumnGrid(BoxConstraints constraints, double cardWidth, int cro
                           // intent(context, Admission(toggleTheme: widget.toggleTheme, isDarkMode: widget.isDarkMode),'/Admission');
                         },
                       );
+                    }
+                    else if(index == 1){
+                      Navigator.pushNamed(context, '/Sample');
+                     
                     }
                     if (index == 1) {
                       print("New Card tapped!");
@@ -347,7 +363,7 @@ Widget buildFourColumnGrid(BoxConstraints constraints, double cardWidth, int cro
                               Text(
                                 Menutitle[index].toUpperCase(),
                                 style: TextStyle(
-                                  color: widget.isDarkMode ? Color.fromARGB(255, 255, 255, 255) : const Color.fromARGB(255, 0, 0, 0),
+                                  color: widget.isDarkMode ? const Color.fromARGB(255, 255, 255, 255) : const Color.fromARGB(255, 0, 0, 0),
                                   fontSize: 10.0,
                                   fontWeight: FontWeight.w900,
                                   fontFamily: 'Urbanist',
@@ -398,15 +414,18 @@ Widget buildLeftColumn(double cardwidth) {
                 ),
               ),
               CustomRichText(
-                textBeforeSpan: getGreeting(),
+                textBeforeSpan: "",
                 spanText: _employeeInfo[EMPL_NAME] ?? '',
                 spanStyle: const TextStyle(
                   fontSize: App.card_textsize,
                   fontWeight: FontWeight.bold,
                 ),
-                icon: iconGreeting() == 'm' ? Icons.sunny : (iconGreeting() == 'a' ? Icons.wb_sunny_sharp : Icons.nights_stay),
+                 icon: Icons.person,
                 iconSize: 24.0,
-                iconColor: iconGreeting() == 'm' ? const Color.fromARGB(255, 193, 174, 1) : (iconGreeting() == 'a' ? Colors.orange : const Color.fromARGB(255, 91, 91, 91)),
+                iconColor: Colors.blue,
+                // icon: iconGreeting() == 'm' ? Icons.sunny : (iconGreeting() == 'a' ? Icons.wb_sunny_sharp : Icons.nights_stay),
+                // iconSize: 24.0,
+                // iconColor: iconGreeting() == 'm' ? const Color.fromARGB(255, 193, 174, 1) : (iconGreeting() == 'a' ? Colors.orange : const Color.fromARGB(255, 91, 91, 91)),
               ),
                CustomRichText(
                 textBeforeSpan: '',
@@ -444,7 +463,7 @@ Widget buildRightColumn(double width) {
     // constraints: BoxConstraints(maxWidth: 400), // Set the maximum width here
      width: width, 
     child: Card(
-      color: widget.isDarkMode ? const Color.fromARGB(255, 81, 81, 81) : Color.fromARGB(255, 255, 255, 255),
+      color: widget.isDarkMode ? const Color.fromARGB(255, 81, 81, 81) : const Color.fromARGB(255, 255, 255, 255),
       shadowColor: widget.isDarkMode ? const Color.fromARGB(255, 109, 109, 109) : const Color.fromARGB(255, 67, 67, 67),
       borderOnForeground: true,
       elevation: App.elevation,
@@ -470,15 +489,15 @@ Widget buildRightColumn(double width) {
                 _isloadingBal ? 
                  CardLoading(
                   height: 25,
-                  borderRadius: BorderRadius.all(Radius.circular(13)),
+                  borderRadius: const BorderRadius.all(Radius.circular(13)),
                   width: width,
-                  margin: EdgeInsets.only(top: 8),
+                  margin: const EdgeInsets.only(top: 8),
                 )
                :
                  CustomRichText(
                 textBeforeSpan: _bal_name[0],
                 spanText:  ' ₱${NumberFormat('#,###').format(int.parse(_bal_amount[0]))}',
-                spanStyle: TextStyle(
+                spanStyle: const TextStyle(
                   fontSize: App.card_textsize,
                   fontWeight: FontWeight.bold,
                 ),
@@ -489,15 +508,15 @@ Widget buildRightColumn(double width) {
                _isloadingBal ? 
                  CardLoading(
                   height: 25,
-                  borderRadius: BorderRadius.all(Radius.circular(15)),
+                  borderRadius: const BorderRadius.all(Radius.circular(15)),
                   width: width,
-                  margin: EdgeInsets.only(top:12),
+                  margin: const EdgeInsets.only(top:12),
                 )
                :
                  CustomRichText(
                 textBeforeSpan: _bal_name[1],
                 spanText:  ' ₱${NumberFormat('#,###').format(int.parse(_bal_amount[1]))}',
-                spanStyle: TextStyle(
+                spanStyle: const TextStyle(
                   fontSize: App.card_textsize,
                   fontWeight: FontWeight.bold,
                 ),

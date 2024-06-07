@@ -1,5 +1,6 @@
 // ignore_for_file: avoid_print, use_build_context_synchronously, sized_box_for_whitespace, use_key_in_widget_constructors, prefer_const_constructors_in_immutables, use_super_parameters, unused_import
 import 'dart:convert';
+import 'dart:developer';
 import 'package:art_sweetalert/art_sweetalert.dart';
 import 'package:edmrs/API/api_service.dart';
 import 'package:edmrs/components/MyNavigatorObserver.dart';
@@ -7,6 +8,7 @@ import 'package:edmrs/components/config.dart';
 import 'package:edmrs/pages/admission.dart';
 import 'package:edmrs/pages/area.dart';
 import 'package:edmrs/pages/menu.dart';
+import 'package:edmrs/pages/sample.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:http/http.dart' as http;
@@ -52,9 +54,10 @@ class _MyAppState extends State<MyApp> {
 
   void _initializeThemeMode() async {
     bool isDarkMode = await getDarkMode(); // Retrieve the saved theme mode
-    setState(() {
-      _themeMode = isDarkMode ? ThemeMode.dark : ThemeMode.light;
-    });
+     if (!mounted) return; // Ensure the widget is still in the tree
+      setState(() {
+        _themeMode = isDarkMode ? ThemeMode.dark : ThemeMode.light;
+      });
   }
 
   void _toggleTheme() {
@@ -78,6 +81,7 @@ class _MyAppState extends State<MyApp> {
         '/Area': (context) => Area(toggleTheme: _toggleTheme, isDarkMode: isDarkMode),
         '/Menu': (context) => Menu(toggleTheme: _toggleTheme, isDarkMode: isDarkMode),
         '/Admission': (context) => Admission(toggleTheme: _toggleTheme, isDarkMode: isDarkMode),
+        '/Sample': (context) => Sample(toggleTheme: _toggleTheme, isDarkMode: isDarkMode),
       },
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
@@ -206,45 +210,57 @@ class LoginPage extends State<MyHomePage> {
                           String enteredPassword = password.text;
 
                           if (enteredUsername.isEmpty) {
-                            await notification_toast(
-                              context,
-                              "Username",
-                              "Please enter valid username",
-                              toastificationType: ToastificationType.error,
-                              toastificationStyle: ToastificationStyle.fillColored,
-                              descTextColor: Colors.white,
-                              icon: const Icon(Icons.error),
-                            );
+                            try {
+                              await notification_toast(
+                                context,
+                                "Username",
+                                "Please enter valid username",
+                                toastificationType: ToastificationType.error,
+                                toastificationStyle: ToastificationStyle.fillColored,
+                                descTextColor: Colors.white,
+                                icon: const Icon(Icons.error),
+                              );
+                            } catch (e) {
+                              // Handle any errors that might occur during the toast notification
+                              print("Error showing toast notification: $e");
+                            }
+
+                           
 
                             FocusScope.of(context).requestFocus(usernameFocus);
                           } else if (enteredPassword.isEmpty) {
-                            await notification_toast(
-                              context,
-                              "Password",
-                              "Please enter valid password",
-                              toastificationType: ToastificationType.error,
-                              toastificationStyle: ToastificationStyle.fillColored,
-                              descTextColor: Colors.white,
-                              icon: const Icon(Icons.error),
-                            );
+                            try {
+                              await notification_toast(
+                                context,
+                                "Password",
+                                "Please enter valid password",
+                                toastificationType: ToastificationType.error,
+                                toastificationStyle: ToastificationStyle.fillColored,
+                                descTextColor: Colors.white,
+                                icon: const Icon(Icons.error),
+                              );
+                             } catch (e) {
+                              // Handle any errors that might occur during the toast notification
+                              print("Error showing toast notification: $e");
+                            }
                             FocusScope.of(context).requestFocus(passwordFocus);
                           } else {
                             loading(context, "Please wait...",widget.isDarkMode);
-                            Map<String, String> body = {
-                              'username': enteredUsername,
-                              'password': enteredPassword,
-                            };
-
-
+                           
                             try {
                               var response = await Login('login', enteredUsername, enteredPassword);
+                              log(response.toString());
+
+                              
+
+
                               if (response.statusCode == 200) {
                                   Map<String, dynamic> responseData = json.decode(response.body);
-                                  bool success = responseData['success'];
+                                   bool success = responseData['success'] ?? false;
                                   closeDialog(context);
                                   if (success) {
                                   // Process the data
-                              List<dynamic> data = responseData['data'];
+                                  List<dynamic> data = responseData['data'];
                                 for (var employee in data) {
                                   String empId = employee['EMPID'];
                                   String name = employee['EMPL_NAME'];
@@ -277,16 +293,7 @@ class LoginPage extends State<MyHomePage> {
                                     print("Failed to save employee information for $name");
                                   }
                                 }
-                                    //  await notification_toast(
-                                    //   context,
-                                    //   "Logged In",
-                                    //   responseData['message'],
-                                    //   toastificationType: ToastificationType.success,
-                                    //   toastificationStyle: ToastificationStyle.fillColored,
-                                    //   descTextColor: Colors.white,
-                                    //   icon: const Icon(Icons.check),
-                                    // );
-
+                              
                                     bool saved = await setLoginStatus(true);
                                     if (saved) {
                                       print('Login status saved successfully.');
@@ -303,6 +310,7 @@ class LoginPage extends State<MyHomePage> {
 
                                 } else {
                                   print('Login not successful. Response data: ${response.body}');
+                                  try {
                                     await notification_toast(
                                       context,
                                       "Invalid username/password",
@@ -312,26 +320,37 @@ class LoginPage extends State<MyHomePage> {
                                       descTextColor: Colors.white,
                                       icon: const Icon(Icons.error),
                                     );
+                                  } catch (e) {
+                                    // Handle any errors that might occur during the toast notification
+                                    print("Error showing toast notification: $e");
+                                  }
                                 }
 
 
                               } else {
                                 // Handle error response
                                 print('Login failed: ${response.statusCode} ${response.body}');
-                                 await notification_toast(
-                                    context,
-                                    "Invalid username/password",
-                                    response.statusCode.toString(),
-                                    toastificationType: ToastificationType.error,
-                                    toastificationStyle: ToastificationStyle.fillColored,
-                                    descTextColor: Colors.white,
-                                    icon: const Icon(Icons.error),
-                                  );
+                                try {
+                                  await notification_toast(
+                                      context,
+                                      "Invalid username/password",
+                                      response.statusCode.toString(),
+                                      toastificationType: ToastificationType.error,
+                                      toastificationStyle: ToastificationStyle.fillColored,
+                                      descTextColor: Colors.white,
+                                      icon: const Icon(Icons.error),
+                                    );
+                                  } catch (e) {
+                                    // Handle any errors that might occur during the toast notification
+                                    print("Error showing toast notification: $e");
+                                  }
                                   print('Request failed with status: ${response.statusCode}');
                               }
                             } catch (e) {
                               // Handle any errors that occurred during the request
                               print('An error occurred: $e');
+                              try {
+                                closeDialog(context);
                                await notification_toast(
                                   context,
                                   "Login",
@@ -341,6 +360,10 @@ class LoginPage extends State<MyHomePage> {
                                   descTextColor: Colors.white,
                                   icon: const Icon(Icons.error),
                                 );
+                              } catch (e) {
+                                // Handle any errors that might occur during the toast notification
+                                print("Error showing toast notification: $e");
+                              }
                             }
 
                           }

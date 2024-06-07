@@ -1,6 +1,7 @@
 // ignore_for_file: avoid_print
 
 import 'dart:convert';
+import 'dart:developer';
 
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
@@ -25,13 +26,16 @@ Future<http.Response> Login(String url, String username, String password) async 
     String credentials = '$username:$password';
     String encodedCredentials = base64Encode(utf8.encode(credentials));
     Map<String, String> headers = {
-      'Authorization': 'Basic $encodedCredentials'
+      'authorization': 'Basic $encodedCredentials'
     };
 
     var response = await http.post(
       Uri.parse(App.baseURLNEW + url),
-      headers: headers,
+      headers: headers
     );
+
+    log('Encoded credentials: $encodedCredentials');
+    log('Response: ${response.body}'); // Log the response body
 
     return response;
   } catch (e) {
@@ -48,7 +52,7 @@ Future<http.Response> Location(String url) async {
     await initLocalStorage();
     String encodedCredentials = localStorage.getItem(App.Auth) ?? '';
     Map<String, String> headers = {
-      'Authorization': 'Basic $encodedCredentials'
+      'authorization': 'Basic $encodedCredentials'
     };
 
     var response = await http.post(
@@ -72,7 +76,7 @@ Future<http.Response> Hospital(String url) async {
     await initLocalStorage();
     String encodedCredentials = localStorage.getItem(App.Auth) ?? '';
     Map<String, String> headers = {
-      'Authorization': 'Basic $encodedCredentials'
+      'authorization': 'Basic $encodedCredentials'
     };
 
     var response = await http.post(
@@ -95,7 +99,7 @@ Future<http.Response> balance(String url, Map<String, dynamic> body) async {
     await initLocalStorage();
     String encodedCredentials = localStorage.getItem(App.Auth) ?? '';
     Map<String, String> headers = {
-      'Authorization': 'Basic $encodedCredentials',
+      'authorization': 'Basic $encodedCredentials',
       'Content-Type': 'application/json', // Specify the content type as JSON
     };
 

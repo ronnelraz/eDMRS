@@ -13,23 +13,26 @@ class CustomLoading extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        crossAxisAlignment: CrossAxisAlignment.center,
-        children: <Widget>[
-          buildImage(img, 100, 100, Alignment.center), // Changed Widget.img to img
-          const SizedBox(height: 10),
-          Text(
-            text, // Changed Widget.text to text
-            style: const TextStyle(
-              color: Color.fromARGB(255, 0, 0, 0),
-              fontSize: 15.0,
-              fontWeight: FontWeight.w900,
-              fontFamily: 'Urbanist',
+    return Container(
+      color: Colors.white,
+      child: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: <Widget>[
+            buildImage(img, 100, 100, Alignment.center), // Changed Widget.img to img
+            const SizedBox(height: 10),
+            Text(
+              text, // Changed Widget.text to text
+              style: const TextStyle(
+                color: Color.fromARGB(255, 0, 0, 0),
+                fontSize: 15.0,
+                fontWeight: FontWeight.w900,
+                fontFamily: 'Urbanist',
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }

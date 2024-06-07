@@ -4,7 +4,7 @@ class CustomRichText extends StatelessWidget {
   final String textBeforeSpan;
   final String spanText;
   final TextStyle spanStyle;
-  final IconData icon;
+  final IconData? icon;
   final double iconSize;
   final Color iconColor;
 
@@ -13,7 +13,7 @@ class CustomRichText extends StatelessWidget {
     required this.textBeforeSpan,
     required this.spanText,
     required this.spanStyle,
-    required this.icon,
+    this.icon,
     this.iconSize = 24.0,
     this.iconColor = Colors.black,
   }) : super(key: key);

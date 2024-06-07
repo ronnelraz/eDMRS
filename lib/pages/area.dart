@@ -53,17 +53,22 @@ class _AreaState extends State<Area> {
         bool success = responseData['success'];
 
         if (success) {
-          List<dynamic> data = responseData['data'];
-          List<String> locations = data.map((item) => item['location_name'].toString()).toList();
-          List<String> location_code = data.map((item) => item['location_code'].toString()).toList();
-          List<String> bu_code = data.map((item) => item['bu_code'].toString()).toList();
-          setState(() {
-            _list = locations;
-            _loc_code = location_code;
-            _loc_bu_code = bu_code;
+          try {
+              List<dynamic> data = responseData['data'];
+            List<String> locations = data.map((item) => item['location_name'].toString()).toList();
+            List<String> location_code = data.map((item) => item['location_code'].toString()).toList();
+            List<String> bu_code = data.map((item) => item['bu_code'].toString()).toList();
+            setState(() {
+              _list = locations;
+              _loc_code = location_code;
+              _loc_bu_code = bu_code;
 
-            _isLoading = false;
-          });
+              _isLoading = false;
+            });
+          }
+          catch (e) {
+            print("Error fetching data: $e");
+          }
         } else {
           print('Login not successful. Response data: ${response.body}');
           setState(() {
@@ -120,7 +125,8 @@ class _AreaState extends State<Area> {
                 color: widget.isDarkMode ? Colors.white : Colors.blue[700],
                 size: 50.0,
               )
-              : CustomDropdown<String>(
+              : (_list.isNotEmpty
+                ? CustomDropdown<String>(
                   hintText: 'Select Location',
                   items: _list,
                   decoration: CustomDropdownDecoration(
@@ -150,7 +156,11 @@ class _AreaState extends State<Area> {
 
                     });
                   },
-                ),
+                )
+                : Text(
+                  'No locations available. Please try again later.',
+                  style: TextStyle(fontSize: 16, color: Colors.red),
+                )),
               ),
               const SizedBox(height: 20),
                 Row(
@@ -189,15 +199,20 @@ class _AreaState extends State<Area> {
 
                         } else {
                           print('Please select an area');
-                          await notification_toast(
-                            context,
-                            "Location Selection Required",
-                            "Oops! It seems like you haven't selected a location yet. Please choose one to continue. Thank you!",
-                            toastificationType: ToastificationType.info,
-                            toastificationStyle: ToastificationStyle.fillColored,
-                            descTextColor: Colors.white,
-                            icon: const Icon(Icons.info),
-                          );
+                           try {
+                            await notification_toast(
+                              context,
+                              "Location Selection Required",
+                              "Oops! It seems like you haven't selected a location yet. Please choose one to continue. Thank you!",
+                              toastificationType: ToastificationType.info,
+                              toastificationStyle: ToastificationStyle.fillColored,
+                              descTextColor: Colors.white,
+                              icon: const Icon(Icons.info),
+                            );
+                          } catch (e) {
+                            // Handle any errors that might occur during the toast notification
+                            print("Error showing toast notification: $e");
+                          }
                         } 
                       },
                       color: widget.isDarkMode ? Color.fromARGB(255, 38, 130, 196) : App.primaryButton,

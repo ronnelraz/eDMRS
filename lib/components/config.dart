@@ -192,7 +192,8 @@ TextStyle builderStyle(double size, Color color, {FontWeight? fontWeight}) {
 }
 
 
-Future notification_toast(BuildContext context, String title ,String desc,{ToastificationType? toastificationType, ToastificationStyle? toastificationStyle, Color? descTextColor, Icon? icon} ){
+Future<void> notification_toast(BuildContext context, String title ,String desc,{ToastificationType? toastificationType, ToastificationStyle? toastificationStyle, Color? descTextColor, Icon? icon} ){
+  
   final completer = Completer(); // Create a Completer
   
   toastification.show(
@@ -218,12 +219,6 @@ Future notification_toast(BuildContext context, String title ,String desc,{Toast
     //   );
     // },
   );
-
-  // Complete the Completer after the autoCloseDuration
-  Future.delayed(const Duration(seconds: 5), () {
-    completer.complete();
-  });
-
   // Return the Completer to allow awaiting its completion
   return completer.future;
 }
