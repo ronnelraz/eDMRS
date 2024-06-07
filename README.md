@@ -1,3 +1,2 @@
 # edmrs
-
-A new Flutter project.
+CPF Medical App
