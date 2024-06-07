@@ -27,6 +27,7 @@ class App {
   static Color primaryButton = Color.fromARGB(255, 63, 117, 251);
   static Color iconColor = Color.fromARGB(255, 0, 0, 0);
   static const String baseURL = 'https://agro.cpf-phil.com/api/PSCfood/home/';
+  static const String baseURLNEW = 'https://agro.cpf-phil.com/edmrs/api/';
   static const String str_logout = 'Are you sure you want to logout?';
   static const String fontFamily = 'Urbanist';
   static const String Subtitle = 'Online Medical Record';
@@ -57,7 +58,7 @@ String getGreeting() {
   if (hour < 12) {
     return 'Hi! good morning ';
   } else if (hour < 17) {
-    return 'GHello! good afternoon ';
+    return 'Hello! good afternoon ';
   } else {
     return 'Hi! good evening ';
   }
@@ -149,15 +150,20 @@ void checkLocationPermission() async {
 
 
 
-void intent(BuildContext context, Widget page) {
+void intent(BuildContext context, Widget page,String newpage) {
   
   try {
+  Navigator.pushNamed(context, newpage);
   Navigator.of(context).pushReplacement(MaterialPageRoute(
     builder: (BuildContext context) => page,
   ));
   } catch (e) {
     print("Error navigating to page: $e");
   }
+}
+
+void Pages(BuildContext context, String page){
+  Navigator.pushNamed(context, page);
 }
 
 
@@ -204,13 +210,13 @@ Future notification_toast(BuildContext context, String title ,String desc,{Toast
     icon: icon,
     autoCloseDuration: const Duration(seconds: 3),
     showProgressBar: false,
-    animationDuration: const Duration(milliseconds: 300),
-    animationBuilder: (context, animation, alignment, child) {
-      return FadeTransition(
-        opacity: animation,
-        child: child,
-      );
-    },
+    // animationDuration: const Duration(milliseconds: 300),
+    // animationBuilder: (context, animation, alignment, child) {
+    //   return FadeTransition(
+    //     opacity: animation,
+    //     child: child,
+    //   );
+    // },
   );
 
   // Complete the Completer after the autoCloseDuration

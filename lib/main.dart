@@ -2,7 +2,9 @@
 import 'dart:convert';
 import 'package:art_sweetalert/art_sweetalert.dart';
 import 'package:edmrs/API/api_service.dart';
+import 'package:edmrs/components/MyNavigatorObserver.dart';
 import 'package:edmrs/components/config.dart';
+import 'package:edmrs/pages/admission.dart';
 import 'package:edmrs/pages/area.dart';
 import 'package:edmrs/pages/menu.dart';
 import 'package:flutter/material.dart';
@@ -67,7 +69,16 @@ class _MyAppState extends State<MyApp> {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-     
+     navigatorObservers: [MyNavigatorObserver()],
+      initialRoute: widget.isLoggedIn
+          ? (widget.isSelectedArea ? '/Menu' : '/Area')
+          : '/',
+      routes: {
+        '/': (context) => MyHomePage(title: App.title, toggleTheme: _toggleTheme, isDarkMode: isDarkMode),
+        '/Area': (context) => Area(toggleTheme: _toggleTheme, isDarkMode: isDarkMode),
+        '/Menu': (context) => Menu(toggleTheme: _toggleTheme, isDarkMode: isDarkMode),
+        '/Admission': (context) => Admission(toggleTheme: _toggleTheme, isDarkMode: isDarkMode),
+      },
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
         primaryColor: App.primaryColor,
@@ -79,11 +90,12 @@ class _MyAppState extends State<MyApp> {
         appBarTheme: const AppBarTheme(backgroundColor:   Color.fromARGB(255,31, 31, 31))
       ),
       themeMode: _themeMode,
-      home: widget.isLoggedIn ? //if logint alrady 
-      (widget.isSelectedArea ?  // check if have area
-      Menu(toggleTheme: _toggleTheme, isDarkMode: isDarkMode) :
-      Area(toggleTheme: _toggleTheme, isDarkMode: isDarkMode) ) : 
-      MyHomePage(title: App.title, toggleTheme: _toggleTheme, isDarkMode: isDarkMode),
+      // home: MyHomePage(title: App.title, toggleTheme: _toggleTheme, isDarkMode: isDarkMode)
+      // home: widget.isLoggedIn ? //if logint alrady 
+      // (widget.isSelectedArea ?  // check if have area
+      // Menu(toggleTheme: _toggleTheme, isDarkMode: isDarkMode) :
+      // Area(toggleTheme: _toggleTheme, isDarkMode: isDarkMode) ) : 
+      // MyHomePage(title: App.title, toggleTheme: _toggleTheme, isDarkMode: isDarkMode),
 
     );
   }
@@ -223,33 +235,74 @@ class LoginPage extends State<MyHomePage> {
                               'password': enteredPassword,
                             };
 
+
                             try {
-                              var response = await postData('login', body);
-                              if (response != null) {
-                                if (response.statusCode == 200) {
-                                  closeDialog(context);
+                              var response = await Login('login', enteredUsername, enteredPassword);
+                              if (response.statusCode == 200) {
                                   Map<String, dynamic> responseData = json.decode(response.body);
-                                  if (responseData['success'] == 0) {
-                                    await notification_toast(
-                                      context,
-                                      "Logged In",
-                                      responseData['message'],
-                                      toastificationType: ToastificationType.success,
-                                      toastificationStyle: ToastificationStyle.fillColored,
-                                      descTextColor: Colors.white,
-                                      icon: const Icon(Icons.check),
-                                    );
+                                  bool success = responseData['success'];
+                                  closeDialog(context);
+                                  if (success) {
+                                  // Process the data
+                              List<dynamic> data = responseData['data'];
+                                for (var employee in data) {
+                                  String empId = employee['EMPID'];
+                                  String name = employee['EMPL_NAME'];
+                                  String department = employee['DEPARTMENT'];
+                                  String country = employee['COUNTRY'];
+                                  String position = employee['POSITION'];
+                                  String bu_code = employee['BU_CODE'];
+                                  String businessUnit = employee['BUSINESS_UNIT'];
+                                  String email = employee['EMAIL'];
+                                  String contactNumber = employee['CONTACT_NUMBER'];
+
+                                  // Create a map for each employee
+                                  Map<String, String> employeeInfo = {
+                                    EMPID: empId,
+                                    EMPL_NAME: name,
+                                    DEPARTMENT: department,
+                                    COUNTRY: country,
+                                    POSITION: position,
+                                    BU_CODE: bu_code,
+                                    BUSINESS_UNIT: businessUnit,
+                                    EMAIL: email,
+                                    CONTACT_NUMBER: contactNumber
+                                  };
+
+                                  // Save employeeInfo
+                                  bool success = await saveEmployeeInfo(employeeInfo);
+                                  if (success) {
+                                    print("Employee information for $name saved successfully");
+                                  } else {
+                                    print("Failed to save employee information for $name");
+                                  }
+                                }
+                                    //  await notification_toast(
+                                    //   context,
+                                    //   "Logged In",
+                                    //   responseData['message'],
+                                    //   toastificationType: ToastificationType.success,
+                                    //   toastificationStyle: ToastificationStyle.fillColored,
+                                    //   descTextColor: Colors.white,
+                                    //   icon: const Icon(Icons.check),
+                                    // );
 
                                     bool saved = await setLoginStatus(true);
                                     if (saved) {
                                       print('Login status saved successfully.');
-                                      locStorage(App.Auth,encrypted(enteredUsername+":"+enteredPassword));
+                                       String credentials = '$enteredUsername:$enteredPassword';
+                                       String encodedCredentials = base64Encode(utf8.encode(credentials));
+                                      locStorage(App.Auth,encodedCredentials);
                                     } else {
                                       print('Failed to save login status.');
                                     }
-                                    intent(context, Area(toggleTheme: widget.toggleTheme, isDarkMode: widget.isDarkMode));
+                                   
+                                    intent(context, Area(toggleTheme: widget.toggleTheme, isDarkMode: widget.isDarkMode),'/Area');
 
-                                  } else {
+
+
+                                } else {
+                                  print('Login not successful. Response data: ${response.body}');
                                     await notification_toast(
                                       context,
                                       "Invalid username/password",
@@ -259,9 +312,13 @@ class LoginPage extends State<MyHomePage> {
                                       descTextColor: Colors.white,
                                       icon: const Icon(Icons.error),
                                     );
-                                  }
-                                } else {
-                                  await notification_toast(
+                                }
+
+
+                              } else {
+                                // Handle error response
+                                print('Login failed: ${response.statusCode} ${response.body}');
+                                 await notification_toast(
                                     context,
                                     "Invalid username/password",
                                     response.statusCode.toString(),
@@ -271,9 +328,11 @@ class LoginPage extends State<MyHomePage> {
                                     icon: const Icon(Icons.error),
                                   );
                                   print('Request failed with status: ${response.statusCode}');
-                                }
-                              } else {
-                                await notification_toast(
+                              }
+                            } catch (e) {
+                              // Handle any errors that occurred during the request
+                              print('An error occurred: $e');
+                               await notification_toast(
                                   context,
                                   "Login",
                                   "Invalid Response",
@@ -282,10 +341,8 @@ class LoginPage extends State<MyHomePage> {
                                   descTextColor: Colors.white,
                                   icon: const Icon(Icons.error),
                                 );
-                              }
-                            } catch (e) {
-                              print('Exception occurred: $e');
                             }
+
                           }
                         },
                         color: widget.isDarkMode ? Color.fromARGB(255, 12, 167, 71) : App.primaryButton,

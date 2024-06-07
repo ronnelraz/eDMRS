@@ -1,5 +1,8 @@
 import 'dart:io';
 
+import 'package:card_loading/card_loading.dart';
+import 'package:edmrs/API/api_service.dart';
+import 'package:edmrs/sharedpref/sharedpref.dart';
 import 'package:flutter/material.dart';
 import '../components/config.dart';
 import 'package:intl/intl.dart';
@@ -13,6 +16,9 @@ import 'dart:typed_data';
 import 'package:sized_icon_button/sized_icon_button.dart';
 import 'dart:developer';
 
+import '../components/loading.dart';
+import 'package:flutter/foundation.dart' show kIsWeb;
+
 
 class Admission extends StatefulWidget {
   final VoidCallback toggleTheme;
@@ -24,11 +30,6 @@ class Admission extends StatefulWidget {
   _AdmissionState createState() => _AdmissionState();
 }
 
-
-const List<String> _list = [
-  'Area1',
-  'Area2',
-];
 
 class _AdmissionState extends State<Admission> {
   final _formKey = GlobalKey<FormState>();
@@ -57,17 +58,97 @@ class _AdmissionState extends State<Admission> {
 
   String _selectedFiles = "";
 
+   Map<String, String> _employeeInfo = {};
+   bool _isLoading = true;
+   bool _isLoadingScreen = true;
+
+   List<String> HOSPITAL_LNAME = [];
+   List<String> hospital_code = [];
+   List<String> HOSPITAL_SNAME = [];
+   bool _isLoadings = true;
+   
+
 
    @override
   void initState() {
     super.initState();
-    // Call locStorage to save the page information when the widget is initialized
-    callLocStorage();
+     _loadEmployeeInfo();
+      dataLoadFunction();
+       _loadHospital();
+  
   }
 
-   void callLocStorage() {
-    locStorage("page", "admission");
+   Future<void> _loadHospital() async {
+    try {
+      var response = await Hospital('getHospital');
+      if (response.statusCode == 200) {
+        Map<String, dynamic> responseData = json.decode(response.body);
+        bool success = responseData['success'];
+
+        if (success) {
+          List<dynamic> data = responseData['data'];
+          List<String> _hospital_code = data.map((item) => item['hospital_code'].toString()).toList();
+          List<String> _HOSPITAL_LNAME = data.map((item) => item['HOSPITAL_LNAME'].toString()).toList();
+          List<String> _HOSPITAL_SNAME = data.map((item) => item['HOSPITAL_SNAME'].toString()).toList();
+          setState(() {
+            hospital_code = _hospital_code;
+            HOSPITAL_LNAME = _HOSPITAL_LNAME;
+            HOSPITAL_SNAME = _HOSPITAL_SNAME;
+
+            _isLoadings = false;
+          });
+        } else {
+          print('Login not successful. Response data: ${response.body}');
+          setState(() {
+            _isLoadings = false;
+          });
+        }
+      } else {
+        print('Login failed: ${response.statusCode} ${response.body}');
+        setState(() {
+          _isLoadings = false;
+        });
+      }
+    } catch (e) {
+      print('An error occurred: $e');
+      setState(() {
+        _isLoadings = false;
+      });
+    }
   }
+
+
+   dataLoadFunction() async {
+    setState(() {
+      _isLoadingScreen = true; // your loader has started to load
+    });
+   
+    await Future.delayed(Duration(seconds: 3));
+
+    Map<String, String> info = await getEmployeeInfo();
+
+    setState(() {
+      _employeeInfo = info;
+      _isLoadingScreen = false; 
+
+      emp_name.text = _employeeInfo[EMPL_NAME] ?? '';
+      department.text = _employeeInfo[DEPARTMENT] ?? '';
+      position.text = _employeeInfo[POSITION] ?? '';
+      bu.text =  _employeeInfo[BUSINESS_UNIT] ?? '';
+
+
+    });
+  }
+
+   Future<void> _loadEmployeeInfo() async {
+    Map<String, String> info = await getEmployeeInfo();
+    setState(() {
+      _employeeInfo = info;
+      _isLoading = false;
+    });
+  }
+
+
 
     @override
   void dispose() {
@@ -83,7 +164,9 @@ class _AdmissionState extends State<Admission> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
+    return  _isLoadingScreen
+    ? const CustomLoading(img: 'assets/logo.png', text: 'Loading',)    
+    : Scaffold(
       appBar: AppBar(
         automaticallyImplyLeading: false, // Disable automatic back button
         leading: Row(
@@ -91,8 +174,10 @@ class _AdmissionState extends State<Admission> {
             IconButton(
               icon: Icon(Icons.arrow_back),
               onPressed: () {
-                Navigator.of(context).pop(); // Navigate back to the previous screen
-                 locStorage("page", "menu");
+                
+                // Navigator.of(context).pop(); // Navigate back to the previous screen
+                // Navigator.pushNamed(context, '/Menu');
+                Navigator.pushNamed(context, '/Menu');
               },
             ),
             // Add your additional icon here
@@ -172,6 +257,7 @@ class _AdmissionState extends State<Admission> {
               // Other form fields
               SizedBox(height: 20),
               CustomTextField(
+                readonly: true,
                 labelText: 'Employee Name',
                 customerRadius: 10.0,
                 controller: emp_name,
@@ -182,6 +268,7 @@ class _AdmissionState extends State<Admission> {
               SizedBox(height: 20),
               // Department Field
              CustomTextField(
+              readonly: true,
                 labelText: 'Department',
                 customerRadius: 10.0,
                 controller: department,
@@ -190,9 +277,16 @@ class _AdmissionState extends State<Admission> {
               ),
               SizedBox(height: 20),
               // Name of Hospital Field (Using CustomDropdown)
-              CustomDropdown<String>.search(
+              _isLoading ?
+                CardLoading(
+                  height: 25,
+                  borderRadius: BorderRadius.all(Radius.circular(13)),
+                  width: MediaQuery.of(context).size.width,
+                  margin: EdgeInsets.only(top: 8),
+                )
+              : CustomDropdown<String>.search(
                   hintText: 'Name of Hospital',
-                  items: _list,
+                  items: HOSPITAL_LNAME,
                   excludeSelected: false,
                   decoration: CustomDropdownDecoration(
                     expandedFillColor: widget.isDarkMode ? const Color.fromARGB(255, 189, 189, 189) : const Color.fromARGB(255, 255, 255, 255),
@@ -217,6 +311,7 @@ class _AdmissionState extends State<Admission> {
               SizedBox(height: 20),
               // Position Field
                CustomTextField(
+                readonly: true,
                 labelText: 'Position',
                 customerRadius: 10.0,
                 controller: position,
@@ -226,6 +321,7 @@ class _AdmissionState extends State<Admission> {
               SizedBox(height: 20),
               // Business Unit Field
               CustomTextField(
+                readonly: true,
                 labelText: 'Business Unit',
                 customerRadius: 10.0,
                 controller: bu,
@@ -317,7 +413,7 @@ class _AdmissionState extends State<Admission> {
                         icon: 'assets/icon_toast/logout.svg',
                         label: 'Save',
                         onPressed: () async {
-                          saveData("save", context);
+                          saveData("save");
                         },
                         color: Colors.green,
                         iconColor: Colors.white,
@@ -332,7 +428,7 @@ class _AdmissionState extends State<Admission> {
                         icon: 'assets/icon_toast/check-circle.svg',
                         label: 'Submit',
                         onPressed: () async {
-                          saveData("save", context);
+                          saveData("save");
                         },
                         color: Colors.blue,
                         iconColor: Colors.white,
@@ -364,24 +460,29 @@ class _AdmissionState extends State<Admission> {
     );
   }
 
-   void _pickFiles() async {
+  void _pickFiles() async {
     try {
       FilePickerResult? result = await FilePicker.platform.pickFiles(
         type: FileType.custom,
         allowedExtensions: ['jpg', 'pdf', 'doc'],
-        withData: true
+        withData: !kIsWeb
       );
 
-      if (result != null && result.files.single.path != null) {
-        PlatformFile file = result.files.first;
-        String base64Data = base64Encode(file.bytes!);
-        log(base64Data);
-        setState(() {
-            _selectedFiles = file.name;
-        });
-      } else {
-        // User canceled the picker
-        print("error talga");
+      if(kIsWeb){
+        print("s");
+      }
+      else{
+          if (result != null && result.files.single.path != null) {
+            PlatformFile file = result.files.first;
+            String base64Data = base64Encode(file.bytes!);
+            log(base64Data);
+            setState(() {
+                _selectedFiles = file.name;
+            });
+          } else {
+            // User canceled the picker
+            print("error talga");
+          }
       }
     } catch (e) {
       print('Error picking files: $e');
@@ -390,7 +491,7 @@ class _AdmissionState extends State<Admission> {
 }
   
 
-  void saveData(String type,BuildContext con){
+  void saveData(String type){
     String requestDate = request_date.text;
     String empname = emp_name.text;
     String dept = department.text;
@@ -403,43 +504,43 @@ class _AdmissionState extends State<Admission> {
     if(empname.isEmpty){
       //  FocusScope.of(con).requestFocus(empNameFocus);
       FocusScope.of(context).requestFocus(empNameFocus);
-       ScaffoldMessenger.of(con).showSnackBar(
+       ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('Please Enter your full name')),
       );
 
     }
     else if(dept.isEmpty){
-      FocusScope.of(con).requestFocus(departmentFocus);
-      ScaffoldMessenger.of(con).showSnackBar(
+      FocusScope.of(context).requestFocus(departmentFocus);
+      ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('Please Enter your Department')),
       );
     }
     else if(hostpital.isEmpty){
-       ScaffoldMessenger.of(con).showSnackBar(
+       ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('Please select a hospital')),
       );
     }
     else if(pos.isEmpty){
-       FocusScope.of(con).requestFocus(positionFocus);
-        ScaffoldMessenger.of(con).showSnackBar(
+       FocusScope.of(context).requestFocus(positionFocus);
+        ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('Please enter your position')),
       );
     }
     else if(businessUnit.isEmpty){
-       FocusScope.of(con).requestFocus(buFocus);
-       ScaffoldMessenger.of(con).showSnackBar(
+       FocusScope.of(context).requestFocus(buFocus);
+       ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('Please enter your business unit')),
       );
     }
     else if(admit_date.isEmpty){
-       FocusScope.of(con).requestFocus(admitdateFocus);
-       ScaffoldMessenger.of(con).showSnackBar(
+       FocusScope.of(context).requestFocus(admitdateFocus);
+       ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('Please select admission date')),
       );
     }
     else if(synt.isEmpty){
-       FocusScope.of(con).requestFocus(syntomFocus);
-        ScaffoldMessenger.of(con).showSnackBar(
+       FocusScope.of(context).requestFocus(syntomFocus);
+        ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(content: Text('please state your symptoms')),
         );
     }

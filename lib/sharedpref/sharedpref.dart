@@ -10,6 +10,64 @@ const String islandName = "islandName";
 const String operation = "operation";
 const String darkModeKey = "isDarkMode";
 
+
+const String EMPID = "EMPID";
+const String EMPL_NAME = "EMPL_NAME";
+const String DEPARTMENT = "DEPARTMENT";
+const String COUNTRY = "COUNTRY";
+const String POSITION = "POSITION";
+const String BU_CODE = "BU_CODE";
+const String BUSINESS_UNIT = "BUSINESS_UNIT";
+const String EMAIL = "EMAIL";
+const String CONTACT_NUMBER = "CONTACT_NUMBER";
+
+const String LOCATION_CODE = "LOCATION_CODE";
+const String LOCATION_NAME = "LOCATION_NAME";
+const String LOCATION_BU_CODE = "LOCATION_BU_CODE";
+
+
+Future<bool> saveEmployeeInfo(Map<String, String> employeeInfo) async {
+  SharedPreferences prefs = await SharedPreferences.getInstance();
+  employeeInfo.forEach((key, value) async {
+    await prefs.setString(key, value);
+  });
+  return true;
+}
+
+
+Future<Map<String, String>> getEmployeeInfo() async {
+  SharedPreferences prefs = await SharedPreferences.getInstance();
+  Map<String, String> employeeInfo = {};
+
+  // Add all the keys you want to retrieve here
+  List<String> keys = [
+    EMPID, EMPL_NAME, DEPARTMENT, COUNTRY, POSITION, BU_CODE, BUSINESS_UNIT, EMAIL, CONTACT_NUMBER
+  ];
+
+  for (String key in keys) {
+    if (prefs.containsKey(key)) {
+      String? value = prefs.getString(key);
+      if (value != null) {
+        employeeInfo[key] = value;
+      }
+    }
+  }
+  return employeeInfo;
+}
+
+Future<bool> saveSelectedLocation(Map<String, String> location) async {
+  SharedPreferences prefs = await SharedPreferences.getInstance();
+  location.forEach((key, value) async {
+    await prefs.setString(key, value);
+  });
+  return true;
+}
+
+
+
+
+
+
 // Save dark mode status to SharedPreferences
 Future<bool> setDarkMode(bool isDarkMode) async {
   SharedPreferences prefs = await SharedPreferences.getInstance();

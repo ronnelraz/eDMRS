@@ -1,7 +1,11 @@
+import 'dart:convert';
+
+import 'package:edmrs/API/api_service.dart';
 import 'package:edmrs/main.dart';
 import 'package:edmrs/pages/menu.dart';
 import 'package:flutter/material.dart';
 import 'package:animated_custom_dropdown/custom_dropdown.dart';
+import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:localstorage/localstorage.dart';
 import 'package:lottie/lottie.dart';
 import 'package:toastification/toastification.dart';
@@ -22,13 +26,63 @@ class Area extends StatefulWidget {
   _AreaState createState() => _AreaState();
 }
 
-const List<String> _list = [
-  'Area1',
-  'Area2',
-];
+
 
 class _AreaState extends State<Area> {
    String? _selectedArea;
+   List<String> _list = [];
+   List<String> _loc_code = [];
+   List<String> _loc_bu_code = [];
+   bool _isLoading = true;
+   int? _selectedIndex;
+
+  String _selectedCode = "";
+   String _selectedBU = "";
+
+   @override
+    void initState() {
+      super.initState();
+      _loadData();
+    }
+
+  Future<void> _loadData() async {
+    try {
+      var response = await Location('getLocation');
+      if (response.statusCode == 200) {
+        Map<String, dynamic> responseData = json.decode(response.body);
+        bool success = responseData['success'];
+
+        if (success) {
+          List<dynamic> data = responseData['data'];
+          List<String> locations = data.map((item) => item['location_name'].toString()).toList();
+          List<String> location_code = data.map((item) => item['location_code'].toString()).toList();
+          List<String> bu_code = data.map((item) => item['bu_code'].toString()).toList();
+          setState(() {
+            _list = locations;
+            _loc_code = location_code;
+            _loc_bu_code = bu_code;
+
+            _isLoading = false;
+          });
+        } else {
+          print('Login not successful. Response data: ${response.body}');
+          setState(() {
+            _isLoading = false;
+          });
+        }
+      } else {
+        print('Login failed: ${response.statusCode} ${response.body}');
+        setState(() {
+          _isLoading = false;
+        });
+      }
+    } catch (e) {
+      print('An error occurred: $e');
+      setState(() {
+        _isLoading = false;
+      });
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -61,30 +115,40 @@ class _AreaState extends State<Area> {
               const SizedBox(height: 20),
               SizedBox(
                 width: 400, // Adjust the width as needed
-                child: CustomDropdown<String>(
-                  hintText: 'Select Area',
+                child: _isLoading
+              ? SpinKitDoubleBounce(
+                color: widget.isDarkMode ? Colors.white : Colors.blue[700],
+                size: 50.0,
+              )
+              : CustomDropdown<String>(
+                  hintText: 'Select Location',
                   items: _list,
                   decoration: CustomDropdownDecoration(
-                    expandedFillColor: widget.isDarkMode ? const Color.fromARGB(255, 66, 66, 66) : const Color.fromARGB(255, 255, 255, 255),
-                    closedFillColor: widget.isDarkMode ? const Color.fromARGB(255, 66, 66, 66) : Colors.white,
-                    
-                    closedBorder: Border.all( // Using BoxBorder with Border.all for a simple solid border
+                    expandedFillColor: widget.isDarkMode
+                        ? const Color.fromARGB(255, 66, 66, 66)
+                        : const Color.fromARGB(255, 255, 255, 255),
+                    closedFillColor: widget.isDarkMode
+                        ? const Color.fromARGB(255, 66, 66, 66)
+                        : Colors.white,
+                    closedBorder: Border.all(
                       color: widget.isDarkMode ? Colors.white : Colors.black,
                       width: 1.0,
                     ),
-                    expandedBorder:  Border.all( // Using BoxBorder with Border.all for a simple solid border
+                    expandedBorder: Border.all(
                       color: widget.isDarkMode ? Colors.white : Colors.black,
                       width: 1.0,
                     ),
-                    
                   ),
                   onChanged: (value) {
-                    // _selectedArea = value;
                     setState(() {
                       _selectedArea = value;
+                      _selectedIndex = _list.indexOf(value!);
+                     _selectedCode = _loc_code[_selectedIndex!];
+                     _selectedBU = _loc_bu_code[_selectedIndex!];
+
+                     
+
                     });
-                    
-                  
                   },
                 ),
               ),
@@ -101,16 +165,27 @@ class _AreaState extends State<Area> {
                         if (_selectedArea != null) {
                           print('Selected Area: $_selectedArea');
                           locStorage(App.Login_area,encrypted(_selectedArea!));
-                          
+                          String _getSelectedArea = _selectedArea ?? '';
+                          String _getSelectedLocCode = _selectedCode ?? '';
+                          String _getSeletedLocBuCode = _selectedBU ?? '';
 
-                            // bool saved = await setLoginStatus(true);
-                            //     if (saved) {
-                            //       print('Login status saved successfully.');
-                                
-                            //     } else {
-                            //       print('Failed to save login status.');
-                            //     }
-                            intent(context, Menu(toggleTheme: widget.toggleTheme, isDarkMode: widget.isDarkMode));
+                          
+                            // Create a map for each employee
+                            Map<String, String> location = {
+                              LOCATION_CODE: _getSelectedArea,
+                              LOCATION_NAME: _getSelectedLocCode,
+                              LOCATION_BU_CODE: _getSeletedLocBuCode
+                            };
+
+                            // Save employeeInfo
+                            bool success = await saveSelectedLocation(location);
+                            if (success) {
+                              print("Employee location $_getSelectedArea saved successfully");
+                            } else {
+                              print("Failed to save employee location $_getSelectedArea");
+                            }
+
+                          intent(context, Menu(toggleTheme: widget.toggleTheme, isDarkMode: widget.isDarkMode),'/Menu');
 
                         } else {
                           print('Please select an area');
@@ -123,7 +198,7 @@ class _AreaState extends State<Area> {
                             descTextColor: Colors.white,
                             icon: const Icon(Icons.info),
                           );
-                        }
+                        } 
                       },
                       color: widget.isDarkMode ? Color.fromARGB(255, 38, 130, 196) : App.primaryButton,
                       iconColor: Colors.white,
@@ -152,7 +227,7 @@ class _AreaState extends State<Area> {
                             } else {
                               print('Failed to save logout status.');
                             }
-                          intent(context, MyHomePage(title: App.title, toggleTheme: widget.toggleTheme, isDarkMode: widget.isDarkMode));
+                          intent(context, MyHomePage(title: App.title, toggleTheme: widget.toggleTheme, isDarkMode: widget.isDarkMode),'/');
                           });
                         
                       },

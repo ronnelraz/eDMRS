@@ -1,11 +1,21 @@
 
+import 'dart:async';
+import 'dart:convert';
+
+import 'package:card_loading/card_loading.dart';
+import 'package:edmrs/API/api_service.dart';
 import 'package:edmrs/components/custom_rich_text.dart';
 import 'package:edmrs/pages/admission.dart';
+import 'package:edmrs/sharedpref/sharedpref.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_spinkit/flutter_spinkit.dart';
+import 'package:intl/intl.dart';
 import 'package:localstorage/localstorage.dart';
 import 'package:responsive_grid/responsive_grid.dart';
 import '../components/config.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
+
+import '../components/loading.dart';
 
 
 class Menu extends StatefulWidget {
@@ -24,29 +34,116 @@ class Menu extends StatefulWidget {
 
 
 class _MenuState extends State<Menu> {
+   Map<String, String> _employeeInfo = {};
+   bool _isLoading = true;
+   bool _isLoadingScreen = true;
+   List<String> _bal_name = [];
+   List<String> _bal_amount = [];
+   bool _isloadingBal = true;
+   late Timer _timer;
+    int _counter = 0;
+   
+   
 
    @override
   void initState() {
     super.initState();
-    // Call locStorage to save the page information when the widget is initialized
+    
+    _loadEmployeeInfo();
+    dataLoadFunction();
 
-    if (kIsWeb) {
-        pages().then((page) {
-            if (page != null) {
-              if(page == 'admission'){
-                  intent(context, Admission(toggleTheme: widget.toggleTheme, isDarkMode: widget.isDarkMode));
-              }
-            } 
-            else {
-                callLocStorage();
-            }
+    
+    Future.delayed(Duration(seconds: 5), () {
+      _LoadBalance();
+       _timer = Timer.periodic(Duration(seconds: 1), (timer) {
+        setState(() {
+            _LoadBalance();
           });
-    } else {
-      // NOT running on the web! You can check for additional platforms here.
+      });
+    });
+    
+    // if (kIsWeb) {
+    //     pages().then((page) {
+    //         if (page != null) {
+    //           if(page == 'admission'){
+    //               intent(context, Admission(toggleTheme: widget.toggleTheme, isDarkMode: widget.isDarkMode));
+    //           }
+    //         } 
+    //         else {
+    //             callLocStorage();
+    //         }
+    //       });
+    // } else {
+      
+    // }
+  }
+
+  Future<void> _LoadBalance() async {
+    try {
+
+      Map<String, String> body = {
+        'year': '2024',
+        'empid': _employeeInfo[EMPID] ?? '',
+      };
+      
+      var response = await balance('getBalance',body);
+      if (response.statusCode == 200) {
+        Map<String, dynamic> responseData = json.decode(response.body);
+        bool success = responseData['success'];
+
+        if (success) {
+          List<dynamic> data = responseData['data'];
+          List<String> bal_name = data.map((item) => item['BAL_NAME'].toString()).toList();
+          List<String> bal_amount = data.map((item) => item['BAL_AMOUNT'].toString()).toList();
+          setState(() {
+            
+            _bal_name = bal_name;
+            _bal_amount = bal_amount;
+            _isloadingBal = false;
+   
+          });
+         
+        } else {
+          print('Login not successful. Response data: ${response.body}');
+          setState(() {
+            _isloadingBal = false;
+          });
+        }
+      } else {
+        print('Login failed: ${response.statusCode} ${response.body}');
+        setState(() {
+          _isloadingBal = false;
+        });
+      }
+    } catch (e) {
+      print('An error occurred: $e');
+      setState(() {
+        _isloadingBal = false;
+      });
     }
+  }
 
+   dataLoadFunction() async {
+    setState(() {
+      _isLoadingScreen = true; // your loader has started to load
+    });
+   
+   await Future.delayed(Duration(seconds: 3));
 
+    Map<String, String> info = await getEmployeeInfo();
 
+    setState(() {
+      _employeeInfo = info;
+      _isLoadingScreen = false; // your loder will stop to finish after the data fetch
+    });
+  }
+
+   Future<void> _loadEmployeeInfo() async {
+    Map<String, String> info = await getEmployeeInfo();
+    setState(() {
+      _employeeInfo = info;
+      _isLoading = false;
+    });
   }
 
    void callLocStorage() {
@@ -56,7 +153,10 @@ class _MenuState extends State<Menu> {
   @override
   Widget build(BuildContext context) {
     WidgetsFlutterBinding.ensureInitialized();
-    return Scaffold(
+    return 
+     _isLoadingScreen
+    ? const CustomLoading(img: 'assets/logo.png', text: 'Loading',)    
+    : Scaffold(
       appBar: AppBar(
         title: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -121,19 +221,25 @@ class _MenuState extends State<Menu> {
       ),
       
       body: LayoutBuilder(
-        builder: (context, constraints) {
-          if (constraints.maxWidth > 802) {
-            return buildWideLayout(context,constraints,400.0);
-          } else {
-            return buildNarrowLayout(context,constraints,700.0);
-          }
-        },
+              builder: (context, constraints) {
+                if (constraints.maxWidth > 802) {
+                  return buildWideLayout(context,constraints,400.0);
+                } else {
+                  return buildNarrowLayout(context,constraints,700.0);
+                }
+              },
       ),
     );
   }
 
   Widget buildWideLayout(BuildContext context, BoxConstraints constraints,double cardwidth) {
-    return Column(
+    return 
+    _isLoading
+    ? SpinKitDoubleBounce(
+      color: widget.isDarkMode ? Colors.white : Colors.blue[700],
+      size: 50.0,
+    )
+    : Column(
       mainAxisAlignment: MainAxisAlignment.start,
       mainAxisSize: MainAxisSize.max,
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -149,15 +255,18 @@ class _MenuState extends State<Menu> {
           ),
         ),
          buildFourColumnGrid(constraints,cardwidth,constraints.maxWidth ~/ 210)
-   
-
-
       ],
     );
   }
 
   Widget buildNarrowLayout(BuildContext context,BoxConstraints constraints,double cardwidth) {
-    return SingleChildScrollView(
+    return 
+    _isLoading
+    ? SpinKitChasingDots(
+      color: widget.isDarkMode ? Colors.white : Colors.blue[700],
+      size: 50.0,
+    )
+    : SingleChildScrollView(
       child: Padding(
         padding: const EdgeInsets.all(5.0), // Adjust the padding as needed
         child: Column(
@@ -209,7 +318,9 @@ Widget buildFourColumnGrid(BoxConstraints constraints, double cardWidth, int cro
                         "This accredited hospital request form is specifically designed for employees who have availed the hospitalization benefit at our affiliated hospitals. Please do not use this form for your Medical Expense Reimbursement.",
                         context,
                         onConfirm: () {
-                          intent(context, Admission(toggleTheme: widget.toggleTheme, isDarkMode: widget.isDarkMode));
+                           Navigator.of(context, rootNavigator: true).pop();
+                           Navigator.pushNamed(context, '/Admission');
+                          // intent(context, Admission(toggleTheme: widget.toggleTheme, isDarkMode: widget.isDarkMode),'/Admission');
                         },
                       );
                     }
@@ -288,7 +399,7 @@ Widget buildLeftColumn(double cardwidth) {
               ),
               CustomRichText(
                 textBeforeSpan: getGreeting(),
-                spanText: 'Ronnel Ronnel Ronnel Razo',
+                spanText: _employeeInfo[EMPL_NAME] ?? '',
                 spanStyle: const TextStyle(
                   fontSize: App.card_textsize,
                   fontWeight: FontWeight.bold,
@@ -297,10 +408,10 @@ Widget buildLeftColumn(double cardwidth) {
                 iconSize: 24.0,
                 iconColor: iconGreeting() == 'm' ? const Color.fromARGB(255, 193, 174, 1) : (iconGreeting() == 'a' ? Colors.orange : const Color.fromARGB(255, 91, 91, 91)),
               ),
-              const CustomRichText(
+               CustomRichText(
                 textBeforeSpan: '',
-                spanText: 'position',
-                spanStyle: TextStyle(
+                spanText: _employeeInfo[POSITION] ?? '',
+                spanStyle: const TextStyle(
                   fontSize: App.card_textsize,
                   fontWeight: FontWeight.bold,
                 ),
@@ -308,10 +419,10 @@ Widget buildLeftColumn(double cardwidth) {
                 iconSize: 24.0,
                 iconColor: Colors.blue,
               ),
-              const CustomRichText(
+               CustomRichText(
                 textBeforeSpan: '',
-                spanText: 'IT Department',
-                spanStyle: TextStyle(
+                spanText: _employeeInfo[DEPARTMENT] ?? '',
+                spanStyle: const TextStyle(
                   fontSize: App.card_textsize,
                   fontWeight: FontWeight.bold,
                 ),
@@ -341,7 +452,7 @@ Widget buildRightColumn(double width) {
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(10.0),
       ),
-      child: const SizedBox(
+      child:  SizedBox(
         height: App.card_height,
         child: Padding(
           padding: const EdgeInsets.all(20.0),
@@ -356,20 +467,17 @@ Widget buildRightColumn(double width) {
                   color: Colors.blueAccent,
                 ),
               ),
-              const CustomRichText(
-                textBeforeSpan: App.personalBal,
-                spanText: '₱100,000',
-                spanStyle: TextStyle(
-                  fontSize: App.card_textsize,
-                  fontWeight: FontWeight.bold,
-                ),
-                icon: Icons.wallet_rounded,
-                iconSize: 24.0,
-                iconColor: Color.fromARGB(255, 12, 149, 30),
-              ),
-              const CustomRichText(
-                textBeforeSpan: App.dependentBal,
-                spanText: '₱50,000',
+                _isloadingBal ? 
+                 CardLoading(
+                  height: 25,
+                  borderRadius: BorderRadius.all(Radius.circular(13)),
+                  width: width,
+                  margin: EdgeInsets.only(top: 8),
+                )
+               :
+                 CustomRichText(
+                textBeforeSpan: _bal_name[0],
+                spanText:  ' ₱${NumberFormat('#,###').format(int.parse(_bal_amount[0]))}',
                 spanStyle: TextStyle(
                   fontSize: App.card_textsize,
                   fontWeight: FontWeight.bold,
@@ -378,6 +486,26 @@ Widget buildRightColumn(double width) {
                 iconSize: 24.0,
                 iconColor: Colors.blueAccent,
               ),
+               _isloadingBal ? 
+                 CardLoading(
+                  height: 25,
+                  borderRadius: BorderRadius.all(Radius.circular(15)),
+                  width: width,
+                  margin: EdgeInsets.only(top:12),
+                )
+               :
+                 CustomRichText(
+                textBeforeSpan: _bal_name[1],
+                spanText:  ' ₱${NumberFormat('#,###').format(int.parse(_bal_amount[1]))}',
+                spanStyle: TextStyle(
+                  fontSize: App.card_textsize,
+                  fontWeight: FontWeight.bold,
+                ),
+                icon: Icons.wallet_rounded,
+                iconSize: 24.0,
+                iconColor: Colors.blueAccent,
+              )
+             
             ],
           ),
         ),
