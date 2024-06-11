@@ -35,6 +35,7 @@ dependencies:
   flutter_easyloading: ^3.0.5
   card_loading: ^0.3.2
   wolt_modal_sheet: ^0.6.1
+  flutter_custom_carousel_slider: ^1.2.0
  
 
   

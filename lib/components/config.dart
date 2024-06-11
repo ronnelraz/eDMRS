@@ -40,7 +40,7 @@ class App {
   static const String employee = "Employee Information";
   static const double card_height = 140.0;
   static const double card_textsize = 13;
-  static const double elevation = 5.0;
+  static const double elevation = 1.0;
 
 
 // localstorage
@@ -294,27 +294,30 @@ void toast(String msg){
     );
 }
 
- void alert(String title, String msg, BuildContext context, {Function? onConfirm}) {
+void alert(String title, String msg, BuildContext context, {Function? onConfirm}) {
   showDialog(
     context: context,
     builder: (BuildContext context) {
       return AlertDialog(
         title: Text(title),
-        content: Text(msg),
+        content: Text(
+          msg,
+          textAlign: TextAlign.left, // Set text alignment to left
+        ),
         actions: <Widget>[
           TextButton(
             child: const Text('Cancel'),
             onPressed: () {
-              // Navigator.of(context).pop();
               Navigator.of(context, rootNavigator: true).pop();
             },
           ),
           TextButton(
             child: const Text('OK'),
             onPressed: () {
-              // If onConfirm is not provided, simply close the dialog
               if (onConfirm != null) {
                 onConfirm();
+              } else {
+                Navigator.of(context, rootNavigator: true).pop();
               }
             },
           ),

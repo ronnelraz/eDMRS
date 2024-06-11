@@ -336,7 +336,19 @@ Widget buildFourColumnGrid(BoxConstraints constraints, double cardWidth, int cro
                       );
                     }
                     else if(index == 1){
-                      Navigator.pushNamed(context, '/Sample');
+                       alert(
+                        "Welfare Claim Procedure:",
+                        """1. Fill-up welfare claim form and attach supporting documents
+2. Submit documents to HR Dept. for checking
+3. Retrieve documents from HR Dept. and have it approved by supervisor.
+4. Park document at SAP system for payment
+5. Submit approved park document to Accounting Department.""",
+                        context,
+                        onConfirm: () {
+                          Navigator.of(context, rootNavigator: true).pop();
+                          Navigator.pushNamed(context, '/Reimbursement');
+                        },
+                      );
                      
                     }
                     if (index == 1) {

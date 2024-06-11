@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:card_loading/card_loading.dart';
 import 'package:edmrs/API/api_service.dart';
+import 'package:edmrs/components/custom_rich_text.dart';
 import 'package:edmrs/sharedpref/sharedpref.dart';
 import 'package:flutter/material.dart';
 import 'package:wolt_modal_sheet/wolt_modal_sheet.dart';
@@ -613,18 +614,43 @@ void showPreviewModal(Map<String, String> userData) {
     context: context,
     builder: (BuildContext context) {
       return AlertDialog(
-        title: const Text('Preview Data'),
+        title: const Text('Preview Request Form'),
         content: SingleChildScrollView(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              CustomPreviewData(labelText:'Request Date :',  data: userData['requestDate'] ?? ''),
+              const CustomRichText(
+                textBeforeSpan: '',
+                spanText: 'Employee Details',
+                spanStyle: TextStyle(
+                  fontSize: App.card_textsize,
+                  fontWeight: FontWeight.bold,
+                ),
+                icon: Icons.person_rounded,
+                iconSize: 18.0,
+                iconColor: Colors.white,
+                bgColor: Color.fromARGB(128, 48, 206, 171),
+              ),
               CustomPreviewData(labelText:'Employee Name :',  data: userData['empname'] ?? ''),
               CustomPreviewData(labelText:'Department :',  data: userData['dept'] ?? ''),
-              CustomPreviewData(labelText:'Hospital :',  data: userData['hostpital'] ?? ''),
               CustomPreviewData(labelText:'Position :',  data: userData['pos'] ?? ''),
               CustomPreviewData(labelText:'Business Unit :',  data: userData['businessUnit'] ?? ''),
+              const SizedBox(height: 15),
+             const CustomRichText(
+                textBeforeSpan: '',
+                spanText: 'Admission Details',
+                spanStyle: TextStyle(
+                  fontSize: App.card_textsize,
+                  fontWeight: FontWeight.bold,
+                ),
+                icon: Icons.info_rounded,
+                iconSize: 18.0,
+                iconColor: Colors.white,
+                bgColor: Color.fromARGB(128, 22, 104, 255),
+              ),
+              CustomPreviewData(labelText:'Request Date :',  data: userData['requestDate'] ?? ''),
               CustomPreviewData(labelText:'Admission Date :',  data: userData['admit_date'] ?? ''),
+              CustomPreviewData(labelText:'Hospital :',  data: userData['hostpital'] ?? ''),
               CustomPreviewData(labelText:'Symptoms :',  data: userData['synt'] ?? ''),
             ],
           ),
