@@ -1,20 +1,20 @@
 
 import 'dart:async';
 import 'dart:convert';
+import 'dart:developer';
 
 import 'package:card_loading/card_loading.dart';
 import 'package:edmrs/API/api_service.dart';
+import 'package:edmrs/components/custom_bal.dart';
+import 'package:edmrs/components/custom_icon.dart';
 import 'package:edmrs/components/custom_rich_text.dart';
-import 'package:edmrs/pages/admission.dart';
-import 'package:edmrs/pages/sample.dart';
 import 'package:edmrs/sharedpref/sharedpref.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:intl/intl.dart';
-import 'package:localstorage/localstorage.dart';
 import 'package:responsive_grid/responsive_grid.dart';
 import '../components/config.dart';
-import 'package:flutter/foundation.dart' show kIsWeb;
+
 
 import '../components/loading.dart';
 
@@ -24,10 +24,11 @@ class Menu extends StatefulWidget {
   final VoidCallback toggleTheme;
   final bool isDarkMode;
 
-  Menu({required this.toggleTheme, required this.isDarkMode});
+  const Menu({super.key, required this.toggleTheme, required this.isDarkMode});
 
 
   @override
+  // ignore: library_private_types_in_public_api
   _MenuState createState() => _MenuState();
   
 }
@@ -38,14 +39,14 @@ class _MenuState extends State<Menu> {
    Map<String, String> _employeeInfo = {};
    bool _isLoading = true;
    bool _isLoadingScreen = true;
+   // ignore: non_constant_identifier_names
    List<String> _bal_name = [];
+   // ignore: non_constant_identifier_names
    List<String> _bal_amount = [];
    bool _isloadingBal = true;
-   late Timer _timer = Timer(Duration(seconds: 0), () {});
-    int _counter = 0;
+   late Timer _timer = Timer(const Duration(seconds: 0), () {});
    
-   
-
+  
    @override
   void initState() {
     super.initState();
@@ -72,7 +73,7 @@ class _MenuState extends State<Menu> {
          _isLoading = false;
       });
     } catch (e) {
-      print('Error loading employee info: $e');
+      log('Error loading employee info: $e');
     }
   }
 
@@ -87,11 +88,11 @@ class _MenuState extends State<Menu> {
   }
 
   void _startBalanceLoading() {
-    Future.delayed(Duration(seconds: 5), () {
-      _LoadBalance();
+    Future.delayed(const Duration(seconds: 5), () {
+      loadBalance();
       _timer = Timer.periodic(const Duration(seconds: 1), (timer) {
         if (mounted) {
-           _LoadBalance();
+           loadBalance();
         } else {
           timer.cancel();
         }
@@ -99,7 +100,7 @@ class _MenuState extends State<Menu> {
     });
   }
 
-  Future<void> _LoadBalance() async {
+  Future<void> loadBalance() async {
     try {
       Map<String, String> body = {
         'year': '2024',
@@ -113,18 +114,18 @@ class _MenuState extends State<Menu> {
 
         if (success) {
           List<dynamic> data = responseData['data'];
-          List<String> bal_name = data.map((item) => item['BAL_NAME'].toString()).toList();
-          List<String> bal_amount = data.map((item) => item['BAL_AMOUNT'].toString()).toList();
+          List<String> balName = data.map((item) => item['BAL_NAME'].toString()).toList();
+          List<String> balAmount = data.map((item) => item['BAL_AMOUNT'].toString()).toList();
           if (mounted) {
             setState(() {
-            _bal_name = bal_name;
-            _bal_amount = bal_amount;
+            _bal_name = balName;
+            _bal_amount = balAmount;
             _isloadingBal = false;
           });
           }
         
         } else {
-          print('Loading balance not successful. Response data: ${response.body}');
+          log('Loading balance not successful. Response data: ${response.body}');
           if (mounted) {
             setState(() {
               _isloadingBal = false;
@@ -132,7 +133,7 @@ class _MenuState extends State<Menu> {
           }
         }
       } else {
-        print('Loading balance failed: ${response.statusCode} ${response.body}');
+        log('Loading balance failed: ${response.statusCode} ${response.body}');
         if (mounted) {
           setState(() {
             _isloadingBal = false;
@@ -140,7 +141,7 @@ class _MenuState extends State<Menu> {
         }
       }
     } catch (e) {
-      print('An error occurred while loading balance: $e');
+      log('An error occurred while loading balance: $e');
       if (mounted) {
         setState(() {
           _isloadingBal = false;
@@ -168,14 +169,14 @@ class _MenuState extends State<Menu> {
                 children: [
                   TextSpan(
                     text: getGreeting(),
-                    style: TextStyle(
+                    style: const TextStyle(
                       fontSize: 20,
                       fontWeight: FontWeight.w400,
                     ),
                   ),
                   TextSpan(
                     text: ' ${_employeeInfo[EMPL_NAME]!.split(" ")[1]}', // Assuming you want to display the second part after splitting by space
-                    style: TextStyle(
+                    style: const TextStyle(
                       fontSize: 20,
                       fontWeight: FontWeight.bold, // You can set different styles for different parts of the text
                     ),
@@ -234,7 +235,7 @@ class _MenuState extends State<Menu> {
       
       body: LayoutBuilder(
               builder: (context, constraints) {
-                if (constraints.maxWidth > 500) {
+                if (constraints.maxWidth > 600) {
                   return buildWideLayout(context,constraints,280.0);
                 } else {
                   return buildNarrowLayout(context,constraints,700.0);
@@ -262,7 +263,7 @@ class _MenuState extends State<Menu> {
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               buildLeftColumn(cardwidth),
-              buildRightColumn(cardwidth),
+              buildRightColumn(cardwidth,false),
             ],
           ),
         ),
@@ -286,7 +287,7 @@ class _MenuState extends State<Menu> {
           children: [
             buildLeftColumn(cardwidth),
             const SizedBox(height: 1),
-            buildRightColumn(cardwidth),
+            buildRightColumn(cardwidth,true),
             const SizedBox(height: 1),
             buildFourColumnGrid(constraints,cardwidth,2),
           ],
@@ -297,8 +298,6 @@ class _MenuState extends State<Menu> {
 
 
 Widget buildFourColumnGrid(BoxConstraints constraints, double cardWidth, int crossAxisCount) {
-  double spacing = 10.0; // Define your spacing value here
-
   double screenWidth = constraints.maxWidth;
   double sidePadding = (screenWidth > 802) ? (screenWidth - 802) / 2 : 16; // Adjust the 802 as needed
   double cardWidth = (screenWidth - sidePadding * 2 - (4 - 1) * 10) / 4; // 4 columns and 10 spacing
@@ -341,7 +340,7 @@ Widget buildFourColumnGrid(BoxConstraints constraints, double cardWidth, int cro
                      
                     }
                     if (index == 1) {
-                      print("New Card tapped!");
+                      log("New Card tapped!");
                     }
                     },
                     child: Card(
@@ -386,12 +385,12 @@ Widget buildFourColumnGrid(BoxConstraints constraints, double cardWidth, int cro
 
   
 Widget buildLeftColumn(double cardwidth) {
-  return Container(
+  return SizedBox(
     //constraints: BoxConstraints(maxWidth: 400), // Set the maximum width here
     width: cardwidth, // Set the width here
     child: Card(
       elevation: App.elevation,
-      color: widget.isDarkMode ? const Color.fromARGB(255, 81, 81, 81) : Color.fromARGB(255, 255, 255, 255),
+      color: widget.isDarkMode ? const Color.fromARGB(255, 81, 81, 81) : const Color.fromARGB(255, 255, 255, 255),
       shadowColor: widget.isDarkMode ? const Color.fromARGB(255, 109, 109, 109) : const Color.fromARGB(255, 67, 67, 67),
       borderOnForeground: true,
       margin: const EdgeInsets.all(10.0),
@@ -401,7 +400,7 @@ Widget buildLeftColumn(double cardwidth) {
       child: SizedBox(
         height: App.card_height,
         child: Padding(
-          padding: const EdgeInsets.all(20.0),
+          padding: const EdgeInsets.only(top: 10.0, left: 20.0, right: 20.0),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -421,11 +420,9 @@ Widget buildLeftColumn(double cardwidth) {
                   fontWeight: FontWeight.bold,
                 ),
                  icon: Icons.person,
-                iconSize: 24.0,
-                iconColor: Colors.blue,
-                // icon: iconGreeting() == 'm' ? Icons.sunny : (iconGreeting() == 'a' ? Icons.wb_sunny_sharp : Icons.nights_stay),
-                // iconSize: 24.0,
-                // iconColor: iconGreeting() == 'm' ? const Color.fromARGB(255, 193, 174, 1) : (iconGreeting() == 'a' ? Colors.orange : const Color.fromARGB(255, 91, 91, 91)),
+                iconSize: 18.0,
+                iconColor: Colors.white,
+                bgColor: const Color.fromARGB(154, 78, 169, 255),
               ),
                CustomRichText(
                 textBeforeSpan: '',
@@ -435,8 +432,9 @@ Widget buildLeftColumn(double cardwidth) {
                   fontWeight: FontWeight.bold,
                 ),
                 icon: Icons.info_outline_rounded,
-                iconSize: 24.0,
-                iconColor: Colors.blue,
+                iconSize: 18.0,
+                iconColor: Colors.white,
+                bgColor: const Color.fromARGB(128, 78, 78, 255),
               ),
                CustomRichText(
                 textBeforeSpan: '',
@@ -446,8 +444,9 @@ Widget buildLeftColumn(double cardwidth) {
                   fontWeight: FontWeight.bold,
                 ),
                 icon: Icons.work,
-                iconSize: 24.0,
-                iconColor: Colors.blue,
+                iconSize: 18.0,
+                iconColor: Colors.white,
+                bgColor: const Color.fromARGB(128, 255, 119, 78),
               ),
             ],
           ),
@@ -458,9 +457,122 @@ Widget buildLeftColumn(double cardwidth) {
 }
 
 
-Widget buildRightColumn(double width) {
-  return Container(
-    // constraints: BoxConstraints(maxWidth: 400), // Set the maximum width here
+Widget buildRightColumn(double width, bool isMobile) {
+
+  if(isMobile){
+  double cardWidth = (width - 280) / 2; 
+  return SizedBox(
+    width: width,
+    child: Row(
+      mainAxisAlignment: MainAxisAlignment.center,
+      crossAxisAlignment: CrossAxisAlignment.center,
+      mainAxisSize: MainAxisSize.max,
+      children: [
+        // First Card
+        SizedBox(
+          width: cardWidth,
+          child: Card(
+            color: widget.isDarkMode ? const Color.fromARGB(255, 81, 81, 81) : const Color.fromARGB(255, 255, 255, 255),
+            shadowColor: widget.isDarkMode ? const Color.fromARGB(255, 109, 109, 109) : const Color.fromARGB(255, 67, 67, 67),
+            borderOnForeground: true,
+            elevation: App.elevation,
+            margin: const EdgeInsets.all(10.0),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(10.0),
+            ),
+            child: SizedBox(
+              height: App.card_height,
+              child: Padding(
+                padding: const EdgeInsets.only(top: 10.0, left: 20.0, right: 20.0),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  mainAxisSize: MainAxisSize.max,
+                  children: [
+                    const Text(
+                      "Personal Balance",
+                      style: TextStyle(
+                        fontSize: 15.0,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.blueAccent,
+                      ),
+                    ),
+                    _isloadingBal 
+                        ? const CardLoading(
+                            height: 15,
+                            borderRadius: BorderRadius.all(Radius.circular(5)),
+                            width: 100.0,
+                            margin: EdgeInsets.only(top: 8),
+                          )
+                        : CustomBalance(
+                          balance: ' ₱${NumberFormat('#,###').format(int.parse(_bal_amount[0]))}',
+                          iconx: Icons.person_rounded,
+                          fontSize: 20,
+                           colors: widget.isDarkMode ? Color.fromARGB(255, 255, 255, 255) : const Color.fromARGB(255, 46, 47, 47),
+                          bgcolor: const Color.fromARGB(255, 49, 196, 222),
+                        ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        ),
+        
+        // Second Card
+        SizedBox(
+          width: cardWidth,
+          child: Card(
+            color: widget.isDarkMode ? const Color.fromARGB(255, 81, 81, 81) : const Color.fromARGB(255, 255, 255, 255),
+            shadowColor: widget.isDarkMode ? const Color.fromARGB(255, 109, 109, 109) : const Color.fromARGB(255, 67, 67, 67),
+            borderOnForeground: true,
+            elevation: App.elevation,
+            margin: const EdgeInsets.all(10.0),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(10.0),
+            ),
+            child: SizedBox(
+              height: App.card_height,
+              child: Padding(
+                padding: const EdgeInsets.only(top: 10.0, left: 20.0, right: 20.0),
+                child: Column(
+                   crossAxisAlignment: CrossAxisAlignment.center,
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  mainAxisSize: MainAxisSize.max,
+                  children: [
+                     const Text(
+                      "Dependents Balance",
+                      style: TextStyle(
+                        fontSize: 15.0,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.blueAccent,
+                      ),
+                    ),
+                    _isloadingBal 
+                        ? const CardLoading(
+                            height: 15,
+                            borderRadius: BorderRadius.all(Radius.circular(5)),
+                            width: 100.0,
+                            margin: EdgeInsets.only(top: 8),
+                          )
+                        : CustomBalance(
+                          balance: ' ₱${NumberFormat('#,###').format(int.parse(_bal_amount[1]))}',
+                          iconx: Icons.family_restroom_rounded,
+                          fontSize: 20,
+                          colors: widget.isDarkMode ? Color.fromARGB(255, 255, 255, 255) : const Color.fromARGB(255, 46, 47, 47),
+                          bgcolor: const Color.fromARGB(255, 222, 147, 49),
+                        ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        ),
+      ],
+    ),
+  );
+  }
+  else{
+    return SizedBox(
      width: width, 
     child: Card(
       color: widget.isDarkMode ? const Color.fromARGB(255, 81, 81, 81) : const Color.fromARGB(255, 255, 255, 255),
@@ -474,7 +586,7 @@ Widget buildRightColumn(double width) {
       child:  SizedBox(
         height: App.card_height,
         child: Padding(
-          padding: const EdgeInsets.all(20.0),
+          padding: const EdgeInsets.only(top: 10.0, left: 20.0, right: 20.0),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -502,8 +614,9 @@ Widget buildRightColumn(double width) {
                   fontWeight: FontWeight.bold,
                 ),
                 icon: Icons.wallet_rounded,
-                iconSize: 24.0,
-                iconColor: Colors.blueAccent,
+                iconSize: 18.0,
+                iconColor: Colors.white,
+                bgColor: Color.fromARGB(119, 58, 158, 204),
               ),
                _isloadingBal ? 
                  CardLoading(
@@ -521,8 +634,9 @@ Widget buildRightColumn(double width) {
                   fontWeight: FontWeight.bold,
                 ),
                 icon: Icons.wallet_rounded,
-                iconSize: 24.0,
-                iconColor: Colors.blueAccent,
+                iconSize: 18.0,
+                iconColor: Colors.white,
+                bgColor: Color.fromARGB(146, 181, 108, 25),
               )
              
             ],
@@ -531,6 +645,9 @@ Widget buildRightColumn(double width) {
       ),
     ),
   );
+  }
+  
+  
 }
 
 

@@ -66,29 +66,10 @@ flutter:
   uses-material-design: true
 
   assets:
-    - assets/clip.svg
-    - assets/icon_small.png
-    - assets/user.svg
-    - assets/password.svg
-    - assets/login.svg
-    - assets/food.png
-    - assets/flutter_create.svg
-    - assets/flutter_edit.svg
-    - assets/flutter_confirm.svg
-    - assets/flutter_document.svg
-    - assets/flutter_sync.svg
-    - assets/smoke.svg
-    - assets/logo.png
-    - assets/icon_toast/check-circle.svg
-    - assets/icon_toast/circle-xmark.svg
-    - assets/icon_toast/info.svg
-    - assets/icon_toast/triangle-warning.svg
-    - assets/lottie/area.json
-    - assets/icon_toast/logout.svg
-    - assets/menu/admission.png
-    - assets/menu/reimbursement.png
-    - assets/menu/appointment.png
-    - assets/menu/history.png
+    - assets/
+    - assets/icon_toast/
+    - assets/lottie/
+    - assets/menu/
    
 
   fonts:
