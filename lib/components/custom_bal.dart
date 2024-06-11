@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import '../components/config.dart';
 import 'custom_icon.dart';
 
 class CustomBalance extends StatelessWidget {

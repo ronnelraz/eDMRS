@@ -6,7 +6,6 @@ import 'dart:developer';
 import 'package:card_loading/card_loading.dart';
 import 'package:edmrs/API/api_service.dart';
 import 'package:edmrs/components/custom_bal.dart';
-import 'package:edmrs/components/custom_icon.dart';
 import 'package:edmrs/components/custom_rich_text.dart';
 import 'package:edmrs/sharedpref/sharedpref.dart';
 import 'package:flutter/material.dart';
@@ -50,7 +49,7 @@ class _MenuState extends State<Menu> {
    @override
   void initState() {
     super.initState();
-    _initializeData();;
+    _initializeData();
   }
 
  @override
