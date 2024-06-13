@@ -19,7 +19,7 @@ import 'package:encrypt/encrypt.dart' as encrypt;
 
 class App {
   static Color primaryColor = const Color(0xFFE1AA74);
-  static String title =  "eDMRS";
+  static String title =  "Welfare Claim System";
   static Color border = const Color.fromRGBO(49, 101, 196,1);
   static Color textColor = const Color(0xFF000000);
   static Color textfieldBgColor = const Color.fromARGB(255, 255, 255, 255);

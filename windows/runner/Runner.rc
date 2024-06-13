@@ -90,12 +90,12 @@ BEGIN
         BLOCK "040904e4"
         BEGIN
             VALUE "CompanyName", "com.example" "\0"
-            VALUE "FileDescription", "edmrs" "\0"
+            VALUE "FileDescription", "welfare_claim_system" "\0"
             VALUE "FileVersion", VERSION_AS_STRING "\0"
-            VALUE "InternalName", "edmrs" "\0"
+            VALUE "InternalName", "welfare_claim_system" "\0"
             VALUE "LegalCopyright", "Copyright (C) 2024 com.example. All rights reserved." "\0"
-            VALUE "OriginalFilename", "edmrs.exe" "\0"
-            VALUE "ProductName", "edmrs" "\0"
+            VALUE "OriginalFilename", "welfare_claim_system.exe" "\0"
+            VALUE "ProductName", "welfare_claim_system" "\0"
             VALUE "ProductVersion", VERSION_AS_STRING "\0"
         END
     END

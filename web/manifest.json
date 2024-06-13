@@ -1,6 +1,6 @@
 {
-    "name": "edmrs",
-    "short_name": "edmrs",
+    "name": "welfare_claim_system",
+    "short_name": "welfare_claim_system",
     "start_url": ".",
     "display": "standalone",
     "background_color": "#0175C2",

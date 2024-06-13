@@ -1,9 +1,9 @@
 import 'dart:io';
 
 import 'package:card_loading/card_loading.dart';
-import 'package:edmrs/API/api_service.dart';
-import 'package:edmrs/components/custom_rich_text.dart';
-import 'package:edmrs/sharedpref/sharedpref.dart';
+import 'package:welfare_claim_system/API/api_service.dart';
+import 'package:welfare_claim_system/components/custom_rich_text.dart';
+import 'package:welfare_claim_system/sharedpref/sharedpref.dart';
 import 'package:flutter/material.dart';
 import 'package:wolt_modal_sheet/wolt_modal_sheet.dart';
 import '../components/config.dart';
@@ -273,6 +273,16 @@ class _AdmissionState extends State<Admission> {
                 cursorColor: const Color.fromRGBO(43, 42, 42, 1),
               ),
               // Employee Name Field
+                SizedBox(height: 20),
+              // Business Unit Field
+              CustomTextField(
+                readonly: true,
+                labelText: 'Business Unit',
+                customerRadius: 10.0,
+                controller: bu,
+                focusNode: buFocus,
+                cursorColor: const Color.fromRGBO(43, 42, 42, 1),
+              ),
               SizedBox(height: 20),
               // Department Field
              CustomTextField(
@@ -283,6 +293,17 @@ class _AdmissionState extends State<Admission> {
                 focusNode: departmentFocus,
                 cursorColor: const Color.fromRGBO(43, 42, 42, 1),
               ),
+              SizedBox(height: 20),
+              // Position Field
+               CustomTextField(
+                readonly: true,
+                labelText: 'Position',
+                customerRadius: 10.0,
+                controller: position,
+                focusNode: positionFocus,
+                cursorColor: const Color.fromRGBO(43, 42, 42, 1),
+              ),
+            
               SizedBox(height: 20),
               // Name of Hospital Field (Using CustomDropdown)
               _isLoading ?
@@ -316,26 +337,6 @@ class _AdmissionState extends State<Admission> {
                      });
                   },
                 ),
-              SizedBox(height: 20),
-              // Position Field
-               CustomTextField(
-                readonly: true,
-                labelText: 'Position',
-                customerRadius: 10.0,
-                controller: position,
-                focusNode: positionFocus,
-                cursorColor: const Color.fromRGBO(43, 42, 42, 1),
-              ),
-              SizedBox(height: 20),
-              // Business Unit Field
-              CustomTextField(
-                readonly: true,
-                labelText: 'Business Unit',
-                customerRadius: 10.0,
-                controller: bu,
-                focusNode: buFocus,
-                cursorColor: const Color.fromRGBO(43, 42, 42, 1),
-              ),
               SizedBox(height: 20),
               // Admission Date Field
                 CustomTextField(

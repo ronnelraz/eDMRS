@@ -1,8 +1,8 @@
 import 'dart:convert';
 
-import 'package:edmrs/API/api_service.dart';
-import 'package:edmrs/main.dart';
-import 'package:edmrs/pages/menu.dart';
+import 'package:welfare_claim_system/API/api_service.dart';
+import 'package:welfare_claim_system/main.dart';
+import 'package:welfare_claim_system/pages/menu.dart';
 import 'package:flutter/material.dart';
 import 'package:animated_custom_dropdown/custom_dropdown.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';

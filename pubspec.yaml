@@ -1,4 +1,4 @@
-name: edmrs
+name: welfare_claim_system
 description: "CPF Electornic Doctor Management Records"
 publish_to: 'none'
 version: 1.0.0+1

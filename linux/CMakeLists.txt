@@ -4,10 +4,10 @@ project(runner LANGUAGES CXX)
 
 # The name of the executable created for the application. Change this to change
 # the on-disk name of your application.
-set(BINARY_NAME "edmrs")
+set(BINARY_NAME "welfare_claim_system")
 # The unique GTK application identifier for this application. See:
 # https://wiki.gnome.org/HowDoI/ChooseApplicationID
-set(APPLICATION_ID "com.example.edmrs")
+set(APPLICATION_ID "com.razo.welfare_claim_system")
 
 # Explicitly opt in to modern CMake behaviors to avoid warnings with recent
 # versions of CMake.

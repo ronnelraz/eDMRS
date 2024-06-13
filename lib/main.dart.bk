@@ -1,10 +1,10 @@
 // ignore_for_file: avoid_print, use_build_context_synchronously, sized_box_for_whitespace, use_key_in_widget_constructors, prefer_const_constructors_in_immutables, use_super_parameters, unused_import
 import 'dart:convert';
 import 'package:art_sweetalert/art_sweetalert.dart';
-import 'package:edmrs/API/api_service.dart';
-import 'package:edmrs/components/config.dart';
-import 'package:edmrs/pages/area.dart';
-import 'package:edmrs/pages/menu.dart';
+import 'package:welfare_claim_system/API/api_service.dart';
+import 'package:welfare_claim_system/components/config.dart';
+import 'package:welfare_claim_system/pages/area.dart';
+import 'package:welfare_claim_system/pages/menu.dart';
 
 import 'package:flutter/material.dart';
 

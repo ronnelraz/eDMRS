@@ -3,10 +3,10 @@ import 'dart:convert';
 import 'dart:developer';
 
 import 'package:card_loading/card_loading.dart';
-import 'package:edmrs/API/api_service.dart';
-import 'package:edmrs/components/custom_bal.dart';
-import 'package:edmrs/components/reimbursement_tile.dart';
-import 'package:edmrs/sharedpref/sharedpref.dart';
+import 'package:welfare_claim_system/API/api_service.dart';
+import 'package:welfare_claim_system/components/custom_bal.dart';
+import 'package:welfare_claim_system/components/reimbursement_tile.dart';
+import 'package:welfare_claim_system/sharedpref/sharedpref.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import '../components/config.dart';
