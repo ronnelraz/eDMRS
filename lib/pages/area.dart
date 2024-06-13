@@ -242,7 +242,9 @@ class _AreaState extends State<Area> {
                             } else {
                               print('Failed to save logout status.');
                             }
-                          intent(context, MyHomePage(title: App.title, toggleTheme: widget.toggleTheme, isDarkMode: widget.isDarkMode),'/');
+                              // intent(context, MyHomePage(title: App.title, toggleTheme: widget.toggleTheme, isDarkMode: widget.isDarkMode),'/');
+                               Navigator.pushNamed(context, '/');
+                          
                           });
                         
                       },

@@ -125,6 +125,8 @@ class _ReimbursementState extends State<Reimbursement> {
 
   @override
   Widget build(BuildContext context) {
+
+
     return  Scaffold(
       appBar: AppBar(
         automaticallyImplyLeading: false, // Disable automatic back button
@@ -158,7 +160,7 @@ class _ReimbursementState extends State<Reimbursement> {
               children: [
                 TextButton(
                   onPressed: () {
-
+                      logout(context);
                   },
                   child: Row(
                     children: [
@@ -187,12 +189,54 @@ class _ReimbursementState extends State<Reimbursement> {
         ],
       ),
       body: Padding(
-        padding: const EdgeInsets.only(top: 50),
+        padding: const EdgeInsets.only(top: 10),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.center,
           mainAxisSize: MainAxisSize.max,
           children: [
+            const Column(
+              mainAxisAlignment: MainAxisAlignment.start,
+              mainAxisSize: MainAxisSize.max,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                Padding(
+                  padding: EdgeInsets.only(left: 10.0,right: 10.0),
+                  child: Text(
+                    "Reimbursement",
+                    style: TextStyle(
+                      color: Colors.blue,
+                      fontFamily: 'Urbanist',
+                      fontWeight: FontWeight.w900,
+                      fontSize: 30,
+                      height: 1.2
+                    ),
+                    ),
+                ),
+              
+                Padding(
+                  padding: EdgeInsets.only(left: 10,right: 10,top: 1),
+                  child: Text(
+                    App.welfareNote,
+                    style: TextStyle(
+                      fontFamily: 'Urbanist',
+                      fontWeight: FontWeight.w400,
+                      fontSize: 12,
+                    ),
+                    ),
+                ),
+              ],
+            ),
 
+            Container(
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(10), 
+              color: widget.isDarkMode ? Colors.white : Colors.black,
+              ),
+              margin: const EdgeInsets.all(10),
+              height: 1, 
+              width: double.infinity, 
+            ),
+            
             Row(
                crossAxisAlignment: CrossAxisAlignment.center,
                   mainAxisAlignment: MainAxisAlignment.center,

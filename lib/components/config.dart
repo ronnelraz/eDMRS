@@ -15,6 +15,8 @@ import 'package:nominatim_geocoding/nominatim_geocoding.dart';
 import 'package:toastification/toastification.dart';
 import 'package:encrypt/encrypt.dart' as encrypt;
 
+import '../sharedpref/sharedpref.dart';
+
 
 
 class App {
@@ -41,6 +43,16 @@ class App {
   static const double card_height = 140.0;
   static const double card_textsize = 13;
   static const double elevation = 1.0;
+
+
+static const String welfareNote = '''
+Welfare Claim Procedure:
+1. Fill-up welfare claim form and attach supporting documents
+2. Submit documents to HR Dept. for checking
+3. Retrieve documents from HR Dept. and have it approved by supervisor
+4. Park document at SAP system for payment
+5. Submit approved park document to Accounting Department.
+''';
 
 
 // localstorage
@@ -166,6 +178,26 @@ void Pages(BuildContext context, String page){
   Navigator.pushNamed(context, page);
 }
 
+
+void logout(BuildContext context){
+    alert(
+    icon: 'assets/icon_toast/question.svg',
+     colorIcon: Colors.blue[200],
+    "Logout",
+    "Are you sure you want logout?", 
+    context,
+    onConfirm: () async {
+    bool saved = await setLoginStatus(false);
+      if (saved) {
+        print('outout status saved successfully.');
+      } else {
+        print('Failed to save logout status.');
+      }
+        // intent(context, MyHomePage(title: App.title, toggleTheme: widget.toggleTheme, isDarkMode: widget.isDarkMode),'/');
+          Navigator.pushNamed(context, '/');
+    
+    });
+}
 
 
 
@@ -294,15 +326,31 @@ void toast(String msg){
     );
 }
 
-void alert(String title, String msg, BuildContext context, {Function? onConfirm}) {
+void alert(String title, String msg, BuildContext context, {Function? onConfirm, String? icon, Color? colorIcon}) {
   showDialog(
     context: context,
     builder: (BuildContext context) {
       return AlertDialog(
-        title: Text(title),
+        title: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          crossAxisAlignment: CrossAxisAlignment.center,
+          mainAxisSize: MainAxisSize.max,
+          children: [
+            if (icon != null && icon.isNotEmpty)
+            buildSvgPicture(
+              icon, 
+              BoxFit.cover,
+              width: 80,
+              height: 80,
+              color: colorIcon
+            ),
+            SizedBox(height: icon != null && icon.isNotEmpty ? 20 : 10), 
+            Text(title),
+          ],
+        ),
         content: Text(
           msg,
-          textAlign: TextAlign.left, // Set text alignment to left
+          textAlign: TextAlign.left,
         ),
         actions: <Widget>[
           TextButton(
@@ -348,7 +396,6 @@ void DialogSelectArea(String title, String msg, BuildContext context, List<Strin
               initialItem: initialItem,
               onChanged: (value) {
                 selectedValue = value;
-                // Log or perform any other action when value changes
                 print('Selected value: $value');
               },
             ),
@@ -364,11 +411,9 @@ void DialogSelectArea(String title, String msg, BuildContext context, List<Strin
           TextButton(
             child: const Text('OK'),
             onPressed: () {
-              // If onConfirm is not provided, simply close the dialog
               if (onConfirm != null) {
                 onConfirm(selectedValue);
               }
-              // Navigator.of(context).pop();
             },
           ),
         ],
@@ -384,7 +429,7 @@ List<String> Menuicons = [
   'assets/menu/admission.png',
   'assets/menu/reimbursement.png',
   'assets/menu/appointment.png',
-  'assets/menu/history.png'
+  'assets/menu/history.png',
 ];
 
 List<String> Menutitle = [

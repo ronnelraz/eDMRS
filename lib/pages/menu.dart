@@ -204,7 +204,7 @@ class _MenuState extends State<Menu> {
               children: [
                 TextButton(
                   onPressed: () {
-
+                      logout(context);
                   },
                   child: Row(
                     children: [

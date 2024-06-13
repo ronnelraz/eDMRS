@@ -172,7 +172,7 @@ class _AdmissionState extends State<Admission> {
     ? const CustomLoading(img: 'assets/logo.png', text: 'Loading',)    
     : Scaffold(
       appBar: AppBar(
-        backgroundColor: Colors.white,
+        backgroundColor: widget.isDarkMode ? const Color.fromARGB(255, 25, 25, 25) :  Colors.white,
         automaticallyImplyLeading: false, // Disable automatic back button
         leading: Row(
           children: <Widget>[
@@ -213,7 +213,7 @@ class _AdmissionState extends State<Admission> {
               children: [
                 TextButton(
                   onPressed: () {
-
+                    logout(context);
                   },
                   child: Row(
                     children: [
@@ -241,219 +241,223 @@ class _AdmissionState extends State<Admission> {
           ),
         ],
       ),
-      body: Padding(
-        padding: const EdgeInsets.only(right:16.0, left: 16.0 ),
-        child: Form(
-          key: _formKey,
-          child: ListView(
-            controller: _scrollController,
-            reverse: false,
-            shrinkWrap: true,
-            children: [
-               SizedBox(height: 5),
-              CustomTextField(
-                labelText: 'Request Date',
-                customerRadius: 10.0,
-                controller: request_date,
-                readonly: true,
-                hintText: "Request Date",
-                cursorColor: const Color.fromRGBO(43, 42, 42, 1),
-              ),
-              // Other form fields
-              SizedBox(height: 20),
-              CustomTextField(
-                readonly: true,
-                labelText: 'Employee Name',
-                customerRadius: 10.0,
-                controller: emp_name,
-                focusNode: empNameFocus,
-                cursorColor: const Color.fromRGBO(43, 42, 42, 1),
-              ),
-              // Employee Name Field
+      body: Container(
+         height: MediaQuery.of(context).size.height,
+         color: widget.isDarkMode ? Color.fromARGB(255, 47, 47, 47) :  Colors.white,
+        child: Padding(
+          padding: const EdgeInsets.only(right:16.0, left: 16.0 ),
+          child: Form(
+            key: _formKey,
+            child: ListView(
+              controller: _scrollController,
+              reverse: false,
+              shrinkWrap: true,
+              children: [
+                 SizedBox(height: 30),
+                CustomTextField(
+                  labelText: 'Request Date',
+                  customerRadius: 10.0,
+                  controller: request_date,
+                  readonly: true,
+                  hintText: "Request Date",
+                  cursorColor: const Color.fromRGBO(43, 42, 42, 1),
+                ),
+                // Other form fields
                 SizedBox(height: 20),
-              // Business Unit Field
-              CustomTextField(
-                readonly: true,
-                labelText: 'Business Unit',
-                customerRadius: 10.0,
-                controller: bu,
-                focusNode: buFocus,
-                cursorColor: const Color.fromRGBO(43, 42, 42, 1),
-              ),
-              SizedBox(height: 20),
-              // Department Field
-             CustomTextField(
-              readonly: true,
-                labelText: 'Department',
-                customerRadius: 10.0,
-                controller: department,
-                focusNode: departmentFocus,
-                cursorColor: const Color.fromRGBO(43, 42, 42, 1),
-              ),
-              SizedBox(height: 20),
-              // Position Field
+                CustomTextField(
+                  readonly: true,
+                  labelText: 'Employee Name',
+                  customerRadius: 10.0,
+                  controller: emp_name,
+                  focusNode: empNameFocus,
+                  cursorColor: const Color.fromRGBO(43, 42, 42, 1),
+                ),
+                // Employee Name Field
+                  SizedBox(height: 20),
+                // Business Unit Field
+                CustomTextField(
+                  readonly: true,
+                  labelText: 'Business Unit',
+                  customerRadius: 10.0,
+                  controller: bu,
+                  focusNode: buFocus,
+                  cursorColor: const Color.fromRGBO(43, 42, 42, 1),
+                ),
+                SizedBox(height: 20),
+                // Department Field
                CustomTextField(
                 readonly: true,
-                labelText: 'Position',
-                customerRadius: 10.0,
-                controller: position,
-                focusNode: positionFocus,
-                cursorColor: const Color.fromRGBO(43, 42, 42, 1),
-              ),
-            
-              SizedBox(height: 20),
-              // Name of Hospital Field (Using CustomDropdown)
-              _isLoading ?
-                CardLoading(
-                  height: 25,
-                  borderRadius: BorderRadius.all(Radius.circular(13)),
-                  width: MediaQuery.of(context).size.width,
-                  margin: EdgeInsets.only(top: 8),
-                )
-              : CustomDropdown<String>.search(
-                  hintText: 'Name of Hospital',
-                  items: HOSPITAL_LNAME,
-                  excludeSelected: false,
-                  decoration: CustomDropdownDecoration(
-                    expandedFillColor: widget.isDarkMode ? const Color.fromARGB(255, 189, 189, 189) : const Color.fromARGB(255, 255, 255, 255),
-                    closedFillColor: widget.isDarkMode ? const Color.fromARGB(255, 189, 189, 189) : Colors.white,
-                    
-                    closedBorder: Border.all( // Using BoxBorder with Border.all for a simple solid border
-                      color: widget.isDarkMode ? Colors.white : Color.fromARGB(255, 189, 189, 189),
-                      width: 1.0,
-                    ),
-                    expandedBorder:  Border.all( // Using BoxBorder with Border.all for a simple solid border
-                      color: widget.isDarkMode ? Colors.white : Color.fromARGB(255, 189, 189, 189),
-                      width: 1.0,
-                    ),
-                    
-                  ),
-                  onChanged: (value) {
-                     setState(() {
-                       getHospital = value;
-                     });
-                  },
+                  labelText: 'Department',
+                  customerRadius: 10.0,
+                  controller: department,
+                  focusNode: departmentFocus,
+                  cursorColor: const Color.fromRGBO(43, 42, 42, 1),
                 ),
-              SizedBox(height: 20),
-              // Admission Date Field
-                CustomTextField(
-                labelText: 'Admission Date',
-                customerRadius: 10.0,
-                controller: admitdate,
-                focusNode: admitdateFocus,
-                cursorColor: const Color.fromRGBO(43, 42, 42, 1),
-                onTapx: () {
-                  showDatePicker(
-                    context: context,
-                    initialDate: _admissionDate,
-                    firstDate: DateTime.now(),
-                    lastDate: DateTime(2100),
-                  ).then((selectedDate) {
-                    if (selectedDate != null) {
-                      setState(() {
-                        _admissionDate = selectedDate;
-                        admitdate.text = _dateFormat.format(selectedDate);
-                      });
-                    }
-                  });
-                },
-              ),
-
-              SizedBox(height: 20),
-              Container(
-                  height: 6 * 24.0,
-                  child: CustomTextArea(
-                    keyboard: TextInputType.multiline,
-                    maxL: 200,
-                    labelText: 'Symptoms',
-                    customerRadius: 10.0,
-                    controller: syntom,
-                    focusNode: syntomFocus,
-                    cursorColor: const Color.fromRGBO(43, 42, 42, 1),
-                    onTapx: () {
-                        setState(() {
-                              _keyboardVisible = MediaQuery.of(context).viewInsets.bottom > 0;
-                              if (_keyboardVisible) {
-                                // Scroll to the bottom when the keyboard is shown
-                                _scrollController.animateTo(
-                                  _scrollController.position.maxScrollExtent,
-                                  duration: Duration(milliseconds: 300),
-                                  curve: Curves.easeOut,
-                                );
-                              }
-                            });
+                SizedBox(height: 20),
+                // Position Field
+                 CustomTextField(
+                  readonly: true,
+                  labelText: 'Position',
+                  customerRadius: 10.0,
+                  controller: position,
+                  focusNode: positionFocus,
+                  cursorColor: const Color.fromRGBO(43, 42, 42, 1),
+                ),
+              
+                SizedBox(height: 20),
+                // Name of Hospital Field (Using CustomDropdown)
+                _isLoading ?
+                  CardLoading(
+                    height: 25,
+                    borderRadius: BorderRadius.all(Radius.circular(13)),
+                    width: MediaQuery.of(context).size.width,
+                    margin: EdgeInsets.only(top: 8),
+                  )
+                : CustomDropdown<String>.search(
+                    hintText: 'Name of Hospital',
+                    items: HOSPITAL_LNAME,
+                    excludeSelected: false,
+                    decoration: CustomDropdownDecoration(
+                      expandedFillColor: widget.isDarkMode ? Color.fromARGB(255, 68, 68, 68) : const Color.fromARGB(255, 255, 255, 255),
+                      closedFillColor: widget.isDarkMode ? const Color.fromARGB(255, 68, 68, 68) : Colors.white,
+                      
+                      closedBorder: Border.all( // Using BoxBorder with Border.all for a simple solid border
+                        color: widget.isDarkMode ? Colors.white : Color.fromARGB(255, 189, 189, 189),
+                        width: 1.0,
+                      ),
+                      expandedBorder:  Border.all( // Using BoxBorder with Border.all for a simple solid border
+                        color: widget.isDarkMode ? Colors.white : Color.fromARGB(255, 189, 189, 189),
+                        width: 1.0,
+                      ),
+                      
+                    ),
+                    onChanged: (value) {
+                       setState(() {
+                         getHospital = value;
+                       });
                     },
                   ),
+                SizedBox(height: 20),
+                // Admission Date Field
+                  CustomTextField(
+                  labelText: 'Admission Date',
+                  customerRadius: 10.0,
+                  controller: admitdate,
+                  focusNode: admitdateFocus,
+                  cursorColor: const Color.fromRGBO(43, 42, 42, 1),
+                  onTapx: () {
+                    showDatePicker(
+                      context: context,
+                      initialDate: _admissionDate,
+                      firstDate: DateTime.now(),
+                      lastDate: DateTime(2100),
+                    ).then((selectedDate) {
+                      if (selectedDate != null) {
+                        setState(() {
+                          _admissionDate = selectedDate;
+                          admitdate.text = _dateFormat.format(selectedDate);
+                        });
+                      }
+                    });
+                  },
                 ),
-
-              // SizedBox(height: 20),
-              // if (_selectedFiles.isEmpty)
-              //   CustomButtonWithIcon(
-              //     icon: 'assets/clip.svg',
-              //     label: 'Attach File ',
-              //     onPressed:_pickFiles,
-              //     color: Color.fromARGB(255, 46, 83, 218),
-              //     iconColor: Colors.white,
-              //   ),
-              // SizedBox(height: 20),
-              // if (_selectedFiles.isNotEmpty)
-              // SingleChildScrollView(
-              //   scrollDirection: Axis.horizontal,
-              //   child: Row(
-              //     children: [
-              //       SizedIconButton(
-              //         color: const Color.fromARGB(255, 243, 33, 33),
-              //         icon: Icon(
-              //           Icons.delete,
-              //           color: Colors.white,
-              //           size: 15,
-              //         ),
-              //         onPressed: _remove,
-              //         // onPressed: () {
-              //         //   // 
-              //         // },
-              //       ),
-              //       Text(' Selected Files: ${_selectedFiles}'),
-              //     ],
-              //   ),
-              // ),
-
-              SizedBox(height: 20),
-              // Save, Submit, and Cancel Buttons
-              Row(
-                mainAxisAlignment: MainAxisAlignment.end,
-                children: [
-                  Expanded(
-                    child: Container(
-                      width: MediaQuery.of(context).size.width * 0.25, // Adjust the width as needed
-                      padding: const EdgeInsets.all(8.0),
-                      child: CustomButtonWithIcon(
-                        icon: 'assets/icon_toast/check-circle.svg',
-                        label: 'Submit',
-                        onPressed: saveData,
-                        color: Colors.blue,
-                        iconColor: Colors.white,
-                      ),
+        
+                SizedBox(height: 20),
+                Container(
+                    height: 6 * 24.0,
+                    child: CustomTextArea(
+                      keyboard: TextInputType.multiline,
+                      maxL: 200,
+                      labelText: 'Symptoms',
+                      customerRadius: 10.0,
+                      controller: syntom,
+                      focusNode: syntomFocus,
+                      cursorColor: const Color.fromRGBO(43, 42, 42, 1),
+                      onTapx: () {
+                          setState(() {
+                                _keyboardVisible = MediaQuery.of(context).viewInsets.bottom > 0;
+                                if (_keyboardVisible) {
+                                  // Scroll to the bottom when the keyboard is shown
+                                  _scrollController.animateTo(
+                                    _scrollController.position.maxScrollExtent,
+                                    duration: Duration(milliseconds: 300),
+                                    curve: Curves.easeOut,
+                                  );
+                                }
+                              });
+                      },
                     ),
                   ),
-                  Expanded(
-                    child: Container(
-                      width: MediaQuery.of(context).size.width * 0.25, // Adjust the width as needed
-                      padding: const EdgeInsets.all(8.0),
-                      child: CustomButtonWithIcon(
-                        icon: 'assets/icon_toast/circle-xmark.svg',
-                        label: 'Cancel',
-                        onPressed: () async {
-                          Navigator.pushNamed(context, '/Menu');
-                        },
-                        color: Colors.red,
-                        iconColor: Colors.white,
+        
+                // SizedBox(height: 20),
+                // if (_selectedFiles.isEmpty)
+                //   CustomButtonWithIcon(
+                //     icon: 'assets/clip.svg',
+                //     label: 'Attach File ',
+                //     onPressed:_pickFiles,
+                //     color: Color.fromARGB(255, 46, 83, 218),
+                //     iconColor: Colors.white,
+                //   ),
+                // SizedBox(height: 20),
+                // if (_selectedFiles.isNotEmpty)
+                // SingleChildScrollView(
+                //   scrollDirection: Axis.horizontal,
+                //   child: Row(
+                //     children: [
+                //       SizedIconButton(
+                //         color: const Color.fromARGB(255, 243, 33, 33),
+                //         icon: Icon(
+                //           Icons.delete,
+                //           color: Colors.white,
+                //           size: 15,
+                //         ),
+                //         onPressed: _remove,
+                //         // onPressed: () {
+                //         //   // 
+                //         // },
+                //       ),
+                //       Text(' Selected Files: ${_selectedFiles}'),
+                //     ],
+                //   ),
+                // ),
+        
+                SizedBox(height: 20),
+                // Save, Submit, and Cancel Buttons
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  children: [
+                    Expanded(
+                      child: Container(
+                        width: MediaQuery.of(context).size.width * 0.25, // Adjust the width as needed
+                        padding: const EdgeInsets.all(8.0),
+                        child: CustomButtonWithIcon(
+                          icon: 'assets/icon_toast/check-circle.svg',
+                          label: 'Submit',
+                          onPressed: saveData,
+                          color: Colors.blue,
+                          iconColor: Colors.white,
+                        ),
                       ),
                     ),
-                  ),
-                ],
-              )
-            ],
+                    Expanded(
+                      child: Container(
+                        width: MediaQuery.of(context).size.width * 0.25, // Adjust the width as needed
+                        padding: const EdgeInsets.all(8.0),
+                        child: CustomButtonWithIcon(
+                          icon: 'assets/icon_toast/circle-xmark.svg',
+                          label: 'Cancel',
+                          onPressed: () async {
+                            Navigator.pushNamed(context, '/Menu');
+                          },
+                          color: Colors.red,
+                          iconColor: Colors.white,
+                        ),
+                      ),
+                    ),
+                  ],
+                )
+              ],
+            ),
           ),
         ),
       ),
@@ -658,7 +662,19 @@ void showPreviewModal(Map<String, String> userData) {
             // icon: 'assets/icon_toast/check-circle.svg',
             label: 'OK',
             onPressed: () async {
-               Navigator.pop(context);
+              //  Navigator.pop(context);
+                alert(
+                icon: 'assets/icon_toast/question.svg',
+                colorIcon: Colors.blue[200],
+                "Confirmation",
+                "Are you sure you want to proceed this form?",
+                context,
+                onConfirm: () {
+                    Navigator.of(context, rootNavigator: true).pop();
+                    Navigator.pushNamed(context, '/Menu');
+                  // intent(context, Admission(toggleTheme: widget.toggleTheme, isDarkMode: widget.isDarkMode),'/Admission');
+                },
+              );
             },
           
           )
