@@ -162,7 +162,7 @@ class _MenuState extends State<Menu> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             FittedBox(
-            fit: BoxFit.scaleDown, // or BoxFit.contain, BoxFit.cover, etc. depending on your needs
+            fit: BoxFit.scaleDown,
             child: Text.rich(
               TextSpan(
                 children: [
@@ -174,10 +174,10 @@ class _MenuState extends State<Menu> {
                     ),
                   ),
                   TextSpan(
-                    text: ' ${_employeeInfo[EMPL_NAME]!.split(" ")[1]}', // Assuming you want to display the second part after splitting by space
+                    text: ' ${_employeeInfo[EMPL_NAME]!.split(" ")[1]}', 
                     style: const TextStyle(
                       fontSize: 20,
-                      fontWeight: FontWeight.bold, // You can set different styles for different parts of the text
+                      fontWeight: FontWeight.bold, 
                     ),
                   ),
                 ],
@@ -191,14 +191,14 @@ class _MenuState extends State<Menu> {
         leading: buildImage('assets/logo.png', 40, 40, Alignment.centerRight), // Icon
         actions: [
           Padding(
-            padding: const EdgeInsets.all(8.0), // Adjust the margin as needed
+            padding: const EdgeInsets.all(8.0), 
             child: IconButton(
               icon: Icon(widget.isDarkMode ? Icons.nights_stay : Icons.wb_sunny),
               onPressed: widget.toggleTheme,
             ),
           ),
           Padding(
-            padding: const EdgeInsets.all(8.0), // Adjust the margin as needed
+            padding: const EdgeInsets.all(8.0), 
             child: Row(
               children: [
                 TextButton(

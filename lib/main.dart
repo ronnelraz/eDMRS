@@ -154,7 +154,7 @@ class LoginPage extends State<MyHomePage> {
             itemList: [
               CarouselItem(
                 image: const NetworkImage(
-                  'https://miro.medium.com/max/1400/1*RpaR1pTpRa0PUdNdfv4njA.png',
+                  'https://cdn.create.vista.com/downloads/c254e914-7862-4402-b865-60e958967d20_1024.jpeg',
                 ),
                 title:'Push your creativity to its limits by reimagining this classic puzzle!',
                 titleTextStyle: const TextStyle(
@@ -166,7 +166,19 @@ class LoginPage extends State<MyHomePage> {
               ),
               CarouselItem(
                 image: const NetworkImage(
-                  'https://pbs.twimg.com/profile_banners/1444928438331224069/1633448972/600x200',
+                  'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQgsz246BlltWV-NfBQiyNvrJu6IDCwxD5nfg&s',
+                ),
+                title: '@coskuncay published flutter_custom_carousel_slider!',
+                titleTextStyle: const TextStyle(
+                  fontSize: 12,
+                  color: Colors.white,
+                ),
+                leftSubtitle: '11 Feb 2022',
+                onImageTap: (i) {},
+              ),
+               CarouselItem(
+                image: const NetworkImage(
+                  'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQvihoZZzF-yO5JgTFt45w-uV13PSEyk-woRJbH3-vGTw1lV4RyOuqneHyj9u3xWgh_NUk',
                 ),
                 title: '@coskuncay published flutter_custom_carousel_slider!',
                 titleTextStyle: const TextStyle(
@@ -242,7 +254,7 @@ class LoginPage extends State<MyHomePage> {
                         Container(
                           width: 350, // Set the desired width
                           child: CustomButtonWithIcon(
-                            icon: 'assets/login.svg',
+                            // icon: 'assets/login.svg',
                             label: 'Login',
                             onPressed: () async {
                               String enteredUsername = username.text;
