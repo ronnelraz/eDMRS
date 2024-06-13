@@ -4,6 +4,7 @@ import 'dart:convert';
 import 'dart:developer';
 
 import 'package:card_loading/card_loading.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:welfare_claim_system/API/api_service.dart';
 import 'package:welfare_claim_system/components/custom_bal.dart';
 import 'package:welfare_claim_system/components/custom_rich_text.dart';
@@ -471,7 +472,7 @@ Widget buildLeftColumn(double cardwidth) {
 Widget buildRightColumn(double width, bool isMobile) {
 
   if(isMobile){
-  double cardWidth = (width - 280) / 2; 
+  double cardWidth = (width - 350) / 2; 
   return SizedBox(
     width: width,
     child: Row(
@@ -503,7 +504,7 @@ Widget buildRightColumn(double width, bool isMobile) {
                     const Text(
                       "Personal Balance",
                       style: TextStyle(
-                        fontSize: 15.0,
+                        fontSize: 13.0,
                         fontWeight: FontWeight.bold,
                         color: Colors.blueAccent,
                       ),
@@ -520,7 +521,7 @@ Widget buildRightColumn(double width, bool isMobile) {
                           iconx: Icons.person_rounded,
                           fontSize: 20,
                            colors: widget.isDarkMode ? Color.fromARGB(255, 255, 255, 255) : const Color.fromARGB(255, 46, 47, 47),
-                          bgcolor: const Color.fromARGB(255, 49, 196, 222),
+                          bgcolor: Colors.blue,
                         ),
                   ],
                 ),
@@ -553,7 +554,7 @@ Widget buildRightColumn(double width, bool isMobile) {
                      const Text(
                       "Dependents Balance",
                       style: TextStyle(
-                        fontSize: 15.0,
+                        fontSize: 12.0,
                         fontWeight: FontWeight.bold,
                         color: Colors.blueAccent,
                       ),

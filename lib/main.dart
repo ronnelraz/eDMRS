@@ -142,250 +142,273 @@ class LoginPage extends State<MyHomePage> {
           ),
         ],
       ),
-      body: Column(
-        children: [
-          Padding(
-            padding: const EdgeInsets.only(
-              top: 10,
-              left: 40,
-              right: 40
-            ),
-            child: AnnoucementTile(
-            itemList: [
-              CarouselItem(
-                image: const NetworkImage(
-                  'https://cdn.create.vista.com/downloads/c254e914-7862-4402-b865-60e958967d20_1024.jpeg',
+      body: SingleChildScrollView(
+        child: Padding(
+          padding: EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom),
+          child: Column(
+            children: [
+              Padding(
+                padding: const EdgeInsets.only(
+                  top: 10,
+                  left: 40,
+                  right: 40
                 ),
-                title:'Push your creativity to its limits by reimagining this classic puzzle!',
-                titleTextStyle: const TextStyle(
-                  fontSize: 12,
-                  color: Colors.white,
-                ),
-                leftSubtitle: '\$51,046 in prizes',
-                onImageTap: (i) {},
-              ),
-              CarouselItem(
-                image: const NetworkImage(
-                  'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQgsz246BlltWV-NfBQiyNvrJu6IDCwxD5nfg&s',
-                ),
-                title: '@coskuncay published flutter_custom_carousel_slider!',
-                titleTextStyle: const TextStyle(
-                  fontSize: 12,
-                  color: Colors.white,
-                ),
-                leftSubtitle: '11 Feb 2022',
-                onImageTap: (i) {},
-              ),
-               CarouselItem(
-                image: const NetworkImage(
-                  'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQvihoZZzF-yO5JgTFt45w-uV13PSEyk-woRJbH3-vGTw1lV4RyOuqneHyj9u3xWgh_NUk',
-                ),
-                title: '@coskuncay published flutter_custom_carousel_slider!',
-                titleTextStyle: const TextStyle(
-                  fontSize: 12,
-                  color: Colors.white,
-                ),
-                leftSubtitle: '11 Feb 2022',
-                onImageTap: (i) {},
-              ),
-            ],
+                child: AnnoucementTile(
+                itemList: [
+                  CarouselItem(
+                    image: const NetworkImage(
+                      'https://cdn.create.vista.com/downloads/c254e914-7862-4402-b865-60e958967d20_1024.jpeg',
                     ),
-          ),
-          Padding(
-                padding: const EdgeInsets.only(top:50.0),
-                child: SingleChildScrollView(
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: <Widget>[
-                        buildImage('assets/logo.png', 100, 100, Alignment.center),
-                        const SizedBox(height: 20),
-                        Text(
-                          widget.title,
-                          style: builderStyle(30, widget.isDarkMode ? Colors.white : Colors.black),
+                    title:'Push your creativity to its limits by reimagining this classic puzzle!',
+                    titleTextStyle: const TextStyle(
+                      fontSize: 12,
+                      color: Colors.white,
+                    ),
+                    leftSubtitle: '\$51,046 in prizes',
+                    onImageTap: (i) {},
+                  ),
+                  CarouselItem(
+                    image: const NetworkImage(
+                      'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQgsz246BlltWV-NfBQiyNvrJu6IDCwxD5nfg&s',
+                    ),
+                    title: '@coskuncay published flutter_custom_carousel_slider!',
+                    titleTextStyle: const TextStyle(
+                      fontSize: 12,
+                      color: Colors.white,
+                    ),
+                    leftSubtitle: '11 Feb 2022',
+                    onImageTap: (i) {},
+                  ),
+                   CarouselItem(
+                    image: const NetworkImage(
+                      'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQvihoZZzF-yO5JgTFt45w-uV13PSEyk-woRJbH3-vGTw1lV4RyOuqneHyj9u3xWgh_NUk',
+                    ),
+                    title: '@coskuncay published flutter_custom_carousel_slider!',
+                    titleTextStyle: const TextStyle(
+                      fontSize: 12,
+                      color: Colors.white,
+                    ),
+                    leftSubtitle: '11 Feb 2022',
+                    onImageTap: (i) {},
+                  ),
+                ],
                         ),
-                        const SizedBox(height: 20),
-                        Container(
-                          width: 350, // Set the desired width
-                          height: 50,
-                          child: CustomTextField(
-                            customerRadius: 10.0,
-                            controller: username,
-                            hintText: "Username",
-                            cursorColor: const Color.fromRGBO(43, 42, 42, 1),
-                            focusNode: usernameFocus,
-                            prefixIcon: Align(
-                              widthFactor: 2.0,
-                              heightFactor: 2.0,
-                              child: buildSvgPicture(
-                                'assets/user.svg',
-                                BoxFit.scaleDown,
-                                width: 25,
-                                height: 25,
-                                color: widget.isDarkMode ? Colors.white : Colors.black,
+              ),
+              Padding(
+                    padding: const EdgeInsets.only(top:50.0),
+                    child: SingleChildScrollView(
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: <Widget>[
+                            buildImage('assets/logo.png', 100, 100, Alignment.center),
+                            const SizedBox(height: 20),
+                            Text(
+                              widget.title,
+                              style: builderStyle(30, widget.isDarkMode ? Colors.white : Colors.black),
+                            ),
+                            const SizedBox(height: 20),
+                            Container(
+                              width: 350, // Set the desired width
+                              height: 50,
+                              child: CustomTextField(
+                                customerRadius: 10.0,
+                                controller: username,
+                                hintText: "Username",
+                                cursorColor: const Color.fromRGBO(43, 42, 42, 1),
+                                focusNode: usernameFocus,
+                                prefixIcon: Align(
+                                  widthFactor: 2.0,
+                                  heightFactor: 2.0,
+                                  child: buildSvgPicture(
+                                    'assets/user.svg',
+                                    BoxFit.scaleDown,
+                                    width: 25,
+                                    height: 25,
+                                    color: widget.isDarkMode ? Colors.white : Colors.black,
+                                  ),
+                                ),
                               ),
                             ),
-                          ),
-                        ),
-                        const SizedBox(height: 20),
-                        Container(
-                          width: 350, // Set the desired width
-                          height: 50,
-                          child: CustomTextField(
-                            customerRadius: 10.0,
-                            controller: password,
-                            hintText: "Password",
-                            cursorColor: const Color.fromRGBO(43, 42, 42, 1),
-                            isPassword: true,
-                            focusNode: passwordFocus,
-                            prefixIcon: Align(
-                              widthFactor: 2.0,
-                              heightFactor: 2.0,
-                              child: buildSvgPicture(
-                                'assets/password.svg',
-                                BoxFit.scaleDown,
-                                width: 25,
-                                height: 25,
-                                color: widget.isDarkMode ? Colors.white : Colors.black,
+                            const SizedBox(height: 20),
+                            Container(
+                              width: 350, // Set the desired width
+                              height: 50,
+                              child: CustomTextField(
+                                customerRadius: 10.0,
+                                controller: password,
+                                hintText: "Password",
+                                cursorColor: const Color.fromRGBO(43, 42, 42, 1),
+                                isPassword: true,
+                                focusNode: passwordFocus,
+                                prefixIcon: Align(
+                                  widthFactor: 2.0,
+                                  heightFactor: 2.0,
+                                  child: buildSvgPicture(
+                                    'assets/password.svg',
+                                    BoxFit.scaleDown,
+                                    width: 25,
+                                    height: 25,
+                                    color: widget.isDarkMode ? Colors.white : Colors.black,
+                                  ),
+                                ),
                               ),
                             ),
-                          ),
-                        ),
-                        const SizedBox(height: 20),
-                        Container(
-                          width: 350, // Set the desired width
-                          child: CustomButtonWithIcon(
-                            // icon: 'assets/login.svg',
-                            label: 'Login',
-                            onPressed: () async {
-                              String enteredUsername = username.text;
-                              String enteredPassword = password.text;
-          
-                              if (enteredUsername.isEmpty) {
-                                try {
-                                  await notification_toast(
-                                    context,
-                                    "Username",
-                                    "Please enter valid username",
-                                    toastificationType: ToastificationType.error,
-                                    toastificationStyle: ToastificationStyle.fillColored,
-                                    descTextColor: Colors.white,
-                                    icon: const Icon(Icons.error),
-                                  );
-                                } catch (e) {
-                                  // Handle any errors that might occur during the toast notification
-                                  print("Error showing toast notification: $e");
-                                }
-          
-                               
-          
-                                FocusScope.of(context).requestFocus(usernameFocus);
-                              } else if (enteredPassword.isEmpty) {
-                                try {
-                                  await notification_toast(
-                                    context,
-                                    "Password",
-                                    "Please enter valid password",
-                                    toastificationType: ToastificationType.error,
-                                    toastificationStyle: ToastificationStyle.fillColored,
-                                    descTextColor: Colors.white,
-                                    icon: const Icon(Icons.error),
-                                  );
-                                 } catch (e) {
-                                  // Handle any errors that might occur during the toast notification
-                                  print("Error showing toast notification: $e");
-                                }
-                                FocusScope.of(context).requestFocus(passwordFocus);
-                              } else {
-                                loading(context, "Please wait...",widget.isDarkMode);
-                               
-                                try {
-                                  var response = await Login('login', enteredUsername, enteredPassword);
-                                  log(response.toString());
-          
-                                  
-          
-          
-                                  if (response.statusCode == 200) {
-                                      Map<String, dynamic> responseData = json.decode(response.body);
-                                       bool success = responseData['success'] ?? false;
-                                      closeDialog(context);
-                                      if (success) {
-                                      // Process the data
-                                      List<dynamic> data = responseData['data'];
-                                    for (var employee in data) {
-                                      String empId = employee['EMPID'];
-                                      String name = employee['EMPL_NAME'];
-                                      String department = employee['DEPARTMENT'];
-                                      String country = employee['COUNTRY'];
-                                      String position = employee['POSITION'];
-                                      String bu_code = employee['BU_CODE'];
-                                      String businessUnit = employee['BUSINESS_UNIT'];
-                                      String email = employee['EMAIL'];
-                                      String contactNumber = employee['CONTACT_NUMBER'];
-          
-                                      // Create a map for each employee
-                                      Map<String, String> employeeInfo = {
-                                        EMPID: empId,
-                                        EMPL_NAME: name,
-                                        DEPARTMENT: department,
-                                        COUNTRY: country,
-                                        POSITION: position,
-                                        BU_CODE: bu_code,
-                                        BUSINESS_UNIT: businessUnit,
-                                        EMAIL: email,
-                                        CONTACT_NUMBER: contactNumber
-                                      };
-          
-                                      // Save employeeInfo
-                                      bool success = await saveEmployeeInfo(employeeInfo);
-                                      if (success) {
-                                        print("Employee information for $name saved successfully");
-                                      } else {
-                                        print("Failed to save employee information for $name");
-                                      }
-                                    }
-                                  
-                                        bool saved = await setLoginStatus(true);
-                                        if (saved) {
-                                          print('Login status saved successfully.');
-                                           String credentials = '$enteredUsername:$enteredPassword';
-                                           String encodedCredentials = base64Encode(utf8.encode(credentials));
-                                          locStorage(App.Auth,encodedCredentials);
-                                        } else {
-                                          print('Failed to save login status.');
-                                        }
-                                       
-                                        intent(context, Area(toggleTheme: widget.toggleTheme, isDarkMode: widget.isDarkMode),'/Area');
-          
-          
-          
-                                    } else {
-                                      print('Login not successful. Response data: ${response.body}');
-                                      try {
-                                        await notification_toast(
-                                          context,
-                                          "Invalid username/password",
-                                          responseData['message'],
-                                          toastificationType: ToastificationType.error,
-                                          toastificationStyle: ToastificationStyle.fillColored,
-                                          descTextColor: Colors.white,
-                                          icon: const Icon(Icons.error),
-                                        );
-                                      } catch (e) {
-                                        // Handle any errors that might occur during the toast notification
-                                        print("Error showing toast notification: $e");
-                                      }
-                                    }
-          
-          
-                                  } else {
-                                    // Handle error response
-                                    print('Login failed: ${response.statusCode} ${response.body}');
+                            const SizedBox(height: 20),
+                            Container(
+                              width: 350, // Set the desired width
+                              child: CustomButtonWithIcon(
+                                // icon: 'assets/login.svg',
+                                label: 'Login',
+                                onPressed: () async {
+                                  String enteredUsername = username.text;
+                                  String enteredPassword = password.text;
+              
+                                  if (enteredUsername.isEmpty) {
                                     try {
                                       await notification_toast(
+                                        context,
+                                        "Username",
+                                        "Please enter valid username",
+                                        toastificationType: ToastificationType.error,
+                                        toastificationStyle: ToastificationStyle.fillColored,
+                                        descTextColor: Colors.white,
+                                        icon: const Icon(Icons.error),
+                                      );
+                                    } catch (e) {
+                                      // Handle any errors that might occur during the toast notification
+                                      print("Error showing toast notification: $e");
+                                    }
+              
+                                   
+              
+                                    FocusScope.of(context).requestFocus(usernameFocus);
+                                  } else if (enteredPassword.isEmpty) {
+                                    try {
+                                      await notification_toast(
+                                        context,
+                                        "Password",
+                                        "Please enter valid password",
+                                        toastificationType: ToastificationType.error,
+                                        toastificationStyle: ToastificationStyle.fillColored,
+                                        descTextColor: Colors.white,
+                                        icon: const Icon(Icons.error),
+                                      );
+                                     } catch (e) {
+                                      // Handle any errors that might occur during the toast notification
+                                      print("Error showing toast notification: $e");
+                                    }
+                                    FocusScope.of(context).requestFocus(passwordFocus);
+                                  } else {
+                                    loading(context, "Please wait...",widget.isDarkMode);
+                                   
+                                    try {
+                                      var response = await Login('login', enteredUsername, enteredPassword);
+                                      log(response.toString());
+              
+                                      
+              
+              
+                                      if (response.statusCode == 200) {
+                                          Map<String, dynamic> responseData = json.decode(response.body);
+                                           bool success = responseData['success'] ?? false;
+                                          closeDialog(context);
+                                          if (success) {
+                                          // Process the data
+                                          List<dynamic> data = responseData['data'];
+                                        for (var employee in data) {
+                                          String empId = employee['EMPID'];
+                                          String name = employee['EMPL_NAME'];
+                                          String department = employee['DEPARTMENT'];
+                                          String country = employee['COUNTRY'];
+                                          String position = employee['POSITION'];
+                                          String bu_code = employee['BU_CODE'];
+                                          String businessUnit = employee['BUSINESS_UNIT'];
+                                          String email = employee['EMAIL'];
+                                          String contactNumber = employee['CONTACT_NUMBER'];
+              
+                                          // Create a map for each employee
+                                          Map<String, String> employeeInfo = {
+                                            EMPID: empId,
+                                            EMPL_NAME: name,
+                                            DEPARTMENT: department,
+                                            COUNTRY: country,
+                                            POSITION: position,
+                                            BU_CODE: bu_code,
+                                            BUSINESS_UNIT: businessUnit,
+                                            EMAIL: email,
+                                            CONTACT_NUMBER: contactNumber
+                                          };
+              
+                                          // Save employeeInfo
+                                          bool success = await saveEmployeeInfo(employeeInfo);
+                                          if (success) {
+                                            print("Employee information for $name saved successfully");
+                                          } else {
+                                            print("Failed to save employee information for $name");
+                                          }
+                                        }
+                                      
+                                            bool saved = await setLoginStatus(true);
+                                            if (saved) {
+                                              print('Login status saved successfully.');
+                                               String credentials = '$enteredUsername:$enteredPassword';
+                                               String encodedCredentials = base64Encode(utf8.encode(credentials));
+                                              locStorage(App.Auth,encodedCredentials);
+                                            } else {
+                                              print('Failed to save login status.');
+                                            }
+                                           
+                                            intent(context, Area(toggleTheme: widget.toggleTheme, isDarkMode: widget.isDarkMode),'/Area');
+              
+              
+              
+                                        } else {
+                                          print('Login not successful. Response data: ${response.body}');
+                                          try {
+                                            await notification_toast(
+                                              context,
+                                              "Invalid username/password",
+                                              responseData['message'],
+                                              toastificationType: ToastificationType.error,
+                                              toastificationStyle: ToastificationStyle.fillColored,
+                                              descTextColor: Colors.white,
+                                              icon: const Icon(Icons.error),
+                                            );
+                                          } catch (e) {
+                                            // Handle any errors that might occur during the toast notification
+                                            print("Error showing toast notification: $e");
+                                          }
+                                        }
+              
+              
+                                      } else {
+                                        // Handle error response
+                                        print('Login failed: ${response.statusCode} ${response.body}');
+                                        try {
+                                          await notification_toast(
+                                              context,
+                                              "Invalid username/password",
+                                              response.statusCode.toString(),
+                                              toastificationType: ToastificationType.error,
+                                              toastificationStyle: ToastificationStyle.fillColored,
+                                              descTextColor: Colors.white,
+                                              icon: const Icon(Icons.error),
+                                            );
+                                          } catch (e) {
+                                            // Handle any errors that might occur during the toast notification
+                                            print("Error showing toast notification: $e");
+                                          }
+                                          print('Request failed with status: ${response.statusCode}');
+                                      }
+                                    } catch (e) {
+                                      // Handle any errors that occurred during the request
+                                      print('An error occurred: $e');
+                                      try {
+                                        closeDialog(context);
+                                       await notification_toast(
                                           context,
-                                          "Invalid username/password",
-                                          response.statusCode.toString(),
+                                          "Login",
+                                          "Invalid Response",
                                           toastificationType: ToastificationType.error,
                                           toastificationStyle: ToastificationStyle.fillColored,
                                           descTextColor: Colors.white,
@@ -395,39 +418,22 @@ class LoginPage extends State<MyHomePage> {
                                         // Handle any errors that might occur during the toast notification
                                         print("Error showing toast notification: $e");
                                       }
-                                      print('Request failed with status: ${response.statusCode}');
+                                    }
+              
                                   }
-                                } catch (e) {
-                                  // Handle any errors that occurred during the request
-                                  print('An error occurred: $e');
-                                  try {
-                                    closeDialog(context);
-                                   await notification_toast(
-                                      context,
-                                      "Login",
-                                      "Invalid Response",
-                                      toastificationType: ToastificationType.error,
-                                      toastificationStyle: ToastificationStyle.fillColored,
-                                      descTextColor: Colors.white,
-                                      icon: const Icon(Icons.error),
-                                    );
-                                  } catch (e) {
-                                    // Handle any errors that might occur during the toast notification
-                                    print("Error showing toast notification: $e");
-                                  }
-                                }
-          
-                              }
-                            },
-                            color: widget.isDarkMode ? Color.fromARGB(255, 12, 167, 71) : App.primaryButton,
-                            iconColor: Colors.white,
-                          ),
+                                },
+                                color: widget.isDarkMode ? Color.fromARGB(255, 12, 167, 71) : App.primaryButton,
+                                iconColor: Colors.white,
+                              ),
+                            ),
+                            const SizedBox(height: 50),
+                          ],
                         ),
-                      ],
-                    ),
+                      ),
                   ),
-              ),
-        ],
+            ],
+          ),
+        ),
       ),
     );
   }

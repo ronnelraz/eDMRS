@@ -1,11 +1,9 @@
-import 'dart:io';
 
 import 'package:card_loading/card_loading.dart';
 import 'package:welfare_claim_system/API/api_service.dart';
 import 'package:welfare_claim_system/components/custom_rich_text.dart';
 import 'package:welfare_claim_system/sharedpref/sharedpref.dart';
 import 'package:flutter/material.dart';
-import 'package:wolt_modal_sheet/wolt_modal_sheet.dart';
 import '../components/config.dart';
 import 'package:intl/intl.dart';
 import 'package:animated_custom_dropdown/custom_dropdown.dart';
@@ -15,8 +13,6 @@ import '../components/custom_text_field.dart';
 import '../components/custom_button.dart';
 import 'package:file_picker/file_picker.dart';
 import 'dart:convert';
-import 'dart:typed_data';
-import 'package:sized_icon_button/sized_icon_button.dart';
 import 'dart:developer';
 
 import '../components/loading.dart';
@@ -128,7 +124,7 @@ class _AdmissionState extends State<Admission> {
       _isLoadingScreen = true; // your loader has started to load
     });
    
-    await Future.delayed(Duration(seconds: 3));
+    await Future.delayed(const Duration(seconds: 3));
 
     Map<String, String> info = await getEmployeeInfo();
 
@@ -176,6 +172,7 @@ class _AdmissionState extends State<Admission> {
     ? const CustomLoading(img: 'assets/logo.png', text: 'Loading',)    
     : Scaffold(
       appBar: AppBar(
+        backgroundColor: Colors.white,
         automaticallyImplyLeading: false, // Disable automatic back button
         leading: Row(
           children: <Widget>[
