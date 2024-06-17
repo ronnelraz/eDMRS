@@ -2,6 +2,7 @@
 import 'dart:convert';
 import 'dart:developer';
 import 'package:art_sweetalert/art_sweetalert.dart';
+import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:welfare_claim_system/API/api_service.dart';
 import 'package:welfare_claim_system/components/MyNavigatorObserver.dart';
 import 'package:welfare_claim_system/components/annoucement.dart';
@@ -47,12 +48,14 @@ class MyApp extends StatefulWidget {
 
 class _MyAppState extends State<MyApp> {
    late ThemeMode _themeMode =  ThemeMode.light;
-
+  
   @override
   void initState() {
     super.initState();
-    _initializeThemeMode(); // Initialize the theme mode during initialization
+    _initializeThemeMode(); 
   }
+
+  
 
   void _initializeThemeMode() async {
     bool isDarkMode = await getDarkMode(); // Retrieve the saved theme mode
@@ -112,6 +115,7 @@ class MyHomePage extends StatefulWidget {
   final String title;
   final VoidCallback toggleTheme;
   final bool isDarkMode;
+  
 
   MyHomePage({required this.title, required this.toggleTheme, required this.isDarkMode});
 
@@ -124,6 +128,52 @@ class LoginPage extends State<MyHomePage> {
   final TextEditingController password = TextEditingController();
   final FocusNode usernameFocus = FocusNode();
   final FocusNode passwordFocus = FocusNode();
+
+  List<CarouselItem> items = [];
+  bool isLoading = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _fetchAnnouncements();
+  }
+
+  Future<void> _fetchAnnouncements() async {
+    try {
+      var response = await getAnnoucement('getAnnoucement');
+      if (response.statusCode == 200) {
+        var jsonResponse = json.decode(response.body);
+        if (jsonResponse['success']) {
+          List<dynamic> data = jsonResponse['data'];
+          setState(() {
+            items = data.map((item) {
+              return CarouselItem(
+                image: NetworkImage(item['path']),
+                title: item['title'],
+                titleTextStyle: const TextStyle(fontSize: 12, color: Colors.white),
+                leftSubtitle: item['sub_title'],
+                onImageTap: (i) {},
+              );
+            }).toList();
+            isLoading = false;
+          });
+        } else {
+          setState(() {
+            isLoading = false;
+          });
+        }
+      } else {
+        setState(() {
+          isLoading = false;
+        });
+      }
+    } catch (e) {
+      print('An error occurred: $e');
+      setState(() {
+        isLoading = false;
+      });
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -153,46 +203,12 @@ class LoginPage extends State<MyHomePage> {
                   left: 40,
                   right: 40
                 ),
-                child: AnnoucementTile(
-                itemList: [
-                  CarouselItem(
-                    image: const NetworkImage(
-                      'https://cdn.create.vista.com/downloads/c254e914-7862-4402-b865-60e958967d20_1024.jpeg',
-                    ),
-                    title:'Push your creativity to its limits by reimagining this classic puzzle!',
-                    titleTextStyle: const TextStyle(
-                      fontSize: 12,
-                      color: Colors.white,
-                    ),
-                    leftSubtitle: '\$51,046 in prizes',
-                    onImageTap: (i) {},
-                  ),
-                  CarouselItem(
-                    image: const NetworkImage(
-                      'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQgsz246BlltWV-NfBQiyNvrJu6IDCwxD5nfg&s',
-                    ),
-                    title: '@coskuncay published flutter_custom_carousel_slider!',
-                    titleTextStyle: const TextStyle(
-                      fontSize: 12,
-                      color: Colors.white,
-                    ),
-                    leftSubtitle: '11 Feb 2022',
-                    onImageTap: (i) {},
-                  ),
-                   CarouselItem(
-                    image: const NetworkImage(
-                      'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQvihoZZzF-yO5JgTFt45w-uV13PSEyk-woRJbH3-vGTw1lV4RyOuqneHyj9u3xWgh_NUk',
-                    ),
-                    title: '@coskuncay published flutter_custom_carousel_slider!',
-                    titleTextStyle: const TextStyle(
-                      fontSize: 12,
-                      color: Colors.white,
-                    ),
-                    leftSubtitle: '11 Feb 2022',
-                    onImageTap: (i) {},
-                  ),
-                ],
-                        ),
+                child: isLoading
+                    ? Center(child: SpinKitDoubleBounce(
+                      color: widget.isDarkMode ? Colors.white : Colors.blue[700],
+                      size: 50.0,
+                    ))
+                    : AnnoucementTile(itemList: items),
               ),
               Padding(
                     padding: const EdgeInsets.only(top:50.0),
@@ -302,7 +318,7 @@ class LoginPage extends State<MyHomePage> {
                                     loading(context, "Please wait...",widget.isDarkMode);
                                    
                                     try {
-                                      var response = await Login('login', enteredUsername, enteredPassword);
+                                      var response = await getlogin('login', enteredUsername, enteredPassword);
                                       log(response.toString());
               
                                       

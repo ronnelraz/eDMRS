@@ -3,14 +3,15 @@ import 'dart:convert';
 import 'dart:developer';
 
 import 'package:card_loading/card_loading.dart';
+import 'package:flutter/cupertino.dart';
+import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import 'package:welfare_claim_system/API/api_service.dart';
 import 'package:welfare_claim_system/components/custom_bal.dart';
 import 'package:welfare_claim_system/components/reimbursement_tile.dart';
 import 'package:welfare_claim_system/sharedpref/sharedpref.dart';
-import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
 import '../components/config.dart';
-
+import 'reimbursement_form.dart';
 
 class Reimbursement extends StatefulWidget {
   final VoidCallback toggleTheme;
@@ -19,28 +20,24 @@ class Reimbursement extends StatefulWidget {
   const Reimbursement({super.key, required this.toggleTheme, required this.isDarkMode});
 
   @override
-  // ignore: library_private_types_in_public_api
   _ReimbursementState createState() => _ReimbursementState();
 }
 
-
 class _ReimbursementState extends State<Reimbursement> {
-    Map<String, String> _employeeInfo = {};
-   // ignore: non_constant_identifier_names
-   List<String> _bal_amount = [];
-   bool _isloadingBal = true;
-   late Timer _timer = Timer(const Duration(seconds: 0), () {});
-   
-  
-   @override
+  Map<String, String> _employeeInfo = {};
+  List<String> _balAmount = [];
+  bool _isLoadingBal = true;
+  late Timer _timer;
+
+  @override
   void initState() {
     super.initState();
     _initializeData();
   }
 
- @override
+  @override
   void dispose() {
-    _timer.cancel();  
+    _timer.cancel();
     super.dispose();
   }
 
@@ -65,7 +62,7 @@ class _ReimbursementState extends State<Reimbursement> {
       loadBalance();
       _timer = Timer.periodic(const Duration(seconds: 1), (timer) {
         if (mounted) {
-           loadBalance();
+          loadBalance();
         } else {
           timer.cancel();
         }
@@ -80,8 +77,6 @@ class _ReimbursementState extends State<Reimbursement> {
         'empid': _employeeInfo['EMPID'] ?? '',
       };
 
-    
-
       var response = await balance('getBalance', body);
       if (response.statusCode == 200) {
         Map<String, dynamic> responseData = json.decode(response.body);
@@ -92,16 +87,15 @@ class _ReimbursementState extends State<Reimbursement> {
           List<String> balAmount = data.map((item) => item['BAL_AMOUNT'].toString()).toList();
           if (mounted) {
             setState(() {
-            _bal_amount = balAmount;
-            _isloadingBal = false;
-          });
+              _balAmount = balAmount;
+              _isLoadingBal = false;
+            });
           }
-        
         } else {
           log('Loading balance not successful. Response data: ${response.body}');
           if (mounted) {
             setState(() {
-              _isloadingBal = false;
+              _isLoadingBal = false;
             });
           }
         }
@@ -109,7 +103,7 @@ class _ReimbursementState extends State<Reimbursement> {
         log('Loading balance failed: ${response.statusCode} ${response.body}');
         if (mounted) {
           setState(() {
-            _isloadingBal = false;
+            _isLoadingBal = false;
           });
         }
       }
@@ -117,7 +111,7 @@ class _ReimbursementState extends State<Reimbursement> {
       log('An error occurred while loading balance: $e');
       if (mounted) {
         setState(() {
-          _isloadingBal = false;
+          _isLoadingBal = false;
         });
       }
     }
@@ -125,62 +119,47 @@ class _ReimbursementState extends State<Reimbursement> {
 
   @override
   Widget build(BuildContext context) {
-
-
-    return  Scaffold(
+    return Scaffold(
       appBar: AppBar(
-        automaticallyImplyLeading: false, // Disable automatic back button
-        leading: Row(
-          children: <Widget>[
-            IconButton(
-              icon: Icon(Icons.arrow_back),
-              onPressed: () {
-                Navigator.pushNamed(context, '/Menu');
-              },
-            ),
-            // Add your additional icon here
-          ],
+        backgroundColor: const Color.fromARGB(255, 64, 113, 187),
+        automaticallyImplyLeading: false,
+        leading: IconButton(
+          tooltip: "Back to menu",
+          icon: const Icon(Icons.arrow_back),
+          color: Colors.white,
+          onPressed: () {
+            Navigator.pushNamed(context, '/Menu');
+          },
         ),
         title: const Column(
           crossAxisAlignment: CrossAxisAlignment.start,
-          
         ),
-        // leading: buildImage('assets/menu/admission.png', 40, 40, Alignment.centerRight),
-          actions: [
-          Padding(
-            padding: const EdgeInsets.all(8.0), // Adjust the margin as needed
-            child: IconButton(
-              icon: Icon(widget.isDarkMode ? Icons.nights_stay : Icons.wb_sunny),
-              onPressed: widget.toggleTheme,
-            ),
+        actions: [
+          IconButton(
+            icon: Icon(widget.isDarkMode ? Icons.nights_stay : Icons.wb_sunny),
+            color: widget.isDarkMode ? const Color.fromARGB(255, 37, 37, 37) : Colors.yellow[600],
+            onPressed: widget.toggleTheme,
           ),
-          Padding(
-            padding: const EdgeInsets.all(8.0), // Adjust the margin as needed
+          TextButton(
+            onPressed: () {
+              logout(context);
+            },
             child: Row(
               children: [
-                TextButton(
-                  onPressed: () {
-                      logout(context);
-                  },
-                  child: Row(
-                    children: [
-                      buildSvgPicture(
-                        'assets/icon_toast/logout.svg',
-                        BoxFit.scaleDown,
-                        width: 18,
-                        height: 18,
-                        color: widget.isDarkMode ? Colors.white : Colors.black,
-                      ),
-                      const SizedBox(width: 5),
-                      Text(
-                        'Logout',
-                        style: TextStyle(
-                          fontSize: 14,
-                          fontWeight: FontWeight.bold,
-                          color: widget.isDarkMode ? Colors.white : Colors.black,
-                        ),
-                      ),
-                    ],
+                buildSvgPicture(
+                  'assets/icon_toast/logout.svg',
+                  BoxFit.scaleDown,
+                  width: 18,
+                  height: 18,
+                  color: Colors.white,
+                ),
+                const SizedBox(width: 5),
+                const Text(
+                  'Logout',
+                  style: TextStyle(
+                    fontSize: 14,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.white,
                   ),
                 ),
               ],
@@ -188,177 +167,180 @@ class _ReimbursementState extends State<Reimbursement> {
           ),
         ],
       ),
-      body: Padding(
-        padding: const EdgeInsets.only(top: 10),
+      body: SingleChildScrollView(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.center,
           mainAxisSize: MainAxisSize.max,
           children: [
-            const Column(
-              mainAxisAlignment: MainAxisAlignment.start,
-              mainAxisSize: MainAxisSize.max,
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                Padding(
-                  padding: EdgeInsets.only(left: 10.0,right: 10.0),
-                  child: Text(
-                    "Reimbursement",
-                    style: TextStyle(
-                      color: Colors.blue,
-                      fontFamily: 'Urbanist',
-                      fontWeight: FontWeight.w900,
-                      fontSize: 30,
-                      height: 1.2
-                    ),
-                    ),
-                ),
-              
-                Padding(
-                  padding: EdgeInsets.only(left: 10,right: 10,top: 1),
-                  child: Text(
-                    App.welfareNote,
-                    style: TextStyle(
-                      fontFamily: 'Urbanist',
-                      fontWeight: FontWeight.w400,
-                      fontSize: 12,
-                    ),
-                    ),
-                ),
-              ],
-            ),
-
-            Container(
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(10), 
-              color: widget.isDarkMode ? Colors.white : Colors.black,
-              ),
-              margin: const EdgeInsets.all(10),
-              height: 1, 
-              width: double.infinity, 
-            ),
-            
-            Row(
-               crossAxisAlignment: CrossAxisAlignment.center,
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  mainAxisSize: MainAxisSize.max,
-              children: [
-              Container(
-                  width: 130,
-                  height: 130,
-                  decoration: BoxDecoration(
-                  color: widget.isDarkMode ? const Color.fromARGB(255, 97, 97, 97) : const Color.fromARGB(255, 255, 255, 255),
-                  borderRadius: BorderRadius.circular(12),
-                  border: Border.all(
-                    width: 1,
-                    color: Colors.black.withOpacity(0.12)
-                  ),
-
-                ),
-                child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    mainAxisSize: MainAxisSize.max,
-                    children: [
-                       Text(
-                        "Personal Balance",
-                        style: TextStyle(
-                          fontSize: 12.0,
-                           fontFamily: 'Urbanist',
-                          fontWeight: FontWeight.w900,
-                          color: widget.isDarkMode ?  Color.fromARGB(255, 247, 151, 6) : Colors.blueAccent ,
+              Stack(
+                children: [
+                  Container(
+                  height: 120.0,
+                  decoration: const BoxDecoration(
+                      color: Color.fromARGB(255, 64, 113, 187),
+                      borderRadius: BorderRadius.only(
+                        bottomLeft: Radius.circular(50.0),
+                        bottomRight: Radius.circular(50.0),
+                      ),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black26,
+                          blurRadius: 10,
+                          spreadRadius: 2,
+                          offset: Offset(0, 5),
                         ),
-                      ),       
-                      _isloadingBal 
-                          ? const CardLoading(
-                              height: 15,
-                              borderRadius: BorderRadius.all(Radius.circular(5)),
-                              width: 100.0,
-                              margin: EdgeInsets.only(top: 8),
-                            )
-                          : CustomBalance(
-                            balance: ' ₱${NumberFormat('#,###').format(int.parse(_bal_amount[0]))}',
-                            iconx: Icons.person_rounded,
-                            fontSize: 13,
-                             colors: widget.isDarkMode ? Color.fromARGB(255, 255, 255, 255) : const Color.fromARGB(255, 46, 47, 47),
-                            bgcolor: const Color.fromARGB(255, 49, 196, 222),
-                          ),
-                    ],
-                  ),
-              ),
-              const SizedBox(width: 50),
-                Container(
-                    width: 130,
-                    height: 130,
-                    decoration: BoxDecoration(
-                    color: widget.isDarkMode ? const Color.fromARGB(255, 97, 97, 97) : const Color.fromARGB(255, 255, 255, 255),
-                    borderRadius: BorderRadius.circular(12),
-                    border: Border.all(
-                      width: 1,
-                      color: Colors.black.withOpacity(0.12)
+                      ],
                     ),
-
-                  ),
-                  child: Column(
-                     crossAxisAlignment: CrossAxisAlignment.center,
-                    mainAxisAlignment: MainAxisAlignment.center,
+                   child: const Column(
+                    mainAxisAlignment: MainAxisAlignment.start,
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
                     mainAxisSize: MainAxisSize.max,
                     children: [
-                        Text(
-                        "Dependent Balance",
-                        style: TextStyle(
-                          fontSize: 12.0,
-                          fontFamily: 'Urbanist',
-                           fontWeight: FontWeight.w900,
-                          color: widget.isDarkMode ? Color.fromARGB(255, 247, 151, 6) : Colors.blueAccent ,
+                      Padding(
+                        padding: EdgeInsets.only(left: 30.0, right: 10.0),
+                        child: Text(
+                          "Reimbursement",
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontFamily: 'Urbanist',
+                            fontWeight: FontWeight.w900,
+                            fontSize: 30,
+                            height: 1.2,
+                          ),
                         ),
                       ),
-                      _isloadingBal 
-                          ? const CardLoading(
-                              height: 15,
-                              borderRadius: BorderRadius.all(Radius.circular(5)),
-                              width: 100.0,
-                              margin: EdgeInsets.only(top: 8),
-                            )
-                          : CustomBalance(
-                            balance: ' ₱${NumberFormat('#,###').format(int.parse(_bal_amount[1]))}',
-                            iconx: Icons.family_restroom_rounded,
-                            fontSize: 13,
-                            colors: widget.isDarkMode ? Color.fromARGB(255, 255, 255, 255) : const Color.fromARGB(255, 46, 47, 47),
-                            bgcolor: const Color.fromARGB(255, 222, 147, 49),
-                          ),
                     ],
                   ),
                 ),
-              ],
-
-            ),         
-           ReimburstmentTile(
-            img: 'assets/menu/employee.png',
-            text: "Employee",
-            width: 100,
-            height: 100,
-            onPressed: () {
-              log("okok");
-            },
-           ),
-           ReimburstmentTile(
-            img: 'assets/menu/dependent.png',
-            text: "DEPENDENT",
-            width: 100,
-            height: 100,
-            onPressed: () {
-              log("okok");
-            },
-           ),
-      
+              Padding(
+                padding: const EdgeInsets.only(top: 50.0),
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  mainAxisSize: MainAxisSize.max,
+                  children: [
+                    _buildBalanceCard(
+                      title: "Personal Balance",
+                      isLoading: _isLoadingBal,
+                      balance: _balAmount.isNotEmpty ? _balAmount[0] : '0',
+                      icon: Icons.person_rounded,
+                      bgColor: const Color.fromARGB(255, 49, 196, 222),
+                    ),
+                    const SizedBox(width: 50),
+                    _buildBalanceCard(
+                      title: "Dependent Balance",
+                      isLoading: _isLoadingBal,
+                      balance: _balAmount.length > 1 ? _balAmount[1] : '0',
+                      icon: Icons.family_restroom_rounded,
+                      bgColor: const Color.fromARGB(255, 222, 147, 49),
+                    ),
+                  ],
+                    ),
+              ),
+                ],
+          
+              ),
+             ReimburstmentTile(
+              img: 'assets/menu/employee.png',
+              text: "Employee",
+              width: 100,
+              height: 100,
+              onPressed: () {
+                Navigator.push( 
+                  context, 
+                  MaterialPageRoute( 
+                    builder: (context) => 
+                        ReimbursementForm(
+                          toggleTheme: widget.toggleTheme,
+                          isDarkMode: widget.isDarkMode,
+                          reimbursementype: 'Employee',
+                        ), 
+                  ), 
+                ); 
+              },
+             ),
+             ReimburstmentTile(
+              img: 'assets/menu/dependent.png',
+              text: "DEPENDENT",
+              width: 100,
+              height: 100,
+              onPressed: () {
+                Navigator.push( 
+                  context, 
+                  MaterialPageRoute( 
+                    builder: (context) => 
+                        ReimbursementForm(
+                          toggleTheme: widget.toggleTheme,
+                          isDarkMode: widget.isDarkMode,
+                          reimbursementype: 'Dependent',
+                        ), 
+                  ), 
+                ); 
+              },
+             ),
           ],
         ),
-      )
+      ),
     );
   }
-  
-  
 
- 
-
+  Widget _buildBalanceCard({
+    required String title,
+    required bool isLoading,
+    required String balance,
+    required IconData icon,
+    required Color bgColor,
+  }) {
+    return Container(
+      width: 130,
+      height: 130,
+      decoration: BoxDecoration(
+        color: widget.isDarkMode ? const Color.fromARGB(255, 97, 97, 97) : const Color.fromARGB(255, 255, 255, 255),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(
+          width: 1,
+          color: Colors.black.withOpacity(0.4),
+        ),
+        boxShadow: const [
+        BoxShadow(
+              color: Colors.black26,
+              blurRadius: 0.1,
+              spreadRadius: 0.2,
+              offset: Offset(0, 1),
+            ),
+          ],
+      ),
+      
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.center,
+        mainAxisAlignment: MainAxisAlignment.center,
+        mainAxisSize: MainAxisSize.max,
+        children: [
+          Text(
+            title,
+            style: TextStyle(
+              fontSize: 12.0,
+              fontFamily: 'Urbanist',
+              fontWeight: FontWeight.w900,
+              color: widget.isDarkMode ? const Color.fromARGB(255, 247, 151, 6) : Colors.blueAccent,
+            ),
+          ),
+          isLoading
+              ? const CardLoading(
+                  height: 15,
+                  borderRadius: BorderRadius.all(Radius.circular(5)),
+                  width: 100.0,
+                  margin: EdgeInsets.only(top: 8),
+                )
+              : CustomBalance(
+                  balance: '₱${NumberFormat('#,###').format(int.parse(balance))}',
+                  iconx: icon,
+                  fontSize: 13,
+                  colors: widget.isDarkMode ? const Color.fromARGB(255, 255, 255, 255) : const Color.fromARGB(255, 46, 47, 47),
+                  bgcolor: bgColor,
+                ),
+        ],
+      ),
+    );
+  }
 }

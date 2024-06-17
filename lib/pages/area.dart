@@ -1,7 +1,6 @@
 import 'dart:convert';
 
 import 'package:welfare_claim_system/API/api_service.dart';
-import 'package:welfare_claim_system/main.dart';
 import 'package:welfare_claim_system/pages/menu.dart';
 import 'package:flutter/material.dart';
 import 'package:animated_custom_dropdown/custom_dropdown.dart';
@@ -47,7 +46,7 @@ class _AreaState extends State<Area> {
 
   Future<void> _loadData() async {
     try {
-      var response = await Location('getLocation');
+      var response = await getlocation('getLocation');
       if (response.statusCode == 200) {
         Map<String, dynamic> responseData = json.decode(response.body);
         bool success = responseData['success'];

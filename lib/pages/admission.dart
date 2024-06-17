@@ -81,7 +81,7 @@ class _AdmissionState extends State<Admission> {
 
    Future<void> _loadHospital() async {
     try {
-      var response = await Hospital('getHospital');
+      var response = await hospital('getHospital');
       if (response.statusCode == 200) {
         Map<String, dynamic> responseData = json.decode(response.body);
         bool success = responseData['success'];
