@@ -36,6 +36,8 @@ dependencies:
   card_loading: ^0.3.2
   wolt_modal_sheet: ^0.6.1
   flutter_custom_carousel_slider: ^1.2.0
+  font_awesome_flutter: ^10.7.0
+  pull_to_refresh: ^2.0.0
  
 
   

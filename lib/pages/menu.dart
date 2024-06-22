@@ -5,7 +5,10 @@ import 'dart:developer';
 
 import 'package:card_loading/card_loading.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:pull_to_refresh/pull_to_refresh.dart';
 import 'package:welfare_claim_system/API/api_service.dart';
+import 'package:welfare_claim_system/components/balTile.dart';
 import 'package:welfare_claim_system/components/custom_bal.dart';
 import 'package:welfare_claim_system/components/custom_rich_text.dart';
 import 'package:welfare_claim_system/sharedpref/sharedpref.dart';
@@ -16,6 +19,7 @@ import 'package:responsive_grid/responsive_grid.dart';
 import '../components/config.dart';
 
 
+import '../components/custom_icon.dart';
 import '../components/loading.dart';
 
 
@@ -45,6 +49,11 @@ class _MenuState extends State<Menu> {
    List<String> _bal_amount = [];
    bool _isloadingBal = true;
    late Timer _timer = Timer(const Duration(seconds: 0), () {});
+
+   final RefreshController _refreshController = RefreshController(initialRefresh: false);
+
+
+
    
   
    @override
@@ -63,6 +72,26 @@ class _MenuState extends State<Menu> {
     await _loadEmployeeInfo();
     await dataLoadFunction();
     _startBalanceLoading();
+  }
+
+    void _onRefresh() async{
+    // monitor network fetch
+      await Future.delayed(const Duration(milliseconds: 1000));
+      // if failed,use refreshFailed()
+       await loadBalance();
+      _refreshController.refreshCompleted();
+    }
+
+  void _onLoading() async{
+    // monitor network fetch
+    await Future.delayed(const Duration(milliseconds: 1000));
+    // if failed,use loadFailed(),if no data return,use LoadNodata()
+    if(mounted) {
+      setState(() {
+       
+      });
+    }
+    _refreshController.loadComplete();
   }
 
   Future<void> _loadEmployeeInfo() async {
@@ -92,7 +121,7 @@ class _MenuState extends State<Menu> {
       loadBalance();
       _timer = Timer.periodic(const Duration(seconds: 1), (timer) {
         if (mounted) {
-           loadBalance();
+          //  loadBalance();
         } else {
           timer.cancel();
         }
@@ -158,7 +187,9 @@ class _MenuState extends State<Menu> {
      _isLoadingScreen
     ? const CustomLoading(img: 'assets/logo.png', text: 'Loading',)    
     : Scaffold(
+      backgroundColor: widget.isDarkMode ? Colors.black87 : Colors.white,
       appBar: AppBar(
+        backgroundColor: Colors.transparent,
         title: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -233,14 +264,22 @@ class _MenuState extends State<Menu> {
         ],
       ),
       
-      body: LayoutBuilder(
-              builder: (context, constraints) {
-                if (constraints.maxWidth > 600) {
-                  return buildWideLayout(context,constraints,280.0);
-                } else {
-                  return buildNarrowLayout(context,constraints,700.0);
-                }
-              },
+      body: SmartRefresher(
+         enablePullDown: true,
+        enablePullUp: true,
+        header: const WaterDropHeader(),
+        controller: _refreshController,
+        onRefresh: _onRefresh,
+        onLoading: _onLoading,
+        child: LayoutBuilder(
+                builder: (context, constraints) {
+                  if (constraints.maxWidth > 800) {
+                    return buildWideLayout(context,constraints,800.0);
+                  } else {
+                    return buildNarrowLayout(context,constraints,700.0);
+                  }
+                },
+        ),
       ),
     );
   }
@@ -260,10 +299,11 @@ class _MenuState extends State<Menu> {
         Padding(
           padding: const EdgeInsets.all(1.0), // Adjust the padding as needed
           child: Row(
+            
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               buildLeftColumn(cardwidth),
-              buildRightColumn(cardwidth,false),
+              // buildRightColumn(cardwidth,false),
             ],
           ),
         ),
@@ -287,8 +327,8 @@ class _MenuState extends State<Menu> {
           children: [
             buildLeftColumn(cardwidth),
             const SizedBox(height: 1),
-            buildRightColumn(cardwidth,true),
-            const SizedBox(height: 1),
+            // buildRightColumn(cardwidth,true),
+            // const SizedBox(height: 1),
             buildFourColumnGrid(constraints,cardwidth,2),
           ],
         ),
@@ -398,72 +438,216 @@ Widget buildFourColumnGrid(BoxConstraints constraints, double cardWidth, int cro
   
 Widget buildLeftColumn(double cardwidth) {
   return SizedBox(
+    height: 170,
     //constraints: BoxConstraints(maxWidth: 400), // Set the maximum width here
     width: cardwidth, // Set the width here
-    child: Card(
-      elevation: App.elevation,
-      color: widget.isDarkMode ? const Color.fromARGB(255, 81, 81, 81) : const Color.fromARGB(255, 255, 255, 255),
-      shadowColor: widget.isDarkMode ? const Color.fromARGB(255, 109, 109, 109) : const Color.fromARGB(255, 67, 67, 67),
-      borderOnForeground: true,
-      margin: const EdgeInsets.all(10.0),
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(10.0),
-      ),
-      child: SizedBox(
-        height: App.card_height,
-        child: Padding(
-          padding: const EdgeInsets.only(top: 10.0, left: 20.0, right: 20.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const Text(
-                App.employee,
-                style: TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.blueAccent,
+    child: Stack(
+      children: [
+         
+        Card(
+        elevation: 0,
+        color: widget.isDarkMode ? const Color.fromARGB(255, 81, 81, 81) : Colors.blue[500],
+        shadowColor: widget.isDarkMode ? const Color.fromARGB(255, 109, 109, 109) : const Color.fromARGB(255, 67, 67, 67),
+        borderOnForeground: true,
+        margin: const EdgeInsets.all(10.0),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(20.0),
+        ),
+        child: SizedBox(
+          height: App.card_height,
+          child: Padding(
+            padding: const EdgeInsets.only(
+              top: 10,
+              left: 20,
+              right: 20,
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                   crossAxisAlignment: CrossAxisAlignment.center,
+                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    const Text(
+                      "Your Current Balance",
+                        style: TextStyle(
+                          fontSize: 13,
+                          fontFamily: 'Urbanist',
+                          fontWeight: FontWeight.w500,
+                          color: Colors.white,
+                        ),
+                      ),
+                      Text(
+                      _employeeInfo[EMPL_NAME] ?? '',
+                      style: const TextStyle(
+                        fontSize: 13,
+                        fontFamily: 'Urbanist',
+                        fontWeight: FontWeight.w500,
+                        color: Colors.white,
+                      ),
+                    ),
+                   
+                  ],
                 ),
-              ),
-              CustomRichText(
-                textBeforeSpan: "",
-                spanText: _employeeInfo[EMPL_NAME] ?? '',
-                spanStyle: const TextStyle(
-                  fontSize: App.card_textsize,
-                  fontWeight: FontWeight.bold,
-                ),
-                 icon: Icons.person,
-                iconSize: 18.0,
-                iconColor: Colors.white,
-                bgColor: const Color.fromARGB(154, 78, 169, 255),
-              ),
-               CustomRichText(
-                textBeforeSpan: '',
-                spanText: _employeeInfo[POSITION] ?? '',
-                spanStyle: const TextStyle(
-                  fontSize: App.card_textsize,
-                  fontWeight: FontWeight.bold,
-                ),
-                icon: Icons.info_outline_rounded,
-                iconSize: 18.0,
-                iconColor: Colors.white,
-                bgColor: const Color.fromARGB(128, 78, 78, 255),
-              ),
-               CustomRichText(
-                textBeforeSpan: '',
-                spanText: _employeeInfo[DEPARTMENT] ?? '',
-                spanStyle: const TextStyle(
-                  fontSize: App.card_textsize,
-                  fontWeight: FontWeight.bold,
-                ),
-                icon: Icons.work,
-                iconSize: 18.0,
-                iconColor: Colors.white,
-                bgColor: const Color.fromARGB(128, 255, 119, 78),
-              ),
-            ],
+                const SizedBox(height: 7),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  mainAxisSize: MainAxisSize.max,
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+      
+                    Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      mainAxisSize: MainAxisSize.max,
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: [
+                         CustomIcon(
+                          width: 50.0,
+                          height: 50.0,
+                          icon: FontAwesomeIcons.person,
+                          iconSize: 20.0,
+                          iconColor: Colors.white,
+                          bgColor: Colors.white.withOpacity(0.2),
+                        ),
+                          const SizedBox(height: 2,),
+                         _isloadingBal 
+                          ? const SpinKitFadingCircle(
+                            color: Colors.white,
+                            size: 25)
+                          : BalTile(
+                            title: _bal_name[0], 
+                            balance: NumberFormat('#,###').format(int.parse(_bal_amount[0])), 
+                            titleSize: 14, 
+                            balanceSize: 15, 
+                            titleColor:  Colors.white,
+                            balanceColor: Colors.white,)
+                      ],
+                    ),
+                     Container(
+                      width: 1,
+                      height: 72,
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(20),
+                        color: Colors.white.withOpacity(0.2),
+                      ),
+                     ),
+                     Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      mainAxisSize: MainAxisSize.max,
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: [
+                         CustomIcon(
+                          width: 50.0,
+                          height: 50.0,
+                          icon: Icons.family_restroom_rounded,
+                          iconSize: 20.0,
+                          iconColor: Colors.white,
+                          bgColor: Colors.white.withOpacity(0.2),
+                        ),
+                          _isloadingBal 
+                          ? const SpinKitFadingCircle(
+                            color: Colors.white,
+                            size: 25)
+                          : BalTile(
+                            title: _bal_name[1], 
+                            balance: NumberFormat('#,###').format(int.parse(_bal_amount[1])), 
+                            titleSize: 14, 
+                            balanceSize: 14, 
+                            titleColor:  Colors.white,
+                            balanceColor: Colors.white,)
+                      ],
+                    ),
+                     Container(
+                      width: 1,
+                      height: 72,
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(20),
+                        color: Colors.white.withOpacity(0.2),
+                      ),
+                     ),
+                     Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      mainAxisSize: MainAxisSize.max,
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: [
+                         CustomIcon(
+                          width: 50.0,
+                          height: 50.0,
+                          icon: FontAwesomeIcons.carBurst,
+                          iconSize: 20.0,
+                          iconColor: Colors.white,
+                          bgColor: Colors.white.withOpacity(0.2),
+                        ),
+                          _isloadingBal 
+                          ? const SpinKitFadingCircle(
+                            color: Colors.white,
+                            size: 25)
+                          : BalTile(
+                            title: _bal_name[2], 
+                            balance: NumberFormat('#,###').format(int.parse(_bal_amount[2])), 
+                            titleSize: 14, 
+                            balanceSize: 14, 
+                            titleColor:  Colors.white,
+                            balanceColor: Colors.white,)
+                      ],
+      
+      
+                    ),
+      
+                  ],
+                )
+                // CustomRichText(
+                //   textBeforeSpan: "",
+                //   spanText: _employeeInfo[EMPL_NAME] ?? '',
+                //   spanStyle: const TextStyle(
+                //     fontSize: App.card_textsize,
+                //     fontWeight: FontWeight.bold,
+                //   ),
+                //    icon: Icons.person,
+                //   iconSize: 18.0,
+                //   iconColor: Colors.white,
+                //   bgColor: const Color.fromARGB(154, 78, 169, 255),
+                // ),
+                //  CustomRichText(
+                //   textBeforeSpan: '',
+                //   spanText: _employeeInfo[POSITION] ?? '',
+                //   spanStyle: const TextStyle(
+                //     fontSize: App.card_textsize,
+                //     fontWeight: FontWeight.bold,
+                //   ),
+                //   icon: Icons.info_outline_rounded,
+                //   iconSize: 18.0,
+                //   iconColor: Colors.white,
+                //   bgColor: const Color.fromARGB(128, 78, 78, 255),
+                // ),
+                //  CustomRichText(
+                //   textBeforeSpan: '',
+                //   spanText: _employeeInfo[DEPARTMENT] ?? '',
+                //   spanStyle: const TextStyle(
+                //     fontSize: App.card_textsize,
+                //     fontWeight: FontWeight.bold,
+                //   ),
+                //   icon: Icons.work,
+                //   iconSize: 18.0,
+                //   iconColor: Colors.white,
+                //   bgColor: const Color.fromARGB(128, 255, 119, 78),
+                // ),
+              ],
+            ),
           ),
         ),
       ),
+    
+        // Container(
+        //   width: 50,
+        //   height: 50,
+        //   margin: const EdgeInsets.all(1.0),
+        //   decoration: BoxDecoration(
+        //     color: Colors.black.withOpacity(0.5), // Adjust the opacity here
+        //     borderRadius: BorderRadius.circular(10.0),
+        //   ),
+        // ),
+      ],
     ),
   );
 }
