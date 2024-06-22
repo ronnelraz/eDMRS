@@ -4,13 +4,13 @@ import 'dart:convert';
 import 'dart:developer';
 
 import 'package:card_loading/card_loading.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:pull_to_refresh/pull_to_refresh.dart';
 import 'package:welfare_claim_system/API/api_service.dart';
 import 'package:welfare_claim_system/components/balTile.dart';
 import 'package:welfare_claim_system/components/custom_bal.dart';
 import 'package:welfare_claim_system/components/custom_rich_text.dart';
+import 'package:welfare_claim_system/pages/sub_menu.dart';
 import 'package:welfare_claim_system/sharedpref/sharedpref.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
@@ -49,6 +49,7 @@ class _MenuState extends State<Menu> {
    List<String> _bal_amount = [];
    bool _isloadingBal = true;
    late Timer _timer = Timer(const Duration(seconds: 0), () {});
+   bool loadBalanceData = false;
 
    final RefreshController _refreshController = RefreshController(initialRefresh: false);
 
@@ -150,6 +151,7 @@ class _MenuState extends State<Menu> {
             _bal_name = balName;
             _bal_amount = balAmount;
             _isloadingBal = false;
+            loadBalanceData = true;
           });
           }
         
@@ -158,6 +160,14 @@ class _MenuState extends State<Menu> {
           if (mounted) {
             setState(() {
               _isloadingBal = false;
+               loadBalanceData = false;
+              _bal_name = ['--','--','--'];
+              _bal_amount = ['0','0','0'];
+               alert(
+                "connection Error",
+                responseData['message'],
+                context,
+              );
             });
           }
         }
@@ -166,6 +176,14 @@ class _MenuState extends State<Menu> {
         if (mounted) {
           setState(() {
             _isloadingBal = false;
+             loadBalanceData = false;
+             _bal_name = ['--','--','--'];
+             _bal_amount = ['0','0','0'];
+              alert(
+                "Balance failed",
+                'Please check your connection, or contact IT',
+                context,
+              );
           });
         }
       }
@@ -174,6 +192,14 @@ class _MenuState extends State<Menu> {
       if (mounted) {
         setState(() {
           _isloadingBal = false;
+           loadBalanceData = false;
+            _bal_name = ['--','--','--'];
+            _bal_amount = ['0','0','0'];
+             alert(
+                "connection Error",
+                'An error occurred while loading balance: $e',
+                context,
+              );
         });
       }
     }
@@ -185,7 +211,7 @@ class _MenuState extends State<Menu> {
     WidgetsFlutterBinding.ensureInitialized();
     return 
      _isLoadingScreen
-    ? const CustomLoading(img: 'assets/logo.png', text: 'Loading',)    
+    ? const CustomLoading(img: 'assets/logo.png', text: 'Please wait...',)    
     : Scaffold(
       backgroundColor: widget.isDarkMode ? Colors.black87 : Colors.white,
       appBar: AppBar(
@@ -370,8 +396,52 @@ Widget buildFourColumnGrid(BoxConstraints constraints, double cardWidth, int cro
                         context,
                         onConfirm: () {
                            Navigator.of(context, rootNavigator: true).pop();
-                           Navigator.pushNamed(context, '/Admission');
-                          // intent(context, Admission(toggleTheme: widget.toggleTheme, isDarkMode: widget.isDarkMode),'/Admission');
+                          //  Navigator.pushNamed(context, '/Submenu');
+                          //  Navigator.push( 
+                          //   context, 
+                          //   MaterialPageRoute( 
+                          //     builder: (context) => 
+                          //         Submenu(
+                          //           toggleTheme: widget.toggleTheme,
+                          //           isDarkMode: widget.isDarkMode,
+                          //           menuType: Menutitle[index],
+                          //         ), 
+                          //   ), 
+                          // ); 
+
+                          if(loadBalanceData){
+                            Navigator.of(context).push(
+                              PageRouteBuilder(
+                                transitionDuration: const Duration(seconds: 1),
+                                reverseTransitionDuration: const Duration(seconds: 1),
+                                pageBuilder: (context, animation, secondaryAnimation) {
+                                  final curvedAnimation = CurvedAnimation(
+                                    parent: animation,
+                                    curve: const Interval(0.1, 0.1, curve: Curves.linear),
+                                  );
+
+                                  return FadeTransition(
+                                    opacity: curvedAnimation,
+                                    child: 
+                                    Submenu(
+                                      toggleTheme: widget.toggleTheme,
+                                      isDarkMode: widget.isDarkMode,
+                                      menuType: Menutitle[index],
+                                      animation: animation,
+                                      empName:  _employeeInfo[EMPL_NAME] ?? '',
+                                      balanceName: _bal_name,
+                                      balanaceAmount: _bal_amount,
+                                    ), 
+                                  );
+                                },
+                              ),
+                            );
+                             //  Navigator.pushNamed(context, '/Admission');
+                          }
+
+                            
+
+                         
                         },
                       );
                     }
@@ -411,13 +481,16 @@ Widget buildFourColumnGrid(BoxConstraints constraints, double cardWidth, int cro
                             children: <Widget>[
                               buildImage(Menuicons[index], iconSize, iconSize, Alignment.center),
                               const SizedBox(height: 10),
-                              Text(
-                                Menutitle[index].toUpperCase(),
-                                style: TextStyle(
-                                  color: widget.isDarkMode ? const Color.fromARGB(255, 255, 255, 255) : const Color.fromARGB(255, 0, 0, 0),
-                                  fontSize: 10.0,
-                                  fontWeight: FontWeight.w900,
-                                  fontFamily: 'Urbanist',
+                              Hero(
+                                tag: Menutitle[index],
+                                child: Text(
+                                  Menutitle[index].toUpperCase(),
+                                  style: TextStyle(
+                                    color: widget.isDarkMode ? const Color.fromARGB(255, 255, 255, 255) : const Color.fromARGB(255, 0, 0, 0),
+                                    fontSize: 10.0,
+                                    fontWeight: FontWeight.w900,
+                                    fontFamily: 'Urbanist',
+                                  ),
                                 ),
                               ),
                             ],
@@ -449,7 +522,7 @@ Widget buildLeftColumn(double cardwidth) {
         color: widget.isDarkMode ? const Color.fromARGB(255, 81, 81, 81) : Colors.blue[500],
         shadowColor: widget.isDarkMode ? const Color.fromARGB(255, 109, 109, 109) : const Color.fromARGB(255, 67, 67, 67),
         borderOnForeground: true,
-        margin: const EdgeInsets.all(10.0),
+        margin: const EdgeInsets.only(top:10.0,left: 15.0, right:25.0),
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(20.0),
         ),
@@ -468,24 +541,30 @@ Widget buildLeftColumn(double cardwidth) {
                    crossAxisAlignment: CrossAxisAlignment.center,
                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    const Text(
-                      "Your Current Balance",
-                        style: TextStyle(
-                          fontSize: 13,
+                    const Hero(
+                      tag: 'balance',
+                      child: Text(
+                        "Your Current Balance",
+                          style: TextStyle(
+                            fontSize: 15,
+                            fontFamily: 'Urbanist',
+                            fontWeight: FontWeight.bold,
+                            color: Colors.white,
+                          ),
+                        ),
+                    ),
+                      Hero(
+                        tag:  _employeeInfo[EMPL_NAME] ?? '',
+                        child: Text(
+                        _employeeInfo[EMPL_NAME] ?? '',
+                        style: const TextStyle(
+                          fontSize: 15,
                           fontFamily: 'Urbanist',
-                          fontWeight: FontWeight.w500,
+                          fontWeight: FontWeight.bold,
                           color: Colors.white,
                         ),
+                                            ),
                       ),
-                      Text(
-                      _employeeInfo[EMPL_NAME] ?? '',
-                      style: const TextStyle(
-                        fontSize: 13,
-                        fontFamily: 'Urbanist',
-                        fontWeight: FontWeight.w500,
-                        color: Colors.white,
-                      ),
-                    ),
                    
                   ],
                 ),
@@ -495,31 +574,33 @@ Widget buildLeftColumn(double cardwidth) {
                   mainAxisSize: MainAxisSize.max,
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
-      
                     Column(
                       mainAxisAlignment: MainAxisAlignment.center,
-                      mainAxisSize: MainAxisSize.max,
-                      crossAxisAlignment: CrossAxisAlignment.center,
+                      mainAxisSize: MainAxisSize.min,
                       children: [
-                         CustomIcon(
-                          width: 50.0,
-                          height: 50.0,
-                          icon: FontAwesomeIcons.person,
-                          iconSize: 20.0,
-                          iconColor: Colors.white,
-                          bgColor: Colors.white.withOpacity(0.2),
-                        ),
+                         Hero(
+                           tag: '1',
+                           child: CustomIcon(
+                            width: 50.0,
+                            height: 50.0,
+                            icon: FontAwesomeIcons.person,
+                            iconSize: 20.0,
+                            iconColor: Colors.white,
+                            bgColor: Colors.white.withOpacity(0.2),
+                                                   ),
+                         ),
                           const SizedBox(height: 2,),
                          _isloadingBal 
                           ? const SpinKitFadingCircle(
                             color: Colors.white,
                             size: 25)
                           : BalTile(
+                            tag: _bal_name[0],
                             title: _bal_name[0], 
                             balance: NumberFormat('#,###').format(int.parse(_bal_amount[0])), 
                             titleSize: 14, 
                             balanceSize: 15, 
-                            titleColor:  Colors.white,
+                            titleColor:  Colors.yellow,
                             balanceColor: Colors.white,)
                       ],
                     ),
@@ -533,27 +614,30 @@ Widget buildLeftColumn(double cardwidth) {
                      ),
                      Column(
                       mainAxisAlignment: MainAxisAlignment.center,
-                      mainAxisSize: MainAxisSize.max,
-                      crossAxisAlignment: CrossAxisAlignment.center,
+                      mainAxisSize: MainAxisSize.min,
                       children: [
-                         CustomIcon(
-                          width: 50.0,
-                          height: 50.0,
-                          icon: Icons.family_restroom_rounded,
-                          iconSize: 20.0,
-                          iconColor: Colors.white,
-                          bgColor: Colors.white.withOpacity(0.2),
-                        ),
+                         Hero(
+                           tag: '2',
+                           child: CustomIcon(
+                            width: 50.0,
+                            height: 50.0,
+                            icon: Icons.family_restroom_rounded,
+                            iconSize: 20.0,
+                            iconColor: Colors.white,
+                            bgColor: Colors.white.withOpacity(0.2),
+                                                   ),
+                         ),
                           _isloadingBal 
                           ? const SpinKitFadingCircle(
                             color: Colors.white,
                             size: 25)
                           : BalTile(
+                            tag: _bal_name[1],
                             title: _bal_name[1], 
                             balance: NumberFormat('#,###').format(int.parse(_bal_amount[1])), 
                             titleSize: 14, 
                             balanceSize: 14, 
-                            titleColor:  Colors.white,
+                            titleColor:  Colors.yellow,
                             balanceColor: Colors.white,)
                       ],
                     ),
@@ -567,27 +651,30 @@ Widget buildLeftColumn(double cardwidth) {
                      ),
                      Column(
                       mainAxisAlignment: MainAxisAlignment.center,
-                      mainAxisSize: MainAxisSize.max,
-                      crossAxisAlignment: CrossAxisAlignment.center,
+                      mainAxisSize: MainAxisSize.min,
                       children: [
-                         CustomIcon(
-                          width: 50.0,
-                          height: 50.0,
-                          icon: FontAwesomeIcons.carBurst,
-                          iconSize: 20.0,
-                          iconColor: Colors.white,
-                          bgColor: Colors.white.withOpacity(0.2),
-                        ),
+                         Hero(
+                           tag: '3',
+                           child: CustomIcon(
+                            width: 50.0,
+                            height: 50.0,
+                            icon: FontAwesomeIcons.carBurst,
+                            iconSize: 20.0,
+                            iconColor: Colors.white,
+                            bgColor: Colors.white.withOpacity(0.2),
+                                                   ),
+                         ),
                           _isloadingBal 
                           ? const SpinKitFadingCircle(
                             color: Colors.white,
                             size: 25)
                           : BalTile(
+                            tag: _bal_name[2],
                             title: _bal_name[2], 
                             balance: NumberFormat('#,###').format(int.parse(_bal_amount[2])), 
                             titleSize: 14, 
                             balanceSize: 14, 
-                            titleColor:  Colors.white,
+                            titleColor:  Colors.yellow,
                             balanceColor: Colors.white,)
                       ],
       

@@ -25,25 +25,11 @@ class CustomIcon extends StatefulWidget {
 }
 
 class _CustomIcon extends State<CustomIcon> {
-  double _opacity = 0.0;
-
-    @override
-    void initState() {
-      super.initState();
-      // Trigger the fade-in animation when the widget is built
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        setState(() {
-          _opacity = 1.0;
-        });
-      });
-    }
+ 
   
   @override
   Widget build(BuildContext context) {
-    return AnimatedOpacity(
-       opacity: _opacity,
-      duration: const Duration(seconds: 1),
-      child: SizedBox(
+    return  SizedBox(
         width: widget.width,  // Set the width of the SizedBox
         height: widget.height,  // Set the height of the SizedBox
         child: Card(
@@ -51,7 +37,7 @@ class _CustomIcon extends State<CustomIcon> {
           elevation: 4,
           shadowColor: Colors.black26,
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(5),
+            borderRadius: BorderRadius.circular(13),
           ),
           child: Padding(
             padding: const EdgeInsets.all(3.0),
@@ -69,7 +55,6 @@ class _CustomIcon extends State<CustomIcon> {
             ),
           ),
         ),
-      ),
-    );
+      );
   }
 }

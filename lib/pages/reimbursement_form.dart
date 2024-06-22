@@ -10,11 +10,11 @@ class ReimbursementForm extends StatefulWidget {
   final String reimbursementype;
 
   const ReimbursementForm({
-    Key? key,
+    super.key,
     required this.toggleTheme,
     required this.isDarkMode,
     required this.reimbursementype,
-  }) : super(key: key);
+  });
 
   @override
   _ReimbursementFormState createState() => _ReimbursementFormState();

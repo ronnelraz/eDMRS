@@ -6,10 +6,10 @@ class CustomLoading extends StatelessWidget {
   final String text;
 
   const CustomLoading({
-    Key? key,
+    super.key,
     required this.img,
     required this.text
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

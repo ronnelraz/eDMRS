@@ -10,7 +10,6 @@ import 'package:welfare_claim_system/components/config.dart';
 import 'package:welfare_claim_system/pages/admission.dart';
 import 'package:welfare_claim_system/pages/area.dart';
 import 'package:welfare_claim_system/pages/menu.dart';
-import 'package:welfare_claim_system/pages/reimbursement.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_custom_carousel_slider/flutter_custom_carousel_slider.dart';
 import 'package:flutter_svg/flutter_svg.dart';
@@ -19,6 +18,7 @@ import 'package:localstorage/localstorage.dart';
 import 'dart:async';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:toastification/toastification.dart';
+import 'package:welfare_claim_system/pages/sub_menu.dart';
 import '../components/custom_button.dart';
 import '../components/custom_text_field.dart';
 import '../sharedpref/sharedpref.dart';
@@ -86,7 +86,7 @@ class _MyAppState extends State<MyApp> {
         '/Area': (context) => Area(toggleTheme: _toggleTheme, isDarkMode: isDarkMode),
         '/Menu': (context) => Menu(toggleTheme: _toggleTheme, isDarkMode: isDarkMode),
         '/Admission': (context) => Admission(toggleTheme: _toggleTheme, isDarkMode: isDarkMode),
-        '/Reimbursement': (context) => Reimbursement(toggleTheme: _toggleTheme, isDarkMode: isDarkMode),
+        // '/Submenu': (context) => Submenu(toggleTheme: _toggleTheme, isDarkMode: isDarkMode),
       },
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
@@ -131,6 +131,7 @@ class LoginPage extends State<MyHomePage> {
 
   List<CarouselItem> items = [];
   bool isLoading = true;
+  bool annoucement = false;
 
   @override
   void initState() {
@@ -156,21 +157,25 @@ class LoginPage extends State<MyHomePage> {
               );
             }).toList();
             isLoading = false;
+            annoucement = true;
           });
         } else {
           setState(() {
             isLoading = false;
+            annoucement = false;
           });
         }
       } else {
         setState(() {
           isLoading = false;
+          annoucement = false;
         });
       }
     } catch (e) {
       print('An error occurred: $e');
       setState(() {
         isLoading = false;
+        annoucement = false;
       });
     }
   }
@@ -208,7 +213,9 @@ class LoginPage extends State<MyHomePage> {
                       color: widget.isDarkMode ? Colors.white : Colors.blue[700],
                       size: 50.0,
                     ))
-                    : AnnoucementTile(itemList: items),
+                    : 
+                    annoucement ? AnnoucementTile(itemList: items) : null,
+                    
               ),
               Padding(
                     padding: const EdgeInsets.only(top:50.0),

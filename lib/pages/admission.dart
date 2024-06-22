@@ -23,9 +23,10 @@ class Admission extends StatefulWidget {
   final VoidCallback toggleTheme;
   final bool isDarkMode;
 
-  Admission({required this.toggleTheme, required this.isDarkMode});
+  const Admission({super.key, required this.toggleTheme, required this.isDarkMode});
 
   @override
+  // ignore: library_private_types_in_public_api
   _AdmissionState createState() => _AdmissionState();
 }
 
