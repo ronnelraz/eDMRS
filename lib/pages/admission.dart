@@ -22,8 +22,16 @@ import 'package:flutter/foundation.dart' show kIsWeb;
 class Admission extends StatefulWidget {
   final VoidCallback toggleTheme;
   final bool isDarkMode;
+  final String title;
+  final String subTitle;
 
-  const Admission({super.key, required this.toggleTheme, required this.isDarkMode});
+  const Admission({
+    super.key, 
+    required this.toggleTheme, 
+    required this.isDarkMode,
+    required this.title,
+    required this.subTitle
+    });
 
   @override
   // ignore: library_private_types_in_public_api
@@ -163,39 +171,44 @@ class _AdmissionState extends State<Admission> {
     super.dispose();
   }
 
-  ScrollController _scrollController = new ScrollController();
+  final ScrollController _scrollController = ScrollController();
     bool _keyboardVisible = false;
 
 
   @override
   Widget build(BuildContext context) {
-    return  _isLoadingScreen
-    ? const CustomLoading(img: 'assets/logo.png', text: 'Loading',)    
-    : Scaffold(
+    return   Scaffold(
       appBar: AppBar(
         backgroundColor: widget.isDarkMode ? const Color.fromARGB(255, 25, 25, 25) :  Colors.white,
         automaticallyImplyLeading: false, // Disable automatic back button
         leading: Row(
           children: <Widget>[
             IconButton(
-              icon: Icon(Icons.arrow_back),
+              icon: const Icon(Icons.arrow_back),
               onPressed: () {
-                Navigator.pushNamed(context, '/Menu');
+                // Navigator.pushNamed(context, '/Menu');
+                 Navigator.of(context).pop();
               },
             ),
             // Add your additional icon here
           ],
         ),
-        title: const Column(
+        title:  Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(
-              'Admission',
-              style: TextStyle(fontSize: 19, fontWeight: FontWeight.w700),
+            Hero(
+              tag: widget.title,
+              child: Text(
+                widget.title,
+                style: const TextStyle(fontSize: 19, fontWeight: FontWeight.w700),
+              ),
             ),
-            Text(
-              'Request Form',
-              style: TextStyle(fontSize: 11, fontWeight: FontWeight.w400),
+            Hero(
+              tag: widget.subTitle,
+              child: Text(
+                widget.subTitle,
+                style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w400),
+              ),
             ),
           ],
         ),
@@ -334,7 +347,7 @@ class _AdmissionState extends State<Admission> {
                     ),
                     onChanged: (value) {
                        setState(() {
-                         getHospital = value;
+                         getHospital = value ?? '';
                        });
                     },
                   ),

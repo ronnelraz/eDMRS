@@ -151,3 +151,29 @@ Future<http.Response> getLocation(String url, Map<String, String> body) async {
     throw Exception('Failed to post data: $e'); // throw an exception
   }
 }
+
+
+Future<http.Response> subMenu(String url, Map<String, dynamic> body) async {
+  try {
+    WidgetsFlutterBinding.ensureInitialized();
+    await initLocalStorage();
+    String encodedCredentials = localStorage.getItem(App.Auth) ?? '';
+    Map<String, String> headers = {
+      'authorization': 'Basic $encodedCredentials',
+      'Content-Type': 'application/json', // Specify the content type as JSON
+    };
+
+    var response = await http.post(
+      Uri.parse(App.baseURLNEW + url),
+      headers: headers,
+      body: jsonEncode(body), // Encode the body to JSON
+    );
+
+    log(response.toString());
+
+    return response;
+  } catch (e) {
+    print('Error: $e');
+    throw Exception('Failed to post data: $e');
+  }
+}

@@ -147,7 +147,7 @@ class _AreaState extends State<Area> {
                   onChanged: (value) {
                     setState(() {
                       _selectedArea = value;
-                      _selectedIndex = _list.indexOf(value);
+                      _selectedIndex = _list.indexOf(value ?? '');
                      _selectedCode = _loc_code[_selectedIndex!];
                      _selectedBU = _loc_bu_code[_selectedIndex!];
 

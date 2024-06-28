@@ -4,6 +4,7 @@ import 'dart:async';
 import 'dart:convert';
 
 import 'package:animated_custom_dropdown/custom_dropdown.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:fluttertoast/fluttertoast.dart';
@@ -40,7 +41,7 @@ class App {
   static const String personalBal = "Personal : ";
   static const String dependentBal = "Dependent : ";
   static const String employee = "Employee Information";
-  static const double card_height = 140.0;
+  static const double card_height = 170.0;
   static const double card_textsize = 13;
   static const double elevation = 1.0;
 
@@ -475,6 +476,25 @@ Widget buildImage(String imagePath, double width, double height, AlignmentGeomet
     ),
   );
 }
+
+Widget buildImageURL(String imageUrl, double width, double height, AlignmentGeometry alignment) {
+  return Container(
+    alignment: alignment,
+    child:  CachedNetworkImage(
+      imageUrl: imageUrl,
+      width: width,
+      height: height,
+      alignment: Alignment.center,
+      placeholder: (context, url) => const SizedBox(
+        width: 10, 
+        height: 10, 
+        child: CircularProgressIndicator(),
+      ),
+      errorWidget: (context, url, error) => const Icon(Icons.error, size: 10), // Adjust the size if needed
+    ),
+  );
+}
+
 
 BoxDecoration buildBoxDecoration() {
   return BoxDecoration(

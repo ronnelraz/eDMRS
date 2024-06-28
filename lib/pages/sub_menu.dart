@@ -1,18 +1,15 @@
-
-import 'package:card_loading/card_loading.dart';
+import 'dart:convert';
 import 'package:flutter/material.dart';
-
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:intl/intl.dart';
-
+import 'package:welfare_claim_system/API/api_service.dart';
 import 'package:welfare_claim_system/components/balTile.dart';
-import 'package:welfare_claim_system/components/custom_bal.dart';
 import 'package:welfare_claim_system/components/custom_icon.dart';
-import 'package:welfare_claim_system/components/hero_tag.dart';
-import 'package:welfare_claim_system/components/hero_widget.dart';
+import 'package:welfare_claim_system/components/loading.dart';
 import 'package:welfare_claim_system/components/reimbursement_tile.dart';
-
+import 'package:welfare_claim_system/pages/admission.dart';
 import '../components/config.dart';
+import '../model/submenu.dart';
 import 'reimbursement_form.dart';
 
 class Submenu extends StatefulWidget {
@@ -20,20 +17,22 @@ class Submenu extends StatefulWidget {
   final bool isDarkMode;
   final String menuType;
   final Animation<double> animation;
-  final List<String> balanceName; 
-  final List<String> balanaceAmount;
+  final List<String> balanceName;
+  final List<String> balanceAmount;
   final String empName;
+  final String welfareCode;
 
   const Submenu({
-    super.key, 
-    required this.toggleTheme, 
+    super.key,
+    required this.toggleTheme,
     required this.isDarkMode,
     required this.menuType,
     required this.animation,
     required this.balanceName,
-    required this.balanaceAmount,
-    required this.empName
-    });
+    required this.balanceAmount,
+    required this.empName,
+    required this.welfareCode,
+  });
 
   @override
   // ignore: library_private_types_in_public_api
@@ -41,9 +40,90 @@ class Submenu extends StatefulWidget {
 }
 
 class _SubmenuState extends State<Submenu> {
+  bool isLoadData = false;
+  List<SubMenuItem> subMenuItems = [];
+
+  @override
+  void initState() {
+    super.initState();
+    _initializeData();
+  }
+
+  @override
+  void dispose() {
+    subMenuItems = [];
+    _initializeData();
+    super.dispose();
+  }
+
+  Future<void> _initializeData() async {
+    await loadSubMenu();
+  }
+
+  Future<void> loadSubMenu() async {
+    try {
+      Map<String, String> body = {
+        'welfare_main_code': widget.welfareCode,
+      };
+
+      var response = await subMenu('getSubmenu', body);
+      if (response.statusCode == 200) {
+        Map<String, dynamic> responseData = json.decode(response.body);
+        bool success = responseData['success'];
+
+        if (success) {
+          List<dynamic> data = responseData['data'];
+          List<SubMenuItem> loadedSubMenuItems =
+              data.map((item) => SubMenuItem.fromJson(item)).toList();
+
+          if (mounted) {
+            setState(() {
+              subMenuItems = loadedSubMenuItems;
+              isLoadData = false;
+            });
+          }
+        } else {
+          if (mounted) {
+            setState(() {
+              isLoadData = false;
+              alert(
+                "Connection Error",
+                responseData['message'],
+                context,
+              );
+            });
+          }
+        }
+      } else {
+        if (mounted) {
+          setState(() {
+            isLoadData = false;
+            alert(
+              "Sub Menu failed",
+              'Please check your connection, or contact IT',
+              context,
+            );
+          });
+        }
+      }
+    } catch (e) {
+      if (mounted) {
+        setState(() {
+          isLoadData = false;
+          alert(
+            "Connection Error",
+            'An error occurred while loading Sub Menu: $e',
+            context,
+          );
+        });
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Colors.white,
       appBar: AppBar(
         backgroundColor: const Color.fromARGB(255, 64, 113, 187),
         automaticallyImplyLeading: false,
@@ -53,7 +133,6 @@ class _SubmenuState extends State<Submenu> {
           color: Colors.white,
           onPressed: () {
             Navigator.of(context).pop();
-            // Navigator.pushNamed(context, '/Menu');
           },
         ),
         title: const Column(
@@ -62,7 +141,9 @@ class _SubmenuState extends State<Submenu> {
         actions: [
           IconButton(
             icon: Icon(widget.isDarkMode ? Icons.nights_stay : Icons.wb_sunny),
-            color: widget.isDarkMode ? const Color.fromARGB(255, 37, 37, 37) : Colors.yellow[600],
+            color: widget.isDarkMode
+                ? const Color.fromARGB(255, 37, 37, 37)
+                : Colors.yellow[600],
             onPressed: widget.toggleTheme,
           ),
           TextButton(
@@ -97,35 +178,26 @@ class _SubmenuState extends State<Submenu> {
           crossAxisAlignment: CrossAxisAlignment.center,
           mainAxisSize: MainAxisSize.max,
           children: [
-              Stack(
-                children: [
-                  Container(
+            Stack(
+              children: [
+                Container(
                   height: 120.0,
                   decoration: const BoxDecoration(
-                      color: Color.fromARGB(255, 64, 113, 187),
-                      borderRadius: BorderRadius.only(
-                        bottomLeft: Radius.circular(50.0),
-                        bottomRight: Radius.circular(50.0),
-                      ),
-                      // boxShadow: [
-                      //   BoxShadow(
-                      //     color: Colors.black26,
-                      //     blurRadius: 10,
-                      //     spreadRadius: 2,
-                      //     offset: Offset(0, 5),
-                      //   ),
-                      // ],
+                    color: Color.fromARGB(255, 64, 113, 187),
+                    borderRadius: BorderRadius.only(
+                      bottomLeft: Radius.circular(50.0),
+                      bottomRight: Radius.circular(50.0),
                     ),
-                   child: Column(
+                  ),
+                  child: Column(
                     mainAxisAlignment: MainAxisAlignment.start,
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     mainAxisSize: MainAxisSize.max,
                     children: [
                       Padding(
-                        padding: EdgeInsets.only(left: 30.0, right: 30.0),
-                        child: Hero(
-                          tag: widget.menuType,
-                          child: Text(
+                        padding:
+                            const EdgeInsets.only(left: 30.0, right: 30.0),
+                        child:Text(
                             widget.menuType,
                             style: const TextStyle(
                               color: Colors.white,
@@ -134,25 +206,28 @@ class _SubmenuState extends State<Submenu> {
                               fontSize: 30,
                               height: 1.2,
                             ),
-                          ),
-                        ),
+                          )
                       ),
                     ],
                   ),
                 ),
-              Padding(
-                padding: const EdgeInsets.only(top: 18.0, left: 5, right: 5),
-                child: Card(
+                Padding(
+                  padding: const EdgeInsets.only(top: 18.0, left: 5, right: 5),
+                  child: Card(
                     elevation: 3,
-                    color: widget.isDarkMode ? const Color.fromARGB(255, 81, 81, 81) : Colors.blue[500],
-                    shadowColor: widget.isDarkMode ? const Color.fromARGB(255, 109, 109, 109) : const Color.fromARGB(255, 67, 67, 67),
+                    color: widget.isDarkMode
+                        ? const Color.fromARGB(255, 81, 81, 81)
+                        : Colors.blue[500],
+                    shadowColor: widget.isDarkMode
+                        ? const Color.fromARGB(255, 109, 109, 109)
+                        : const Color.fromARGB(255, 67, 67, 67),
                     borderOnForeground: true,
                     margin: const EdgeInsets.all(20.0),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(20.0),
                     ),
                     child: SizedBox(
-                      height: App.card_height,
+                      height: 140,
                       child: Padding(
                         padding: const EdgeInsets.only(
                           top: 10,
@@ -167,20 +242,20 @@ class _SubmenuState extends State<Submenu> {
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: [
                                 const Hero(
-                                  tag: 'balance',
+                                  tag: 'balance-menu', // Unique tag
                                   child: Text(
                                     "Your Current Balance",
-                                      style: TextStyle(
-                                        fontSize: 15,
-                                        fontFamily: 'Urbanist',
-                                        fontWeight: FontWeight.bold,
-                                        color: Colors.white,
-                                      ),
+                                    style: TextStyle(
+                                      fontSize: 18,
+                                      fontFamily: 'Urbanist',
+                                      fontWeight: FontWeight.bold,
+                                      color: Colors.yellow,
                                     ),
+                                  ),
                                 ),
-                                  Hero(
-                                    tag: widget.empName,
-                                    child: Text(
+                                Hero(
+                                  tag: 'empName-${widget.empName}', // Unique tag
+                                  child: Text(
                                     widget.empName,
                                     style: const TextStyle(
                                       fontSize: 15,
@@ -188,9 +263,8 @@ class _SubmenuState extends State<Submenu> {
                                       fontWeight: FontWeight.bold,
                                       color: Colors.white,
                                     ),
-                                                                    ),
                                   ),
-                              
+                                ),
                               ],
                             ),
                             const SizedBox(height: 7),
@@ -204,25 +278,28 @@ class _SubmenuState extends State<Submenu> {
                                   mainAxisSize: MainAxisSize.min,
                                   children: [
                                     Hero(
-                                      tag: '1',
+                                      tag: 'icon-1', // Unique tag
                                       child: CustomIcon(
                                         width: 50.0,
                                         height: 50.0,
                                         icon: FontAwesomeIcons.person,
                                         iconSize: 20.0,
                                         iconColor: Colors.white,
-                                        bgColor: Colors.white.withOpacity(0.2),
+                                        bgColor:
+                                            Colors.white.withOpacity(0.2),
                                       ),
                                     ),
-                                      const SizedBox(height: 2,),
-                                      BalTile(
-                                        tag: widget.balanceName[0],
-                                        title: widget.balanceName[0], 
-                                        balance: NumberFormat('#,###').format(int.parse(widget.balanaceAmount[0])), 
-                                        titleSize: 14, 
-                                        balanceSize: 15, 
-                                        titleColor:  Colors.yellow,
-                                        balanceColor: Colors.white,)
+                                    const SizedBox(height: 2),
+                                    BalTile(
+                                      tag: 'balanceName-0', // Unique tag
+                                      title: widget.balanceName[0],
+                                      balance: NumberFormat('#,###').format(
+                                          int.parse(widget.balanceAmount[0])),
+                                      titleSize: 14,
+                                      balanceSize: 15,
+                                      titleColor: Colors.yellow,
+                                      balanceColor: Colors.white,
+                                    )
                                   ],
                                 ),
                                 Container(
@@ -238,24 +315,27 @@ class _SubmenuState extends State<Submenu> {
                                   mainAxisSize: MainAxisSize.min,
                                   children: [
                                     Hero(
-                                      tag: '2',
+                                      tag: 'icon-2', // Unique tag
                                       child: CustomIcon(
                                         width: 50.0,
                                         height: 50.0,
                                         icon: Icons.family_restroom_rounded,
                                         iconSize: 20.0,
                                         iconColor: Colors.white,
-                                        bgColor: Colors.white.withOpacity(0.2),
+                                        bgColor:
+                                            Colors.white.withOpacity(0.2),
                                       ),
                                     ),
-                                       BalTile(
-                                         tag: widget.balanceName[1],
-                                        title: widget.balanceName[1], 
-                                        balance: NumberFormat('#,###').format(int.parse(widget.balanaceAmount[1])), 
-                                        titleSize: 14, 
-                                        balanceSize: 14, 
-                                        titleColor:  Colors.yellow,
-                                        balanceColor: Colors.white,)
+                                    BalTile(
+                                      tag: 'balanceName-1', // Unique tag
+                                      title: widget.balanceName[1],
+                                      balance: NumberFormat('#,###').format(
+                                          int.parse(widget.balanceAmount[1])),
+                                      titleSize: 14,
+                                      balanceSize: 14,
+                                      titleColor: Colors.yellow,
+                                      balanceColor: Colors.white,
+                                    )
                                   ],
                                 ),
                                 Container(
@@ -271,141 +351,99 @@ class _SubmenuState extends State<Submenu> {
                                   mainAxisSize: MainAxisSize.min,
                                   children: [
                                     Hero(
-                                      tag: '3',
+                                      tag: 'icon-3', // Unique tag
                                       child: CustomIcon(
                                         width: 50.0,
                                         height: 50.0,
                                         icon: FontAwesomeIcons.carBurst,
                                         iconSize: 20.0,
                                         iconColor: Colors.white,
-                                        bgColor: Colors.white.withOpacity(0.2),
+                                        bgColor:
+                                            Colors.white.withOpacity(0.2),
                                       ),
                                     ),
-                                      BalTile(
-                                         tag: widget.balanceName[2],
-                                        title: widget.balanceName[2], 
-                                        balance: NumberFormat('#,###').format(int.parse(widget.balanaceAmount[2])), 
-                                        titleSize: 14, 
-                                        balanceSize: 14, 
-                                        titleColor:  Colors.yellow,
-                                        balanceColor: Colors.white,)
+                                    BalTile(
+                                      tag: 'balanceName-2', // Unique tag
+                                      title: widget.balanceName[2],
+                                      balance: NumberFormat('#,###').format(
+                                          int.parse(widget.balanceAmount[2])),
+                                      titleSize: 14,
+                                      balanceSize: 14,
+                                      titleColor: Colors.yellow,
+                                      balanceColor: Colors.white,
+                                    )
                                   ],
-                  
-                  
                                 ),
-                  
                               ],
                             )
-                        
                           ],
                         ),
                       ),
                     ),
                   ),
-              ),
-                ],
-          
-              ),
-             ReimburstmentTile(
-              img: 'assets/menu/employee.png',
-              text: "Employee",
-              width: 100,
-              height: 100,
-              onPressed: () {
-                Navigator.push( 
-                  context, 
-                  MaterialPageRoute( 
-                    builder: (context) => 
-                        ReimbursementForm(
-                          toggleTheme: widget.toggleTheme,
-                          isDarkMode: widget.isDarkMode,
-                          reimbursementype: 'Employee',
-                        ), 
-                  ), 
-                ); 
-              },
-             ),
-             ReimburstmentTile(
-              img: 'assets/menu/dependent.png',
-              text: "DEPENDENT",
-              width: 100,
-              height: 100,
-              onPressed: () {
-                Navigator.push( 
-                  context, 
-                  MaterialPageRoute( 
-                    builder: (context) => 
-                        ReimbursementForm(
-                          toggleTheme: widget.toggleTheme,
-                          isDarkMode: widget.isDarkMode,
-                          reimbursementype: 'Dependent',
-                        ), 
-                  ), 
-                ); 
-              },
-             ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildBalanceCard({
-    required String title,
-    required bool isLoading,
-    required String balance,
-    required IconData icon,
-    required Color bgColor,
-  }) {
-    return Container(
-      width: 130,
-      height: 130,
-      decoration: BoxDecoration(
-        color: widget.isDarkMode ? const Color.fromARGB(255, 97, 97, 97) : const Color.fromARGB(255, 255, 255, 255),
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(
-          width: 1,
-          color: Colors.black.withOpacity(0.4),
-        ),
-        boxShadow: const [
-        BoxShadow(
-              color: Colors.black26,
-              blurRadius: 0.1,
-              spreadRadius: 0.2,
-              offset: Offset(0, 1),
-            ),
-          ],
-      ),
-      
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.center,
-        mainAxisAlignment: MainAxisAlignment.center,
-        mainAxisSize: MainAxisSize.max,
-        children: [
-          Text(
-            title,
-            style: TextStyle(
-              fontSize: 12.0,
-              fontFamily: 'Urbanist',
-              fontWeight: FontWeight.w900,
-              color: widget.isDarkMode ? const Color.fromARGB(255, 247, 151, 6) : Colors.blueAccent,
-            ),
-          ),
-          isLoading
-              ? const CardLoading(
-                  height: 15,
-                  borderRadius: BorderRadius.all(Radius.circular(5)),
-                  width: 100.0,
-                  margin: EdgeInsets.only(top: 8),
-                )
-              : CustomBalance(
-                  balance: '₱${NumberFormat('#,###').format(int.parse(balance))}',
-                  iconx: icon,
-                  fontSize: 13,
-                  colors: widget.isDarkMode ? const Color.fromARGB(255, 255, 255, 255) : const Color.fromARGB(255, 46, 47, 47),
-                  bgcolor: bgColor,
                 ),
-        ],
+              ],
+            ),
+            isLoadData
+                ? const CustomLoading(
+                    img: 'assets/logo.png',
+                    text: 'Please wait...',
+                  )
+                : ListView.builder(
+                    shrinkWrap: true,
+                    physics: const NeverScrollableScrollPhysics(),
+                    itemCount: subMenuItems.length,
+                    itemBuilder: (context, index) {
+                      final item = subMenuItems[index];
+                      return ReimburstmentTile(
+                        img: item.urlImg, // Update with relevant image path
+                        text: item.sname,
+                        subTitle: item.fname,
+                        width: 60,
+                        height: 60,
+                        onPressed: () {
+
+                            if(widget.welfareCode == "WG01"){
+                                Navigator.of(context).push(
+                                    PageRouteBuilder(
+                                      transitionDuration: const Duration(seconds: 1),
+                                      reverseTransitionDuration: const Duration(seconds: 1),
+                                      pageBuilder: (context, animation, secondaryAnimation) {
+                                        final curvedAnimation = CurvedAnimation(
+                                          parent: animation,
+                                          curve: const Interval(0.1, 0.1, curve: Curves.linear),
+                                        );
+
+                                        return FadeTransition(
+                                          opacity: curvedAnimation,
+                                          child: 
+                                          Admission(
+                                            toggleTheme: widget.toggleTheme,
+                                            isDarkMode: widget.isDarkMode,
+                                            title: item.sname,
+                                            subTitle: item.fname,
+                                          ), 
+                                        );
+                                      },
+                                    ),
+                                  );
+                            }
+                          // Navigator.push(
+                          //   context,
+                          //   MaterialPageRoute(
+                          //     builder: (context) => ReimbursementForm(
+                          //       toggleTheme: widget.toggleTheme,
+                          //       isDarkMode: widget.isDarkMode,
+                          //       reimbursementype: item.fname, // Passing the relevant data
+                          //     ),
+                          //   ),
+                          // );
+                        },
+                      );
+                    },
+                  )
+          ],
+        ),
       ),
     );
   }

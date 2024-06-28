@@ -85,7 +85,7 @@ class _MyAppState extends State<MyApp> {
         '/': (context) => MyHomePage(title: App.title, toggleTheme: _toggleTheme, isDarkMode: isDarkMode),
         '/Area': (context) => Area(toggleTheme: _toggleTheme, isDarkMode: isDarkMode),
         '/Menu': (context) => Menu(toggleTheme: _toggleTheme, isDarkMode: isDarkMode),
-        '/Admission': (context) => Admission(toggleTheme: _toggleTheme, isDarkMode: isDarkMode),
+        // '/Admission': (context) => Admission(toggleTheme: _toggleTheme, isDarkMode: isDarkMode),
         // '/Submenu': (context) => Submenu(toggleTheme: _toggleTheme, isDarkMode: isDarkMode),
       },
       debugShowCheckedModeBanner: false,

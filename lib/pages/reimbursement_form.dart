@@ -68,21 +68,6 @@ class _ReimbursementFormState extends State<ReimbursementForm> {
             pinned: true,
             centerTitle: true,
             expandedHeight: MediaQuery.of(context).size.height * 0.2,
-            // flexibleSpace: FlexibleSpaceBar(
-            //   title: Text(
-            //     '${widget.reimbursementype} Form',
-            //     style: const TextStyle(
-            //       color: Colors.white,
-            //       fontSize: 20.0,
-            //       fontWeight: FontWeight.bold,
-            //     ),
-            //     textAlign: TextAlign.center,
-            //   ),
-            //   background: Image.asset(
-            //     'assets/reimburse.png', // Replace with your background image asset
-            //     fit: BoxFit.cover,
-            //   ),
-            // ),
              flexibleSpace: Stack(
               children: [
                 const Positioned(

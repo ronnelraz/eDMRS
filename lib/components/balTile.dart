@@ -62,7 +62,7 @@ class _BalTileState extends State<BalTile> {
                 color: widget.balanceColor,
                 fontSize: widget.balanceSize,
                 fontFamily: 'Urbanist',
-                fontWeight: FontWeight.w100,
+                fontWeight: FontWeight.w900,
               ),
             ),
           ],
