@@ -4,6 +4,7 @@ import 'dart:convert';
 import 'dart:developer';
 import 'package:flutter/services.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:panara_dialogs/panara_dialogs.dart';
 import 'package:pull_to_refresh/pull_to_refresh.dart';
 import 'package:shimmer/shimmer.dart';
 import 'package:welfare_claim_system/API/api_service.dart';
@@ -242,19 +243,18 @@ class _MenuState extends State<Menu> {
                 ),
               ),
             ),
-      
-      
+
             ],
           ),
           leading: buildImage('assets/logo.png', 40, 40, Alignment.centerRight), // Icon
           actions: [
-          IconButton(
-            icon: Icon(widget.isDarkMode ? Icons.nights_stay : Icons.wb_sunny),
-            color: widget.isDarkMode
-                ? const Color.fromARGB(255, 37, 37, 37)
-                : Colors.yellow[600],
-            onPressed: widget.toggleTheme,
-          ),
+          // IconButton(
+          //   icon: Icon(widget.isDarkMode ? Icons.nights_stay : Icons.wb_sunny),
+          //   color: widget.isDarkMode
+          //       ? const Color.fromARGB(255, 37, 37, 37)
+          //       : Colors.yellow[600],
+          //   onPressed: widget.toggleTheme,
+          // ),
           TextButton(
             onPressed: () {
               logout(context);
@@ -382,7 +382,7 @@ Widget buildFourColumnGrid(BoxConstraints constraints, double cardWidth, int cro
   double screenWidth = constraints.maxWidth;
   double sidePadding = (screenWidth > 802) ? (screenWidth - 802) / 2 : 16; // Adjust the 802 as needed
   double cardWidth = (screenWidth - sidePadding * 2 - (4 - 1) * 10) / 4; // 4 columns and 10 spacing
-  final iconSize = screenWidth < 802 ? 90.0 : 100.0;
+  final iconSize = screenWidth < 802 ? 70.0 : 100.0;
 
   return Padding(
     padding: EdgeInsets.symmetric(horizontal: sidePadding, vertical: 5),
@@ -405,21 +405,27 @@ Widget buildFourColumnGrid(BoxConstraints constraints, double cardWidth, int cro
                     highlightColor: Colors.blue.withOpacity(0.5),
                     onTap: () {
                      if (index == 0) {
-                      alert(
-                        "IMPORTANT NOTICE",
-                        "This accredited hospital request form is specifically designed for employees who have availed the hospitalization benefit at our affiliated hospitals. Please do not use this form for your Medical Expense Reimbursement.",
+                      PanaraConfirmDialog.showAnimatedGrow(
                         context,
-                        onConfirm: () {
+                        barrierDismissible: false,
+                        title: "IMPORTANT NOTICE",
+                        message: "This accredited hospital request form is specifically designed for employees who have availed the hospitalization benefit at our affiliated hospitals. Please do not use this form for your Medical Expense Reimbursement.",
+                        confirmButtonText: "Ok",
+                        cancelButtonText: "Cancel",
+                        onTapCancel: () {
+                          Navigator.pop(context);
+                        },
+                        onTapConfirm: () {
                           Navigator.of(context, rootNavigator: true).pop();
                           if(loadBalanceData){
                             Navigator.of(context).push(
                               PageRouteBuilder(
-                                transitionDuration: const Duration(seconds: 1),
+                                 transitionDuration: const Duration(seconds: 1),
                                 reverseTransitionDuration: const Duration(seconds: 1),
                                 pageBuilder: (context, animation, secondaryAnimation) {
                                   final curvedAnimation = CurvedAnimation(
                                     parent: animation,
-                                    curve: const Interval(0.1, 0.1, curve: Curves.linear),
+                                    curve: const Interval(0.1, 1, curve: Curves.linear),
                                   );
 
                                   return FadeTransition(
@@ -442,23 +448,28 @@ Widget buildFourColumnGrid(BoxConstraints constraints, double cardWidth, int cro
                              //  Navigator.pushNamed(context, '/Admission');
                           }
 
-                            
-
-                         
                         },
+                        panaraDialogType: PanaraDialogType.normal,
                       );
+                 
                     }
                     else if(index == 1){
-                       alert(
-                        "Welfare Claim Procedure:",
-                        """1. Fill-up welfare claim form and attach supporting documents
+                       PanaraConfirmDialog.showAnimatedGrow(
+                        context,
+                        barrierDismissible: false,
+                        title:  "Welfare Claim Procedure",
+                        message: """1. Fill-up welfare claim form and attach supporting documents
 2. Submit documents to HR Dept. for checking
 3. Retrieve documents from HR Dept. and have it approved by supervisor.
 4. Park document at SAP system for payment
 5. Submit approved park document to Accounting Department.""",
-                        context,
-                        onConfirm: () {
-                          Navigator.of(context, rootNavigator: true).pop();
+                        confirmButtonText: "Ok",
+                        cancelButtonText: "Cancel",
+                        onTapCancel: () {
+                          Navigator.pop(context);
+                        },
+                        onTapConfirm: () {
+                           Navigator.of(context, rootNavigator: true).pop();
                           if(loadBalanceData){
                             Navigator.of(context).push(
                               PageRouteBuilder(
@@ -467,7 +478,7 @@ Widget buildFourColumnGrid(BoxConstraints constraints, double cardWidth, int cro
                                 pageBuilder: (context, animation, secondaryAnimation) {
                                   final curvedAnimation = CurvedAnimation(
                                     parent: animation,
-                                    curve: const Interval(0.1, 0.1, curve: Curves.linear),
+                                    curve: const Interval(0.1, 1, curve: Curves.linear),
                                   );
 
                                   return FadeTransition(
@@ -489,8 +500,11 @@ Widget buildFourColumnGrid(BoxConstraints constraints, double cardWidth, int cro
                             );
                              //  Navigator.pushNamed(context, '/Admission');
                           }
+
                         },
+                        panaraDialogType: PanaraDialogType.normal,
                       );
+           
                      
                     }
                     if (index == 1) {

@@ -40,8 +40,8 @@ dependencies:
   pull_to_refresh: ^2.0.0
   shimmer: ^3.0.0
   cached_network_image: ^3.3.1
- 
-
+  panara_dialogs: ^0.1.5
+  
   
 
 dev_dependencies:

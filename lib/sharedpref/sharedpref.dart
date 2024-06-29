@@ -35,6 +35,13 @@ Future<bool> saveEmployeeInfo(Map<String, String> employeeInfo) async {
 }
 
 
+Future<String?> getBUCode() async {
+  SharedPreferences prefs = await SharedPreferences.getInstance();
+  String? buCode = prefs.getString(BU_CODE);
+  return buCode;
+}
+
+
 Future<Map<String, String>> getEmployeeInfo() async {
   SharedPreferences prefs = await SharedPreferences.getInstance();
   Map<String, String> employeeInfo = {};

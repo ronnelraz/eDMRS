@@ -66,6 +66,12 @@ class _CustomTextFieldState extends State<CustomTextField> {
       focusNode: widget.focusNode,
       decoration: InputDecoration(
         labelText: widget.labelText,
+        labelStyle: TextStyle(
+          fontSize: 18, 
+          color: Colors.black,
+          fontWeight: FontWeight.w900,
+          inherit: true
+        ),
         contentPadding: const EdgeInsets.only(top: 12.0,left: 10.0),
         constraints: BoxConstraints(maxHeight: height * 0.065, maxWidth: width),
         filled: true,

@@ -13,6 +13,7 @@ import 'package:art_sweetalert/art_sweetalert.dart';
 import 'package:localstorage/localstorage.dart';
 import 'package:location/location.dart';
 import 'package:nominatim_geocoding/nominatim_geocoding.dart';
+import 'package:panara_dialogs/panara_dialogs.dart';
 import 'package:toastification/toastification.dart';
 import 'package:encrypt/encrypt.dart' as encrypt;
 
@@ -180,24 +181,57 @@ void Pages(BuildContext context, String page){
 }
 
 
+
+void errorMessage(String title, String message,BuildContext context) {
+  ScaffoldMessenger.of(context).showSnackBar(
+    SnackBar(
+      backgroundColor: Colors.orange, // Customize background color as needed
+      content: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisSize: MainAxisSize.min,
+        children: <Widget>[
+          Text(title, style: TextStyle(fontWeight: FontWeight.bold)),
+          SizedBox(height: 4),
+          Text(message),
+        ],
+      ),
+      duration: Duration(seconds: 5), // Adjust duration as needed
+      behavior: SnackBarBehavior.floating,
+      action: SnackBarAction(
+        label: 'Close',
+        textColor: Colors.black,
+        onPressed: () {
+          ScaffoldMessenger.of(context).hideCurrentSnackBar();
+        },
+      ),
+    ),
+  );
+}
+
+
 void logout(BuildContext context){
-    alert(
-    icon: 'assets/icon_toast/question.svg',
-     colorIcon: Colors.blue[200],
-    "Logout",
-    "Are you sure you want logout?", 
-    context,
-    onConfirm: () async {
-    bool saved = await setLoginStatus(false);
+     PanaraConfirmDialog.showAnimatedGrow(
+      context,
+      barrierDismissible: false,
+      title: "Logout",
+      message: "Are you sure you want to sign out?",
+      confirmButtonText: "Confirm",
+      cancelButtonText: "Cancel",
+      onTapCancel: () {
+        Navigator.pop(context);
+      },
+      onTapConfirm: () async {
+        bool saved = await setLoginStatus(false);
       if (saved) {
         print('outout status saved successfully.');
       } else {
         print('Failed to save logout status.');
       }
-        // intent(context, MyHomePage(title: App.title, toggleTheme: widget.toggleTheme, isDarkMode: widget.isDarkMode),'/');
-          Navigator.pushNamed(context, '/');
-    
-    });
+        // ignore: use_build_context_synchronously
+        Navigator.pushNamed(context, '/');
+      },
+      panaraDialogType: PanaraDialogType.warning,
+    );
 }
 
 
@@ -376,6 +410,29 @@ void alert(String title, String msg, BuildContext context, {Function? onConfirm,
   );
 }
 
+
+String convertDateFormat(String inputDate) {
+ 
+  List<String> dateParts = inputDate.split('/');
+
+  // Ensure there are three parts (MM, dd, YYYY)
+  if (dateParts.length != 3) {
+    return ''; // Invalid format handling
+  }
+
+  // Extract parts
+  int month = int.tryParse(dateParts[0]) ?? 0; // Month (MM)
+  int day = int.tryParse(dateParts[1]) ?? 0;   // Day (dd)
+  int year = int.tryParse(dateParts[2]) ?? 0;  // Year (YYYY)
+
+  // Create DateTime object
+  DateTime dateTime = DateTime(year, month, day);
+
+  // Format DateTime to YYYY-MM-dd
+  String formattedDate = '${dateTime.year}-${dateTime.month.toString().padLeft(2, '0')}-${dateTime.day.toString().padLeft(2, '0')}';
+
+  return formattedDate;
+}
 
 void DialogSelectArea(String title, String msg, BuildContext context, List<String> items, {String? initialItem, Function? onConfirm}) {
   String? selectedValue = initialItem;

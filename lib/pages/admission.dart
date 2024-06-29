@@ -1,7 +1,11 @@
 
 import 'package:card_loading/card_loading.dart';
-import 'package:welfare_claim_system/API/api_service.dart';
+import 'package:panara_dialogs/panara_dialogs.dart';
+import 'package:welfare_claim_system/API/API_Hospital.dart';
+import 'package:welfare_claim_system/API/API_MedicalNeeds.dart';
 import 'package:welfare_claim_system/components/custom_rich_text.dart';
+import 'package:welfare_claim_system/model/hospitals.dart';
+import 'package:welfare_claim_system/model/medicalneed.dart';
 import 'package:welfare_claim_system/sharedpref/sharedpref.dart';
 import 'package:flutter/material.dart';
 import '../components/config.dart';
@@ -14,8 +18,6 @@ import '../components/custom_button.dart';
 import 'package:file_picker/file_picker.dart';
 import 'dart:convert';
 import 'dart:developer';
-
-import '../components/loading.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
 
 
@@ -24,13 +26,17 @@ class Admission extends StatefulWidget {
   final bool isDarkMode;
   final String title;
   final String subTitle;
+  final String welfareSubCode;
+  final bool isDependent;
 
   const Admission({
     super.key, 
     required this.toggleTheme, 
     required this.isDarkMode,
     required this.title,
-    required this.subTitle
+    required this.subTitle,
+    required this.welfareSubCode,
+    required this.isDependent
     });
 
   @override
@@ -62,21 +68,31 @@ class _AdmissionState extends State<Admission> {
 
   final TextEditingController syntom = TextEditingController();
   final FocusNode syntomFocus = FocusNode();
-  late String getHospital = "";
 
-  String _selectedFiles = "";
+  final TextEditingController dependent = TextEditingController();
+  final FocusNode dependentFocus = FocusNode();
+ 
+
+  // String _selectedFiles = "";
 
    Map<String, String> _employeeInfo = {};
-   bool _isLoading = true;
-   bool _isLoadingScreen = true;
+  //  bool _isLoading = true;
+  //  bool _isLoadingScreen = true;
 
-   List<String> HOSPITAL_LNAME = [];
-   List<String> hospital_code = [];
-   List<String> HOSPITAL_SNAME = [];
-   String uploadFile_name = "";
-   String uploadFile = "";
-   bool _isLoadings = true;
-   
+  //  String uploadFile_name = "";
+  //  String uploadFile = "";
+  //  bool _isLoadings = true;
+
+
+  List<HospitalsItem> hospitalsItem = [];
+  bool isloadHospital = true;
+  String selectedHospitalCode = "";
+  String selectedHospitalName = "";
+
+   List<MedicalNeedItem> medicalNeeds = [];
+   bool isLoadData = true;
+   String selectedMedicalNeedsID = "";
+   String selectedMedicalNeedsName = "";
 
 
    @override
@@ -84,63 +100,62 @@ class _AdmissionState extends State<Admission> {
     super.initState();
      _loadEmployeeInfo();
       dataLoadFunction();
-       _loadHospital();
-  
+       loadHospitals();
+       loadMedicalNeeds();
   }
 
-   Future<void> _loadHospital() async {
-    try {
-      var response = await hospital('getHospital');
-      if (response.statusCode == 200) {
-        Map<String, dynamic> responseData = json.decode(response.body);
-        bool success = responseData['success'];
+  @override
+  void dispose() {
+        empNameFocus.dispose();
+        departmentFocus.dispose();
+        positionFocus.dispose();
+        buFocus.dispose();
+        admitdateFocus.dispose();
+        syntomFocus.dispose();
+         medicalNeeds = [];
+         hospitalsItem = [];
+        super.dispose();
+  }
 
-        if (success) {
-          List<dynamic> data = responseData['data'];
-          List<String> _hospital_code = data.map((item) => item['hospital_code'].toString()).toList();
-          List<String> _HOSPITAL_LNAME = data.map((item) => item['HOSPITAL_LNAME'].toString()).toList();
-          List<String> _HOSPITAL_SNAME = data.map((item) => item['HOSPITAL_SNAME'].toString()).toList();
-          setState(() {
-            hospital_code = _hospital_code;
-            HOSPITAL_LNAME = _HOSPITAL_LNAME;
-            HOSPITAL_SNAME = _HOSPITAL_SNAME;
+  
 
-            _isLoadings = false;
-          });
-        } else {
-          print('Login not successful. Response data: ${response.body}');
-          setState(() {
-            _isLoadings = false;
-          });
-        }
-      } else {
-        print('Login failed: ${response.statusCode} ${response.body}');
-        setState(() {
-          _isLoadings = false;
-        });
-      }
-    } catch (e) {
-      print('An error occurred: $e');
-      setState(() {
-        _isLoadings = false;
-      });
+ Future<void> loadMedicalNeeds() async {
+    bool success = await medicalneeds((update) {
+      setState(update);
+    }, medicalNeeds, isLoadData);
+    if (success) {
+      log("Data loaded successfully");
+      isLoadData = false;
+    } else {
+      log("Failed to load data");
+       isLoadData = false;
     }
   }
 
+  Future<void> loadHospitals() async {
+    bool success = await hospitalList((update) {
+      setState(update);
+    }, hospitalsItem, isloadHospital);
+    if (success) {
+      log("Data loaded successfully");
+      isloadHospital = false;
+    } else {
+      log("Failed to load data");
+       isloadHospital = false;
+    }
+  }
+  
+
+
 
    dataLoadFunction() async {
-    setState(() {
-      _isLoadingScreen = true; // your loader has started to load
-    });
-   
-    await Future.delayed(const Duration(seconds: 3));
+  
+    await Future.delayed(const Duration(seconds: 0));
 
     Map<String, String> info = await getEmployeeInfo();
 
     setState(() {
       _employeeInfo = info;
-      _isLoadingScreen = false; 
-
       emp_name.text = _employeeInfo[EMPL_NAME] ?? '';
       department.text = _employeeInfo[DEPARTMENT] ?? '';
       position.text = _employeeInfo[POSITION] ?? '';
@@ -154,22 +169,12 @@ class _AdmissionState extends State<Admission> {
     Map<String, String> info = await getEmployeeInfo();
     setState(() {
       _employeeInfo = info;
-      _isLoading = false;
     });
   }
 
 
 
-    @override
-  void dispose() {
-    empNameFocus.dispose();
-    departmentFocus.dispose();
-    positionFocus.dispose();
-    buFocus.dispose();
-    admitdateFocus.dispose();
-    syntomFocus.dispose();
-    super.dispose();
-  }
+
 
   final ScrollController _scrollController = ScrollController();
     bool _keyboardVisible = false;
@@ -178,12 +183,14 @@ class _AdmissionState extends State<Admission> {
   @override
   Widget build(BuildContext context) {
     return   Scaffold(
+      backgroundColor: Colors.blue,
       appBar: AppBar(
-        backgroundColor: widget.isDarkMode ? const Color.fromARGB(255, 25, 25, 25) :  Colors.white,
+        backgroundColor: Colors.blue,
         automaticallyImplyLeading: false, // Disable automatic back button
         leading: Row(
           children: <Widget>[
             IconButton(
+              color: Colors.white,
               icon: const Icon(Icons.arrow_back),
               onPressed: () {
                 // Navigator.pushNamed(context, '/Menu');
@@ -199,28 +206,29 @@ class _AdmissionState extends State<Admission> {
             Hero(
               tag: widget.title,
               child: Text(
+                
                 widget.title,
-                style: const TextStyle(fontSize: 19, fontWeight: FontWeight.w700),
+                style: const TextStyle(fontSize: 19, fontWeight: FontWeight.w700, color: Colors.white),
               ),
             ),
             Hero(
               tag: widget.subTitle,
               child: Text(
                 widget.subTitle,
-                style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w400),
+                style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w400,color: Colors.white),
               ),
             ),
           ],
         ),
         // leading: buildImage('assets/menu/admission.png', 40, 40, Alignment.centerRight),
           actions: [
-          Padding(
-            padding: const EdgeInsets.all(8.0), // Adjust the margin as needed
-            child: IconButton(
-              icon: Icon(widget.isDarkMode ? Icons.nights_stay : Icons.wb_sunny),
-              onPressed: widget.toggleTheme,
-            ),
-          ),
+          // Padding(
+          //   padding: const EdgeInsets.all(8.0), // Adjust the margin as needed
+          //   child: IconButton(
+          //     icon: Icon(widget.isDarkMode ? Icons.nights_stay : Icons.wb_sunny),
+          //     onPressed: widget.toggleTheme,
+          //   ),
+          // ),
           Padding(
             padding: const EdgeInsets.all(8.0), // Adjust the margin as needed
             child: Row(
@@ -236,15 +244,15 @@ class _AdmissionState extends State<Admission> {
                         BoxFit.scaleDown,
                         width: 18,
                         height: 18,
-                        color: widget.isDarkMode ? Colors.white : Colors.black,
+                        color:  Colors.white,
                       ),
                       const SizedBox(width: 5),
-                      Text(
+                      const Text(
                         'Logout',
                         style: TextStyle(
                           fontSize: 14,
                           fontWeight: FontWeight.bold,
-                          color: widget.isDarkMode ? Colors.white : Colors.black,
+                          color:  Colors.white,
                         ),
                       ),
                     ],
@@ -257,220 +265,291 @@ class _AdmissionState extends State<Admission> {
       ),
       body: Container(
          height: MediaQuery.of(context).size.height,
-         color: widget.isDarkMode ? Color.fromARGB(255, 47, 47, 47) :  Colors.white,
+         color:  Colors.blue,
         child: Padding(
-          padding: const EdgeInsets.only(right:16.0, left: 16.0 ),
-          child: Form(
-            key: _formKey,
-            child: ListView(
-              controller: _scrollController,
-              reverse: false,
-              shrinkWrap: true,
-              children: [
-                 SizedBox(height: 30),
-                CustomTextField(
-                  labelText: 'Request Date',
-                  customerRadius: 10.0,
-                  controller: request_date,
-                  readonly: true,
-                  hintText: "Request Date",
-                  cursorColor: const Color.fromRGBO(43, 42, 42, 1),
+          padding: const EdgeInsets.only(right:0.0, left: 0.0 ),
+          child: Container(
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: const BorderRadius.only(
+                  topLeft: Radius.circular(20.0),
+                  topRight: Radius.circular(20.0),
                 ),
-                // Other form fields
-                SizedBox(height: 20),
-                CustomTextField(
-                  readonly: true,
-                  labelText: 'Employee Name',
-                  customerRadius: 10.0,
-                  controller: emp_name,
-                  focusNode: empNameFocus,
-                  cursorColor: const Color.fromRGBO(43, 42, 42, 1),
-                ),
-                // Employee Name Field
-                  SizedBox(height: 20),
-                // Business Unit Field
-                CustomTextField(
-                  readonly: true,
-                  labelText: 'Business Unit',
-                  customerRadius: 10.0,
-                  controller: bu,
-                  focusNode: buFocus,
-                  cursorColor: const Color.fromRGBO(43, 42, 42, 1),
-                ),
-                SizedBox(height: 20),
-                // Department Field
-               CustomTextField(
-                readonly: true,
-                  labelText: 'Department',
-                  customerRadius: 10.0,
-                  controller: department,
-                  focusNode: departmentFocus,
-                  cursorColor: const Color.fromRGBO(43, 42, 42, 1),
-                ),
-                SizedBox(height: 20),
-                // Position Field
-                 CustomTextField(
-                  readonly: true,
-                  labelText: 'Position',
-                  customerRadius: 10.0,
-                  controller: position,
-                  focusNode: positionFocus,
-                  cursorColor: const Color.fromRGBO(43, 42, 42, 1),
-                ),
-              
-                SizedBox(height: 20),
-                // Name of Hospital Field (Using CustomDropdown)
-                _isLoading ?
-                  CardLoading(
-                    height: 25,
-                    borderRadius: BorderRadius.all(Radius.circular(13)),
-                    width: MediaQuery.of(context).size.width,
-                    margin: EdgeInsets.only(top: 8),
-                  )
-                : CustomDropdown<String>.search(
-                    hintText: 'Name of Hospital',
-                    items: HOSPITAL_LNAME,
-                    excludeSelected: false,
-                    decoration: CustomDropdownDecoration(
-                      expandedFillColor: widget.isDarkMode ? Color.fromARGB(255, 68, 68, 68) : const Color.fromARGB(255, 255, 255, 255),
-                      closedFillColor: widget.isDarkMode ? const Color.fromARGB(255, 68, 68, 68) : Colors.white,
-                      
-                      closedBorder: Border.all( // Using BoxBorder with Border.all for a simple solid border
-                        color: widget.isDarkMode ? Colors.white : Color.fromARGB(255, 189, 189, 189),
-                        width: 1.0,
-                      ),
-                      expandedBorder:  Border.all( // Using BoxBorder with Border.all for a simple solid border
-                        color: widget.isDarkMode ? Colors.white : Color.fromARGB(255, 189, 189, 189),
-                        width: 1.0,
-                      ),
-                      
-                    ),
-                    onChanged: (value) {
-                       setState(() {
-                         getHospital = value ?? '';
-                       });
-                    },
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.2),
+                    spreadRadius: 5, 
+                    blurRadius: 2, 
+                    offset: const Offset(0, 3),
                   ),
-                SizedBox(height: 20),
-                // Admission Date Field
-                  CustomTextField(
-                  labelText: 'Admission Date',
-                  customerRadius: 10.0,
-                  controller: admitdate,
-                  focusNode: admitdateFocus,
-                  cursorColor: const Color.fromRGBO(43, 42, 42, 1),
-                  onTapx: () {
-                    showDatePicker(
-                      context: context,
-                      initialDate: _admissionDate,
-                      firstDate: DateTime.now(),
-                      lastDate: DateTime(2100),
-                    ).then((selectedDate) {
-                      if (selectedDate != null) {
-                        setState(() {
-                          _admissionDate = selectedDate;
-                          admitdate.text = _dateFormat.format(selectedDate);
-                        });
-                      }
-                    });
-                  },
-                ),
-        
-                SizedBox(height: 20),
-                Container(
-                    height: 6 * 24.0,
-                    child: CustomTextArea(
-                      keyboard: TextInputType.multiline,
-                      maxL: 200,
-                      labelText: 'Symptoms',
+                ],
+              ),
+            child: Form(
+              key: _formKey,
+              child: Padding(
+               padding: const EdgeInsets.only(left: 20, right: 20, top: 1),
+                child: ListView(
+                  controller: _scrollController,
+                  reverse: false,
+                  shrinkWrap: true,
+                  children: [
+                     const SizedBox(height: 30),
+                    CustomTextField(
                       customerRadius: 10.0,
-                      controller: syntom,
-                      focusNode: syntomFocus,
+                      controller: request_date,
+                      readonly: true,
+                      hintText: "Request Date",
+                      cursorColor: const Color.fromRGBO(43, 42, 42, 1),
+                    ),
+                    // Other form fields
+                    const SizedBox(height: 20),
+                    CustomTextField(
+                      readonly: true,
+                      customerRadius: 10.0,
+                      controller: emp_name,
+                      focusNode: empNameFocus,
+                      cursorColor: const Color.fromRGBO(43, 42, 42, 1),
+                    ),
+                    // Employee Name Field
+                      const SizedBox(height: 20),
+                    // Business Unit Field
+                    CustomTextField(
+                      readonly: true,
+                      customerRadius: 10.0,
+                      controller: bu,
+                      focusNode: buFocus,
+                      cursorColor: const Color.fromRGBO(43, 42, 42, 1),
+                    ),
+                    const SizedBox(height: 20),
+                    // Department Field
+                   CustomTextField(
+                    readonly: true,
+                      customerRadius: 10.0,
+                      controller: department,
+                      focusNode: departmentFocus,
+                      cursorColor: const Color.fromRGBO(43, 42, 42, 1),
+                    ),
+                    const SizedBox(height: 20),
+                    // Position Field
+                     CustomTextField(
+                      readonly: true,
+                      customerRadius: 10.0,
+                      controller: position,
+                      focusNode: positionFocus,
+                      cursorColor: const Color.fromRGBO(43, 42, 42, 1),
+                    ),
+
+                     const SizedBox(height: 20),
+                      if(widget.isDependent)
+                      CustomTextField(
+                        hintText: "Dependent Name",
+                        customerRadius: 10.0,
+                        controller: dependent,
+                        focusNode: dependentFocus,
+                        cursorColor: const Color.fromRGBO(43, 42, 42, 1),
+                      ),
+                      if(widget.isDependent)
+                       const SizedBox(height: 20),
+                    
+
+
+                    isloadHospital ?
+                      CardLoading(
+                        height: 25,
+                        borderRadius: const BorderRadius.all(Radius.circular(13)),
+                        width: MediaQuery.of(context).size.width,
+                        margin: const EdgeInsets.only(top: 8),
+                      )
+                    : CustomDropdown<String>.search(
+                        hintText: 'Name of Hospital',
+                        items: hospitalsItem.map((e) => e.hospitalfname).toList(), 
+                        excludeSelected: false,
+                        decoration: CustomDropdownDecoration(
+                          expandedFillColor: widget.isDarkMode ? Color.fromARGB(255, 68, 68, 68) : const Color.fromARGB(255, 255, 255, 255),
+                          closedFillColor: widget.isDarkMode ? const Color.fromARGB(255, 68, 68, 68) : Colors.white,
+                          
+                          closedBorder: Border.all( // Using BoxBorder with Border.all for a simple solid border
+                            color: widget.isDarkMode ? Colors.white : Color.fromARGB(255, 189, 189, 189),
+                            width: 1.0,
+                          ),
+                          expandedBorder:  Border.all( // Using BoxBorder with Border.all for a simple solid border
+                            color: widget.isDarkMode ? Colors.white : Color.fromARGB(255, 189, 189, 189),
+                            width: 1.0,
+                          ),
+                          
+                        ),
+                        onChanged: (value) {
+                           setState(() {
+                              int selectedIndex = hospitalsItem.indexWhere((element) => element.hospitalfname == value);
+                              selectedHospitalName = value!;
+                              selectedHospitalCode = hospitalsItem[selectedIndex].hospitalcode;
+                              log('Selected value: $value, Index: $selectedIndex, code: $selectedHospitalCode');
+                           });
+                        },
+                      ),
+                      
+                     const SizedBox(height: 20),
+                    // Name of Hospital Field (Using CustomDropdown)
+                    isLoadData ?
+                      CardLoading(
+                        height: 25,
+                        borderRadius: const BorderRadius.all(Radius.circular(13)),
+                        width: MediaQuery.of(context).size.width,
+                        margin: const EdgeInsets.only(top: 8),
+                      )
+                    : CustomDropdown<String>.search(
+                        hintText: 'Medical Needs',
+                        items: medicalNeeds.map((e) => e.medname).toList(), 
+                        excludeSelected: false,
+                        decoration: CustomDropdownDecoration(
+                          expandedFillColor: widget.isDarkMode ? Color.fromARGB(255, 68, 68, 68) : const Color.fromARGB(255, 255, 255, 255),
+                          closedFillColor: widget.isDarkMode ? const Color.fromARGB(255, 68, 68, 68) : Colors.white,
+                          
+                          closedBorder: Border.all( // Using BoxBorder with Border.all for a simple solid border
+                            color: widget.isDarkMode ? Colors.white : Color.fromARGB(255, 189, 189, 189),
+                            width: 1.0,
+                          ),
+                          expandedBorder:  Border.all( // Using BoxBorder with Border.all for a simple solid border
+                            color: widget.isDarkMode ? Colors.white : Color.fromARGB(255, 189, 189, 189),
+                            width: 1.0,
+                          ),
+                          
+                        ),
+                        onChanged: (value) {
+                           setState(() {
+                           selectedMedicalNeedsID = value ?? '';
+                           int selectedIndex = medicalNeeds.indexWhere((element) => element.medname == value);
+                           selectedMedicalNeedsName = value!;
+                           selectedMedicalNeedsID = medicalNeeds[selectedIndex].medcode;
+                            log('Selected value: $value, Index: $selectedIndex, code: $selectedMedicalNeedsID');
+
+                           });
+                        },
+                      ),
+
+                    const SizedBox(height: 20),
+                    // Admission Date Field
+                      CustomTextField(
+                      customerRadius: 10.0,
+                      controller: admitdate,
+                       readonly: true,
+                      hintText: 'Admission Date',
+                      focusNode: admitdateFocus,
                       cursorColor: const Color.fromRGBO(43, 42, 42, 1),
                       onTapx: () {
-                          setState(() {
-                                _keyboardVisible = MediaQuery.of(context).viewInsets.bottom > 0;
-                                if (_keyboardVisible) {
-                                  // Scroll to the bottom when the keyboard is shown
-                                  _scrollController.animateTo(
-                                    _scrollController.position.maxScrollExtent,
-                                    duration: Duration(milliseconds: 300),
-                                    curve: Curves.easeOut,
-                                  );
-                                }
-                              });
+                        showDatePicker(
+                          context: context,
+                          initialDate: _admissionDate,
+                          firstDate: DateTime.now(),
+                          lastDate: DateTime(2100),
+                        ).then((selectedDate) {
+                          if (selectedDate != null) {
+                            setState(() {
+                              _admissionDate = selectedDate;
+                              admitdate.text = _dateFormat.format(selectedDate);
+                            });
+                          }
+                        });
                       },
                     ),
-                  ),
-        
-                // SizedBox(height: 20),
-                // if (_selectedFiles.isEmpty)
-                //   CustomButtonWithIcon(
-                //     icon: 'assets/clip.svg',
-                //     label: 'Attach File ',
-                //     onPressed:_pickFiles,
-                //     color: Color.fromARGB(255, 46, 83, 218),
-                //     iconColor: Colors.white,
-                //   ),
-                // SizedBox(height: 20),
-                // if (_selectedFiles.isNotEmpty)
-                // SingleChildScrollView(
-                //   scrollDirection: Axis.horizontal,
-                //   child: Row(
-                //     children: [
-                //       SizedIconButton(
-                //         color: const Color.fromARGB(255, 243, 33, 33),
-                //         icon: Icon(
-                //           Icons.delete,
-                //           color: Colors.white,
-                //           size: 15,
-                //         ),
-                //         onPressed: _remove,
-                //         // onPressed: () {
-                //         //   // 
-                //         // },
-                //       ),
-                //       Text(' Selected Files: ${_selectedFiles}'),
-                //     ],
-                //   ),
-                // ),
-        
-                SizedBox(height: 20),
-                // Save, Submit, and Cancel Buttons
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.end,
-                  children: [
-                    Expanded(
-                      child: Container(
-                        width: MediaQuery.of(context).size.width * 0.25, // Adjust the width as needed
-                        padding: const EdgeInsets.all(8.0),
-                        child: CustomButtonWithIcon(
-                          icon: 'assets/icon_toast/check-circle.svg',
-                          label: 'Submit',
-                          onPressed: saveData,
-                          color: Colors.blue,
-                          iconColor: Colors.white,
-                        ),
-                      ),
-                    ),
-                    Expanded(
-                      child: Container(
-                        width: MediaQuery.of(context).size.width * 0.25, // Adjust the width as needed
-                        padding: const EdgeInsets.all(8.0),
-                        child: CustomButtonWithIcon(
-                          icon: 'assets/icon_toast/circle-xmark.svg',
-                          label: 'Cancel',
-                          onPressed: () async {
-                            Navigator.pushNamed(context, '/Menu');
+                      
+                    SizedBox(height: 20),
+                    Container(
+                        height: 6 * 24.0,
+                        child: CustomTextArea(
+                          keyboard: TextInputType.multiline,
+                          maxL: 200,
+                          hintText: 'Symptoms',
+                          customerRadius: 10.0,
+                          controller: syntom,
+                          focusNode: syntomFocus,
+                          cursorColor: const Color.fromRGBO(43, 42, 42, 1),
+                          onTapx: () {
+                              setState(() {
+                                    _keyboardVisible = MediaQuery.of(context).viewInsets.bottom > 0;
+                                    if (_keyboardVisible) {
+                                      // Scroll to the bottom when the keyboard is shown
+                                      _scrollController.animateTo(
+                                        _scrollController.position.maxScrollExtent,
+                                        duration: Duration(milliseconds: 300),
+                                        curve: Curves.easeOut,
+                                      );
+                                    }
+                                  });
                           },
-                          color: Colors.red,
-                          iconColor: Colors.white,
                         ),
                       ),
-                    ),
+                      
+                    // SizedBox(height: 20),
+                    // if (_selectedFiles.isEmpty)
+                    //   CustomButtonWithIcon(
+                    //     icon: 'assets/clip.svg',
+                    //     label: 'Attach File ',
+                    //     onPressed:_pickFiles,
+                    //     color: Color.fromARGB(255, 46, 83, 218),
+                    //     iconColor: Colors.white,
+                    //   ),
+                    // SizedBox(height: 20),
+                    // if (_selectedFiles.isNotEmpty)
+                    // SingleChildScrollView(
+                    //   scrollDirection: Axis.horizontal,
+                    //   child: Row(
+                    //     children: [
+                    //       SizedIconButton(
+                    //         color: const Color.fromARGB(255, 243, 33, 33),
+                    //         icon: Icon(
+                    //           Icons.delete,
+                    //           color: Colors.white,
+                    //           size: 15,
+                    //         ),
+                    //         onPressed: _remove,
+                    //         // onPressed: () {
+                    //         //   // 
+                    //         // },
+                    //       ),
+                    //       Text(' Selected Files: ${_selectedFiles}'),
+                    //     ],
+                    //   ),
+                    // ),
+                      
+                    SizedBox(height: 20),
+                    // Save, Submit, and Cancel Buttons
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.end,
+                      children: [
+                        Expanded(
+                          child: Container(
+                            width: MediaQuery.of(context).size.width * 0.25, // Adjust the width as needed
+                            padding: const EdgeInsets.all(8.0),
+                            child: CustomButtonWithIcon(
+                              icon: 'assets/icon_toast/check-circle.svg',
+                              label: 'Submit',
+                              onPressed: saveData,
+                              color: Colors.blue,
+                              iconColor: Colors.white,
+                            ),
+                          ),
+                        ),
+                        Expanded(
+                          child: Container(
+                            width: MediaQuery.of(context).size.width * 0.25, // Adjust the width as needed
+                            padding: const EdgeInsets.all(8.0),
+                            child: CustomButtonWithIcon(
+                              icon: 'assets/icon_toast/circle-xmark.svg',
+                              label: 'Cancel',
+                              onPressed: () async {
+                                Navigator.pushNamed(context, '/Menu');
+                              },
+                              color: Colors.red,
+                              iconColor: Colors.white,
+                            ),
+                          ),
+                        ),
+                      ],
+                    )
                   ],
-                )
-              ],
+                ),
+              ),
             ),
           ),
         ),
@@ -487,9 +566,9 @@ class _AdmissionState extends State<Admission> {
       onConfirm: () async {
          setState(() {
           Navigator.of(context).pop();
-          _selectedFiles = "";
-            uploadFile_name = "";
-            uploadFile = "";
+          // _selectedFiles = "";
+          //   uploadFile_name = "";
+          //   uploadFile = "";
         }); 
       });
    
@@ -508,9 +587,9 @@ class _AdmissionState extends State<Admission> {
               String filename = file.name;
               String base64Data = base64Encode(file.bytes!);
               setState(() {
-                 uploadFile_name = filename;
-                 uploadFile = base64Data;
-                _selectedFiles = filename;
+                //  uploadFile_name = filename;
+                //  uploadFile = base64Data;
+                // _selectedFiles = filename;
             });
          
             } else {
@@ -535,9 +614,9 @@ class _AdmissionState extends State<Admission> {
             String filename = file.name;
             log(base64Data);
             setState(() {
-               uploadFile_name = filename;
-               uploadFile = base64Data;
-                _selectedFiles = file.name;
+              //  uploadFile_name = filename;
+              //  uploadFile = base64Data;
+              //   _selectedFiles = file.name;
             });
           } else {
             // User canceled the picker
@@ -552,60 +631,54 @@ class _AdmissionState extends State<Admission> {
 }
   
 
+
   void saveData(){
     String requestDate = request_date.text;
     String empname = emp_name.text;
     String dept = department.text;
-    String hostpital = getHospital.toString();
+    String hostpital = selectedHospitalName;
+    String medical = selectedMedicalNeedsName;
     String pos = position.text;
     String businessUnit = bu.text;
     String admit_date = admitdate.text;
     String synt = syntom.text;
-    String file_name = uploadFile_name;
-    String file_data = uploadFile;
+    String dependents = widget.isDependent ? dependent.text : '';
+    // String file_name = uploadFile_name;
+    // String file_data = uploadFile;
     
     if(empname.isEmpty){
       //  FocusScope.of(con).requestFocus(empNameFocus);
       FocusScope.of(context).requestFocus(empNameFocus);
-       ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Please Enter your full name')),
-      );
-
+      errorMessage("Fullname", "Please Enter your fullname", context);
     }
     else if(dept.isEmpty){
       FocusScope.of(context).requestFocus(departmentFocus);
-      ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Please Enter your Department')),
-      );
+      errorMessage("Department", "Please Enter your Department",context);
     }
     else if(hostpital.isEmpty){
-       ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Please select a hospital')),
-      );
+      errorMessage("Hospital", "Please select a hospital",context);
+    }
+    else if(medical.isEmpty){
+      errorMessage("Medical", "Please select Medical Need",context);
+    }
+    else if(widget.isDependent && dependents.isEmpty){
+      errorMessage("Dependents", "Please Enter Dependent Name",context);
     }
     else if(pos.isEmpty){
        FocusScope.of(context).requestFocus(positionFocus);
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Please enter your position')),
-      );
+       errorMessage("Position", "Please enter your position",context);
     }
     else if(businessUnit.isEmpty){
        FocusScope.of(context).requestFocus(buFocus);
-       ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Please enter your business unit')),
-      );
+       errorMessage("Business Unit", "Please enter your business unit",context);
     }
     else if(admit_date.isEmpty){
        FocusScope.of(context).requestFocus(admitdateFocus);
-       ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Please select admission date')),
-      );
+       errorMessage("Admission Date", "Please select admission date",context);
     }
     else if(synt.isEmpty){
        FocusScope.of(context).requestFocus(syntomFocus);
-        ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('please state your symptoms')),
-        );
+       errorMessage("Symptoms", "Please state your symptoms",context);
     }
     else{
       Map<String, String> userData = {
@@ -613,12 +686,14 @@ class _AdmissionState extends State<Admission> {
         'empname': empname,
         'dept': dept,
         'hostpital': hostpital,
+        'medical': medical,
         'pos': pos,
         'businessUnit': businessUnit,
         'admit_date': admit_date,
         'synt': synt,
-        'file_name': file_name,
-        'file_data': file_data,
+        'hosital_code':selectedHospitalCode,
+        'medical_code':selectedMedicalNeedsID,
+        'dependent': dependents
       };
       showPreviewModal(userData);
     }
@@ -637,7 +712,7 @@ void showPreviewModal(Map<String, String> userData) {
             children: [
               const CustomRichText(
                 textBeforeSpan: '',
-                spanText: 'Employee Details',
+                spanText: 'Employee',
                 spanStyle: TextStyle(
                   fontSize: App.card_textsize,
                   fontWeight: FontWeight.bold,
@@ -652,9 +727,24 @@ void showPreviewModal(Map<String, String> userData) {
               CustomPreviewData(labelText:'Position :',  data: userData['pos'] ?? ''),
               CustomPreviewData(labelText:'Business Unit :',  data: userData['businessUnit'] ?? ''),
               const SizedBox(height: 15),
+              if(widget.isDependent) 
+               const CustomRichText(
+                textBeforeSpan: '',
+                spanText: 'Depdent',
+                spanStyle: TextStyle(
+                  fontSize: App.card_textsize,
+                  fontWeight: FontWeight.bold,
+                ),
+                icon: Icons.family_restroom,
+                iconSize: 18.0,
+                iconColor: Colors.white,
+                bgColor: Color.fromARGB(128, 206, 143, 48),
+              ),
+              CustomPreviewData(labelText:'Dependent Name: ',  data: userData['dependent'] ?? ''),
+               const SizedBox(height: 15),
              const CustomRichText(
                 textBeforeSpan: '',
-                spanText: 'Admission Details',
+                spanText: 'Admission',
                 spanStyle: TextStyle(
                   fontSize: App.card_textsize,
                   fontWeight: FontWeight.bold,
@@ -667,6 +757,7 @@ void showPreviewModal(Map<String, String> userData) {
               CustomPreviewData(labelText:'Request Date :',  data: userData['requestDate'] ?? ''),
               CustomPreviewData(labelText:'Admission Date :',  data: userData['admit_date'] ?? ''),
               CustomPreviewData(labelText:'Hospital :',  data: userData['hostpital'] ?? ''),
+              CustomPreviewData(labelText:'Medical Need :',  data: userData['medical'] ?? ''),
               CustomPreviewData(labelText:'Symptoms :',  data: userData['synt'] ?? ''),
             ],
           ),
@@ -676,19 +767,39 @@ void showPreviewModal(Map<String, String> userData) {
             // icon: 'assets/icon_toast/check-circle.svg',
             label: 'OK',
             onPressed: () async {
-              //  Navigator.pop(context);
-                alert(
-                icon: 'assets/icon_toast/question.svg',
-                colorIcon: Colors.blue[200],
-                "Confirmation",
-                "Are you sure you want to proceed this form?",
-                context,
-                onConfirm: () {
-                    Navigator.of(context, rootNavigator: true).pop();
-                    Navigator.pushNamed(context, '/Menu');
-                  // intent(context, Admission(toggleTheme: widget.toggleTheme, isDarkMode: widget.isDarkMode),'/Admission');
-                },
-              );
+               PanaraConfirmDialog.showAnimatedGrow(
+                  context,
+                  title: "Confirmation",
+                  message: "Are you sure you want to request submit this form?",
+                  confirmButtonText: "Confirm",
+                  cancelButtonText: "Cancel",
+                  onTapCancel: () {
+                    Navigator.pop(context);
+                  },
+                  onTapConfirm: () async {
+                     Map<String, String> info = await getEmployeeInfo();
+                     Map<String, dynamic> payload = {
+                        'document_date': convertDateFormat(userData['requestDate'] ?? ''),
+                        'welfare_type': widget.welfareSubCode,
+                        'med_needs_code': userData['medical_code'] ?? '',
+                        'business_unit': info['BU_CODE'] ?? '',
+                        'department': userData['dept'] ?? '',
+                        'emp_id': info['EMPID'] ?? '',
+                        'emp_name': userData['empname'] ?? '',
+                        'dependent_name': userData['dependent'] ?? '',
+                        'position': userData['pos'] ?? '',
+                        'symptoms': userData['synt'] ?? '',
+                        'hospital_name': selectedHospitalName,
+                        'hospital_code': selectedHospitalCode,
+                    };
+
+                    log(payload.toString());
+                    // Navigator.pop(context);
+                    //  Navigator.of(context, rootNavigator: true).pop();
+                    // Navigator.pushNamed(context, '/Menu');
+                  },
+                  panaraDialogType: PanaraDialogType.normal,
+                );
             },
           
           )

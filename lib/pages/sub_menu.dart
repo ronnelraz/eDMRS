@@ -135,17 +135,37 @@ class _SubmenuState extends State<Submenu> {
             Navigator.of(context).pop();
           },
         ),
-        title: const Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-        ),
-        actions: [
-          IconButton(
-            icon: Icon(widget.isDarkMode ? Icons.nights_stay : Icons.wb_sunny),
-            color: widget.isDarkMode
-                ? const Color.fromARGB(255, 37, 37, 37)
-                : Colors.yellow[600],
-            onPressed: widget.toggleTheme,
+        title: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              FittedBox(
+              fit: BoxFit.scaleDown,
+              child: Text.rich(
+                TextSpan(
+                  children: [
+                    TextSpan(
+                      text: widget.menuType,
+                      style: const TextStyle(
+                        fontSize: 20,
+                        fontWeight: FontWeight.w900,
+                        color: Colors.white
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+
+            ],
           ),
+        actions: [
+          // IconButton(
+          //   icon: Icon(widget.isDarkMode ? Icons.nights_stay : Icons.wb_sunny),
+          //   color: widget.isDarkMode
+          //       ? const Color.fromARGB(255, 37, 37, 37)
+          //       : Colors.yellow[600],
+          //   onPressed: widget.toggleTheme,
+          // ),
           TextButton(
             onPressed: () {
               logout(context);
@@ -189,30 +209,9 @@ class _SubmenuState extends State<Submenu> {
                       bottomRight: Radius.circular(50.0),
                     ),
                   ),
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.start,
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    mainAxisSize: MainAxisSize.max,
-                    children: [
-                      Padding(
-                        padding:
-                            const EdgeInsets.only(left: 30.0, right: 30.0),
-                        child:Text(
-                            widget.menuType,
-                            style: const TextStyle(
-                              color: Colors.white,
-                              fontFamily: 'Urbanist',
-                              fontWeight: FontWeight.w900,
-                              fontSize: 30,
-                              height: 1.2,
-                            ),
-                          )
-                      ),
-                    ],
-                  ),
                 ),
                 Padding(
-                  padding: const EdgeInsets.only(top: 18.0, left: 5, right: 5),
+                  padding: const EdgeInsets.only(left: 0, right: 0),
                   child: Card(
                     elevation: 3,
                     color: widget.isDarkMode
@@ -222,7 +221,7 @@ class _SubmenuState extends State<Submenu> {
                         ? const Color.fromARGB(255, 109, 109, 109)
                         : const Color.fromARGB(255, 67, 67, 67),
                     borderOnForeground: true,
-                    margin: const EdgeInsets.all(20.0),
+                     margin: const EdgeInsets.only(top:10.0,left: 15.0, right:25.0),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(20.0),
                     ),
@@ -411,7 +410,7 @@ class _SubmenuState extends State<Submenu> {
                                       pageBuilder: (context, animation, secondaryAnimation) {
                                         final curvedAnimation = CurvedAnimation(
                                           parent: animation,
-                                          curve: const Interval(0.1, 0.1, curve: Curves.linear),
+                                          curve: const Interval(0.1, 1, curve: Curves.linear),
                                         );
 
                                         return FadeTransition(
@@ -422,22 +421,39 @@ class _SubmenuState extends State<Submenu> {
                                             isDarkMode: widget.isDarkMode,
                                             title: item.sname,
                                             subTitle: item.fname,
+                                            welfareSubCode: item.subCode,
+                                            isDependent: item.subCode == "W002" ? true : false,
                                           ), 
                                         );
                                       },
                                     ),
                                   );
                             }
-                          // Navigator.push(
-                          //   context,
-                          //   MaterialPageRoute(
-                          //     builder: (context) => ReimbursementForm(
-                          //       toggleTheme: widget.toggleTheme,
-                          //       isDarkMode: widget.isDarkMode,
-                          //       reimbursementype: item.fname, // Passing the relevant data
-                          //     ),
-                          //   ),
-                          // );
+                            if(widget.welfareCode == "WG02"){
+                                Navigator.of(context).push(
+                                    PageRouteBuilder(
+                                      transitionDuration: const Duration(seconds: 1),
+                                      reverseTransitionDuration: const Duration(seconds: 1),
+                                      pageBuilder: (context, animation, secondaryAnimation) {
+                                        final curvedAnimation = CurvedAnimation(
+                                          parent: animation,
+                                          curve: const Interval(0.1, 1, curve: Curves.linear),
+                                        );
+
+                                        return FadeTransition(
+                                          opacity: curvedAnimation,
+                                          child: 
+                                          ReimbursementForm(
+                                              toggleTheme: widget.toggleTheme,
+                                              isDarkMode: widget.isDarkMode,
+                                              reimbursementype: item.fname,
+                                          ), 
+                                        );
+                                      },
+                                    ),
+                                  );
+                            }
+                    
                         },
                       );
                     },

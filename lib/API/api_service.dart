@@ -69,7 +69,30 @@ Future<http.Response> getlocation(String url) async {
 }
 
 
-Future<http.Response> hospital(String url) async {
+Future<http.Response> apihospital(String url) async {
+  try {
+    // Combine username and password
+    WidgetsFlutterBinding.ensureInitialized();
+    await initLocalStorage();
+    String encodedCredentials = localStorage.getItem(App.Auth) ?? '';
+    Map<String, String> headers = {
+      'authorization': 'Basic $encodedCredentials'
+    };
+
+    var response = await http.post(
+      Uri.parse(App.baseURLNEW + url),
+      headers: headers,
+    );
+
+    return response;
+  } catch (e) {
+    // Exception occurred during the request
+    print('Error: $e');
+    throw Exception('Failed to post data: $e'); // Throw an exception
+  }
+}
+
+Future<http.Response> api_medicalNeeds(String url) async {
   try {
     // Combine username and password
     WidgetsFlutterBinding.ensureInitialized();

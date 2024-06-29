@@ -94,15 +94,15 @@ class _AreaState extends State<Area> {
     return Scaffold(
       appBar: AppBar(
         automaticallyImplyLeading: false,
-        actions: [
-          Padding(
-            padding: const EdgeInsets.all(8.0), // Adjust the margin as needed
-            child: IconButton(
-              icon: Icon(widget.isDarkMode ? Icons.nights_stay : Icons.wb_sunny),
-              onPressed: widget.toggleTheme,
-            ),
-          ),
-        ],
+        // actions: [
+        //   Padding(
+        //     padding: const EdgeInsets.all(8.0), // Adjust the margin as needed
+        //     child: IconButton(
+        //       icon: Icon(widget.isDarkMode ? Icons.nights_stay : Icons.wb_sunny),
+        //       onPressed: widget.toggleTheme,
+        //     ),
+        //   ),
+        // ],
       ),
       body: Padding(
         padding: const EdgeInsets.only(top: 100.0, left: 32.0, right: 32.0 ),

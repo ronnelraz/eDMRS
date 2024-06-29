@@ -64,6 +64,10 @@ class _CustomTextAreaState extends State<CustomTextArea> {
       style: TextStyle(fontSize: 18, color: textColor), // Change as per your requirements
       focusNode: widget.focusNode,
       decoration: InputDecoration(
+         counterStyle: const TextStyle(
+          color: Colors.white,
+          fontSize: 12
+        ),
         labelText: widget.labelText,
         contentPadding: const EdgeInsets.only(top: 12.0,left: 10.0),
         constraints: BoxConstraints(maxHeight: height * 0.065, maxWidth: width),
