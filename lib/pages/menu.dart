@@ -566,7 +566,7 @@ Widget buildLeftColumn(double cardwidth) {
                   ),
                 ),
                 SizedBox(
-              height: 160,
+              height: 180,
               //constraints: BoxConstraints(maxWidth: 400), // Set the maximum width here
               width: cardwidth, // Set the width here
               child: Stack(
