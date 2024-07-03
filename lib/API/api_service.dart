@@ -200,3 +200,51 @@ Future<http.Response> subMenu(String url, Map<String, dynamic> body) async {
     throw Exception('Failed to post data: $e');
   }
 }
+
+
+Future<http.Response> saveHeader(String url, Map<String, dynamic> body) async {
+  try {
+    WidgetsFlutterBinding.ensureInitialized();
+    await initLocalStorage();
+    String encodedCredentials = localStorage.getItem(App.Auth) ?? '';
+    Map<String, String> headers = {
+      'authorization': 'Basic $encodedCredentials',
+      'Content-Type': 'application/json', // Specify the content type as JSON
+    };
+
+    var response = await http.post(
+      Uri.parse(App.baseURLNEW + url),
+      headers: headers,
+      body: jsonEncode(body), // Encode the body to JSON
+    );
+
+    return response;
+  } catch (e) {
+    print('Error: $e');
+    throw Exception('Failed to post data: $e');
+  }
+}
+
+
+Future<http.Response> api(String url, [Map<String, dynamic>? body]) async {
+  try {
+    WidgetsFlutterBinding.ensureInitialized();
+    await initLocalStorage();
+    String encodedCredentials = localStorage.getItem(App.Auth) ?? '';
+    Map<String, String> headers = {
+      'authorization': 'Basic $encodedCredentials',
+      'Content-Type': 'application/json', // Specify the content type as JSON
+    };
+
+    var response = await http.post(
+      Uri.parse(App.baseURLNEW + url),
+      headers: headers,
+      body: body != null ? jsonEncode(body) : null, // Encode the body to JSON if it's not null
+    );
+
+    return response;
+  } catch (e) {
+    print('Error: $e');
+    throw Exception('Failed to post data: $e');
+  }
+}

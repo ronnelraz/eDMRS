@@ -322,7 +322,7 @@ class LoginPage extends State<MyHomePage> {
                                     }
                                     FocusScope.of(context).requestFocus(passwordFocus);
                                   } else {
-                                    loading(context, "Please wait...",widget.isDarkMode);
+                                    loading(context, "Please wait...");
                                    
                                     try {
                                       var response = await getlogin('login', enteredUsername, enteredPassword);

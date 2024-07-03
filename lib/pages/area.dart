@@ -233,24 +233,7 @@ class _AreaState extends State<Area> {
                         WidgetsFlutterBinding.ensureInitialized();
                         await initLocalStorage();
                         String? user = localStorage.getItem(App.Auth);
-
-                      
-                        alert(
-                          "Logout",
-                          "Are you sure you want logout?", 
-                          context,
-                          onConfirm: () async {
-                          bool saved = await setLoginStatus(false);
-                            if (saved) {
-                              print('outout status saved successfully.');
-                            } else {
-                              print('Failed to save logout status.');
-                            }
-                              // intent(context, MyHomePage(title: App.title, toggleTheme: widget.toggleTheme, isDarkMode: widget.isDarkMode),'/');
-                               Navigator.pushNamed(context, '/');
-                          
-                          });
-                        
+                        logout(context);
                       },
                       color: widget.isDarkMode ? Colors.grey : Colors.blueGrey,
                       iconColor: Colors.white,

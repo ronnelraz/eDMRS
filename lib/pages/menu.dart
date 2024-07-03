@@ -127,7 +127,7 @@ class _MenuState extends State<Menu> {
   Future<void> loadBalance() async {
     try {
       Map<String, String> body = {
-        'year': '2024',
+        'year': getCurrentYear().toString(),
         'empid': _employeeInfo['EMPID'] ?? '',
       };
 
@@ -566,7 +566,7 @@ Widget buildLeftColumn(double cardwidth) {
                   ),
                 ),
                 SizedBox(
-              height: 180,
+              height:  MediaQuery.of(context).size.height * 0.2,
               //constraints: BoxConstraints(maxWidth: 400), // Set the maximum width here
               width: cardwidth, // Set the width here
               child: Stack(

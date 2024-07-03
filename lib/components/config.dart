@@ -292,35 +292,54 @@ Future<void> notification_toast(BuildContext context, String title ,String desc,
 
 
 Widget image(bool isDarkMode) {
-  return SpinKitDoubleBounce(
+  return SpinKitFadingCircle(
     color: isDarkMode ? Colors.white : Colors.blue[700],
     size: 50.0,
   );
 }
 
-void loading(BuildContext context, String message, bool isDarkMode) {
+void loading(BuildContext context, String message, {bool isDarkMode = false}) {
   showDialog(
     context: context,
     barrierDismissible: false,
-    barrierColor: Color.fromARGB(139, 0, 0, 0),
+    barrierColor: const Color.fromARGB(139, 0, 0, 0),
     builder: (BuildContext context) {
-      return AlertDialog(
-        backgroundColor: isDarkMode ? Color.fromARGB(255, 70, 69, 69) : Color.fromRGBO(255, 255, 255, 1), // Semi-transparent black color
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            image(isDarkMode), 
-            SizedBox(height: 20),
-            Text(
-              message,
-              style: TextStyle(color: isDarkMode ? Colors.white : Colors.black),
+      return Center(
+        child: Container(
+          margin: const EdgeInsets.symmetric(horizontal: 130.0), // Adjust the margin as needed
+          child: Card(
+            color: isDarkMode ? const Color.fromARGB(255, 70, 69, 69) : const Color.fromRGBO(255, 255, 255, 1),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(16.0),
             ),
-          ],
+            child: Padding(
+              padding: const EdgeInsets.all(20.0),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  image(isDarkMode),
+                  const SizedBox(height: 20),
+                  Text(
+                    message,
+                    style: TextStyle(color: isDarkMode ? Colors.white : Colors.black),
+                  ),
+                ],
+              ),
+            ),
+          ),
         ),
       );
     },
   );
 }
+
+int getCurrentYear() {
+  DateTime now = DateTime.now();
+  int currentYear = now.year;
+  return currentYear;
+}
+
+
 
 
 void closeDialog(BuildContext context) {

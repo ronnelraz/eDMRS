@@ -1,9 +1,14 @@
 
 import 'package:card_loading/card_loading.dart';
 import 'package:panara_dialogs/panara_dialogs.dart';
+import 'package:toastification/toastification.dart';
+import 'package:welfare_claim_system/API/API_Depedents.dart';
 import 'package:welfare_claim_system/API/API_Hospital.dart';
 import 'package:welfare_claim_system/API/API_MedicalNeeds.dart';
+import 'package:welfare_claim_system/API/API_SaveHeader.dart';
+import 'package:welfare_claim_system/API/api_service.dart';
 import 'package:welfare_claim_system/components/custom_rich_text.dart';
+import 'package:welfare_claim_system/model/dependents.dart';
 import 'package:welfare_claim_system/model/hospitals.dart';
 import 'package:welfare_claim_system/model/medicalneed.dart';
 import 'package:welfare_claim_system/sharedpref/sharedpref.dart';
@@ -28,6 +33,8 @@ class Admission extends StatefulWidget {
   final String subTitle;
   final String welfareSubCode;
   final bool isDependent;
+  final String balanceCode;
+  final String balance;
 
   const Admission({
     super.key, 
@@ -36,7 +43,9 @@ class Admission extends StatefulWidget {
     required this.title,
     required this.subTitle,
     required this.welfareSubCode,
-    required this.isDependent
+    required this.isDependent,
+    required this.balanceCode,
+    required this.balance
     });
 
   @override
@@ -69,8 +78,6 @@ class _AdmissionState extends State<Admission> {
   final TextEditingController syntom = TextEditingController();
   final FocusNode syntomFocus = FocusNode();
 
-  final TextEditingController dependent = TextEditingController();
-  final FocusNode dependentFocus = FocusNode();
  
 
   // String _selectedFiles = "";
@@ -94,6 +101,10 @@ class _AdmissionState extends State<Admission> {
    String selectedMedicalNeedsID = "";
    String selectedMedicalNeedsName = "";
 
+   List<DependentsItem> dependents = [];
+   bool isLoadDependent = true;
+   String selectedDependentName = "";
+
 
    @override
   void initState() {
@@ -102,6 +113,7 @@ class _AdmissionState extends State<Admission> {
       dataLoadFunction();
        loadHospitals();
        loadMedicalNeeds();
+       loadDependents();
   }
 
   @override
@@ -114,12 +126,14 @@ class _AdmissionState extends State<Admission> {
         syntomFocus.dispose();
          medicalNeeds = [];
          hospitalsItem = [];
+         dependents = [];
         super.dispose();
   }
 
   
 
  Future<void> loadMedicalNeeds() async {
+  
     bool success = await medicalneeds((update) {
       setState(update);
     }, medicalNeeds, isLoadData);
@@ -131,6 +145,39 @@ class _AdmissionState extends State<Admission> {
        isLoadData = false;
     }
   }
+
+   Future<void> loadDependents() async {
+    if(widget.isDependent){
+          Map<String, String> info = await getEmployeeInfo();
+          Map<String, dynamic> payload = {
+              'emp_ID': info['EMPID'] ?? ''
+          };
+
+          bool success = await apidependents((update) {
+            setState(update);
+          }, dependents,payload,isLoadDependent);
+          if (success) {
+            log("Data loaded successfully dependent");
+            isLoadDependent = false;
+          } else {
+              PanaraInfoDialog.showAnimatedGrow(
+                  context,
+                  title: "Dependent",
+                  message: "Sorry, no dependent is set up in your account. Please Contact HR to add dependents to continue.",
+                  buttonText: "Ok",
+                  onTapDismiss: () {
+                    //  Navigator.pushNamed(context, '/Menu');
+                    Navigator.of(context).pop();
+                    Navigator.of(context).pop();
+                  },
+                  panaraDialogType: PanaraDialogType.error,
+                );
+            isLoadDependent = false;
+       }
+    }
+  }
+
+  
 
   Future<void> loadHospitals() async {
     bool success = await hospitalList((update) {
@@ -340,18 +387,44 @@ class _AdmissionState extends State<Admission> {
                     ),
 
                      const SizedBox(height: 20),
-                      if(widget.isDependent)
-                      CustomTextField(
-                        hintText: "Dependent Name",
-                        customerRadius: 10.0,
-                        controller: dependent,
-                        focusNode: dependentFocus,
-                        cursorColor: const Color.fromRGBO(43, 42, 42, 1),
-                      ),
-                      if(widget.isDependent)
-                       const SizedBox(height: 20),
+                      if(widget.isDependent) ...[
+                           isLoadDependent ?
+                            CardLoading(
+                              height: 25,
+                              borderRadius: const BorderRadius.all(Radius.circular(13)),
+                              width: MediaQuery.of(context).size.width,
+                              margin: const EdgeInsets.only(top: 8),
+                            )
+                          : CustomDropdown<String>.search(
+                              hintText: 'Select Dependent',
+                              items: dependents.map((e) => '${e.dependentName} - ${e.dependentRelation}').toList(), 
+                              excludeSelected: false,
+                              decoration: CustomDropdownDecoration(
+                                expandedFillColor: widget.isDarkMode ? Color.fromARGB(255, 68, 68, 68) : const Color.fromARGB(255, 255, 255, 255),
+                                closedFillColor: widget.isDarkMode ? const Color.fromARGB(255, 68, 68, 68) : Colors.white,
+                                
+                                closedBorder: Border.all( // Using BoxBorder with Border.all for a simple solid border
+                                  color: widget.isDarkMode ? Colors.white : Color.fromARGB(255, 189, 189, 189),
+                                  width: 1.0,
+                                ),
+                                expandedBorder:  Border.all( // Using BoxBorder with Border.all for a simple solid border
+                                  color: widget.isDarkMode ? Colors.white : Color.fromARGB(255, 189, 189, 189),
+                                  width: 1.0,
+                                ),
+                                
+                              ),
+                              onChanged: (value) {
+                                List<String> name = value!.split(' - ');
+                                String getname = name[0];
+                                setState(() {
+                                    log('Selected value: $getname');
+                                    selectedDependentName =  getname;
+                                });
+                              },
+                            ),
+                            const SizedBox(height: 20),
+                      ],
                     
-
 
                     isloadHospital ?
                       CardLoading(
@@ -427,31 +500,31 @@ class _AdmissionState extends State<Admission> {
                         },
                       ),
 
-                    const SizedBox(height: 20),
-                    // Admission Date Field
-                      CustomTextField(
-                      customerRadius: 10.0,
-                      controller: admitdate,
-                       readonly: true,
-                      hintText: 'Admission Date',
-                      focusNode: admitdateFocus,
-                      cursorColor: const Color.fromRGBO(43, 42, 42, 1),
-                      onTapx: () {
-                        showDatePicker(
-                          context: context,
-                          initialDate: _admissionDate,
-                          firstDate: DateTime.now(),
-                          lastDate: DateTime(2100),
-                        ).then((selectedDate) {
-                          if (selectedDate != null) {
-                            setState(() {
-                              _admissionDate = selectedDate;
-                              admitdate.text = _dateFormat.format(selectedDate);
-                            });
-                          }
-                        });
-                      },
-                    ),
+                    // const SizedBox(height: 20),
+                    // // Admission Date Field
+                    //   CustomTextField(
+                    //   customerRadius: 10.0,
+                    //   controller: admitdate,
+                    //    readonly: true,
+                    //   hintText: 'Admission Date',
+                    //   focusNode: admitdateFocus,
+                    //   cursorColor: const Color.fromRGBO(43, 42, 42, 1),
+                    //   onTapx: () {
+                    //     showDatePicker(
+                    //       context: context,
+                    //       initialDate: _admissionDate,
+                    //       firstDate: DateTime.now(),
+                    //       lastDate: DateTime(2100),
+                    //     ).then((selectedDate) {
+                    //       if (selectedDate != null) {
+                    //         setState(() {
+                    //           _admissionDate = selectedDate;
+                    //           admitdate.text = _dateFormat.format(selectedDate);
+                    //         });
+                    //       }
+                    //     });
+                    //   },
+                    // ),
                       
                     SizedBox(height: 20),
                     Container(
@@ -536,7 +609,7 @@ class _AdmissionState extends State<Admission> {
                             padding: const EdgeInsets.all(8.0),
                             child: CustomButtonWithIcon(
                               icon: 'assets/icon_toast/circle-xmark.svg',
-                              label: 'Cancel',
+                              label: 'Exit',
                               onPressed: () async {
                                 Navigator.pushNamed(context, '/Menu');
                               },
@@ -640,9 +713,9 @@ class _AdmissionState extends State<Admission> {
     String medical = selectedMedicalNeedsName;
     String pos = position.text;
     String businessUnit = bu.text;
-    String admit_date = admitdate.text;
+    // String admit_date = admitdate.text;
     String synt = syntom.text;
-    String dependents = widget.isDependent ? dependent.text : '';
+    String dependents = widget.isDependent ? selectedDependentName : '';
     // String file_name = uploadFile_name;
     // String file_data = uploadFile;
     
@@ -672,15 +745,16 @@ class _AdmissionState extends State<Admission> {
        FocusScope.of(context).requestFocus(buFocus);
        errorMessage("Business Unit", "Please enter your business unit",context);
     }
-    else if(admit_date.isEmpty){
-       FocusScope.of(context).requestFocus(admitdateFocus);
-       errorMessage("Admission Date", "Please select admission date",context);
-    }
+    // else if(admit_date.isEmpty){
+    //    FocusScope.of(context).requestFocus(admitdateFocus);
+    //    errorMessage("Admission Date", "Please select admission date",context);
+    // }
     else if(synt.isEmpty){
        FocusScope.of(context).requestFocus(syntomFocus);
        errorMessage("Symptoms", "Please state your symptoms",context);
     }
     else{
+      syntomFocus.unfocus();
       Map<String, String> userData = {
         'requestDate': requestDate,
         'empname': empname,
@@ -689,7 +763,7 @@ class _AdmissionState extends State<Admission> {
         'medical': medical,
         'pos': pos,
         'businessUnit': businessUnit,
-        'admit_date': admit_date,
+        // 'admit_date': admit_date,
         'synt': synt,
         'hosital_code':selectedHospitalCode,
         'medical_code':selectedMedicalNeedsID,
@@ -703,7 +777,7 @@ class _AdmissionState extends State<Admission> {
 void showPreviewModal(Map<String, String> userData) {
   showDialog(
     context: context,
-    builder: (BuildContext context) {
+    builder: (BuildContext dialogcontext) {
       return AlertDialog(
         title: const Text('Preview Request Form'),
         content: SingleChildScrollView(
@@ -726,22 +800,28 @@ void showPreviewModal(Map<String, String> userData) {
               CustomPreviewData(labelText:'Department :',  data: userData['dept'] ?? ''),
               CustomPreviewData(labelText:'Position :',  data: userData['pos'] ?? ''),
               CustomPreviewData(labelText:'Business Unit :',  data: userData['businessUnit'] ?? ''),
-              const SizedBox(height: 15),
-              if(widget.isDependent) 
-               const CustomRichText(
-                textBeforeSpan: '',
-                spanText: 'Depdent',
-                spanStyle: TextStyle(
-                  fontSize: App.card_textsize,
-                  fontWeight: FontWeight.bold,
+              
+              if (widget.isDependent) ...[
+                const SizedBox(height: 15),
+                const CustomRichText(
+                  textBeforeSpan: '',
+                  spanText: 'Dependent',
+                  spanStyle: TextStyle(
+                    fontSize: App.card_textsize,
+                    fontWeight: FontWeight.bold,
+                  ),
+                  icon: Icons.family_restroom,
+                  iconSize: 18.0,
+                  iconColor: Colors.white,
+                  bgColor: Color.fromARGB(128, 206, 143, 48),
                 ),
-                icon: Icons.family_restroom,
-                iconSize: 18.0,
-                iconColor: Colors.white,
-                bgColor: Color.fromARGB(128, 206, 143, 48),
-              ),
-              CustomPreviewData(labelText:'Dependent Name: ',  data: userData['dependent'] ?? ''),
-               const SizedBox(height: 15),
+                CustomPreviewData(
+                  labelText: 'Dependent Name: ',
+                  data: userData['dependent'] ?? '',
+                ),
+                const SizedBox(height: 15),
+              ],
+
              const CustomRichText(
                 textBeforeSpan: '',
                 spanText: 'Admission',
@@ -755,7 +835,7 @@ void showPreviewModal(Map<String, String> userData) {
                 bgColor: Color.fromARGB(128, 22, 104, 255),
               ),
               CustomPreviewData(labelText:'Request Date :',  data: userData['requestDate'] ?? ''),
-              CustomPreviewData(labelText:'Admission Date :',  data: userData['admit_date'] ?? ''),
+              // CustomPreviewData(labelText:'Admission Date :',  data: userData['admit_date'] ?? ''),
               CustomPreviewData(labelText:'Hospital :',  data: userData['hostpital'] ?? ''),
               CustomPreviewData(labelText:'Medical Need :',  data: userData['medical'] ?? ''),
               CustomPreviewData(labelText:'Symptoms :',  data: userData['synt'] ?? ''),
@@ -767,6 +847,8 @@ void showPreviewModal(Map<String, String> userData) {
             // icon: 'assets/icon_toast/check-circle.svg',
             label: 'OK',
             onPressed: () async {
+              Navigator.of(dialogcontext).pop();
+              
                PanaraConfirmDialog.showAnimatedGrow(
                   context,
                   title: "Confirmation",
@@ -777,23 +859,79 @@ void showPreviewModal(Map<String, String> userData) {
                     Navigator.pop(context);
                   },
                   onTapConfirm: () async {
+                     
                      Map<String, String> info = await getEmployeeInfo();
                      Map<String, dynamic> payload = {
                         'document_date': convertDateFormat(userData['requestDate'] ?? ''),
                         'welfare_type': widget.welfareSubCode,
                         'med_needs_code': userData['medical_code'] ?? '',
-                        'business_unit': info['BU_CODE'] ?? '',
-                        'department': userData['dept'] ?? '',
+                        'bussiness_unit': info['BU_CODE'] ?? '',
+                        'dept_name': userData['dept'] ?? '',
                         'emp_id': info['EMPID'] ?? '',
                         'emp_name': userData['empname'] ?? '',
                         'dependent_name': userData['dependent'] ?? '',
                         'position': userData['pos'] ?? '',
                         'symptoms': userData['synt'] ?? '',
                         'hospital_name': selectedHospitalName,
-                        'hospital_code': selectedHospitalCode,
+                        'hos_code': selectedHospitalCode,
+                        'balance_code': widget.balanceCode,
+                        'balance': widget.balance
                     };
-
                     log(payload.toString());
+
+                     try {
+                          final result = await apisaveHeader(payload,context,widget.isDarkMode);
+                          bool success = result['success'];
+                          String message = result['message'];
+
+                          if (success) {
+                            log('Success: $message');
+                            Navigator.pop(context);
+                             await notification_toast(
+                              // ignore: use_build_context_synchronously
+                              context,
+                              message,
+                              "Submitted successfully!",
+                              toastificationType: ToastificationType.success,
+                              toastificationStyle: ToastificationStyle.fillColored,
+                              descTextColor: Colors.white,
+                              icon: const Icon(Icons.info),
+                            );
+
+                          } else {
+                            log('Failed: $message');
+                             Navigator.pop(context);
+                            await notification_toast(
+                              // ignore: use_build_context_synchronously
+                              context,
+                              message,
+                              "The entry you are trying to add already exists in the system.",
+                              toastificationType: ToastificationType.error,
+                              toastificationStyle: ToastificationStyle.fillColored,
+                              descTextColor: Colors.white,
+                              icon: const Icon(Icons.info),
+                            );
+                          }
+                        } catch (error) {
+                          log('Error: $error');
+                           Navigator.pop(context);
+                            await notification_toast(
+                              // ignore: use_build_context_synchronously
+                              context,
+                              "Submit",
+                              error.toString(),
+                              toastificationType: ToastificationType.info,
+                              toastificationStyle: ToastificationStyle.fillColored,
+                              descTextColor: Colors.white,
+                              icon: const Icon(Icons.info),
+                            );
+                       }
+
+                      
+
+                    
+
+                    // log(payload.toString());
                     // Navigator.pop(context);
                     //  Navigator.of(context, rootNavigator: true).pop();
                     // Navigator.pushNamed(context, '/Menu');

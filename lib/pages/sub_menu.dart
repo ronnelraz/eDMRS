@@ -423,6 +423,10 @@ class _SubmenuState extends State<Submenu> {
                                             subTitle: item.fname,
                                             welfareSubCode: item.subCode,
                                             isDependent: item.subCode == "W002" ? true : false,
+                                            balanceCode: item.balCode,
+                                            balance: item.balCode == "BN01" ? widget.balanceAmount[0] : 
+                                                    (item.balCode == "BN02" ? widget.balanceAmount[1] : widget.balanceAmount[2]),
+                                            
                                           ), 
                                         );
                                       },
