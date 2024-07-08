@@ -1,4 +1,3 @@
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import '../components/config.dart';
 
@@ -31,18 +30,18 @@ class ReimburstmentTile extends StatelessWidget {
                 ),
                 child: InkWell(
                     borderRadius: BorderRadius.circular(20.0),
-                    splashColor: Colors.blue.withOpacity(0.5),
-                    highlightColor: Colors.blue.withOpacity(0.5),
+                    splashColor: colorBlue.withOpacity(0.5),
+                    highlightColor: colorBlue.withOpacity(0.5),
                      onTap: () {
                       onPressed();
                     },
                     child: Card(
                       elevation: App.elevation,
-                      color: isDarkMode ? const Color.fromARGB(255, 81, 81, 81) : Color.fromARGB(255, 255, 255, 255),
-                      shadowColor: isDarkMode ? const Color.fromARGB(255, 109, 109, 109) : const Color.fromARGB(255, 67, 67, 67),
+                      color: colorWhite,
+                      shadowColor: colorDarkBlue,
                       shape:  RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(20.0),
-                        side: const BorderSide(width: 0.8, color: Colors.blue)
+                        side: const BorderSide(width: 1, color: colorDarkBlue)
                       ),
                       child: Padding(
                         padding: const EdgeInsets.all(10.0),
@@ -59,7 +58,7 @@ class ReimburstmentTile extends StatelessWidget {
                                   text,
                                   style: TextStyle(
                                     color: isDarkMode ? const Color.fromARGB(255, 255, 255, 255) : const Color.fromARGB(255, 0, 0, 0),
-                                    fontSize: 18.0,
+                                    fontSize: 19.0,
                                     fontWeight: FontWeight.w900,
                                     fontFamily: 'Urbanist',
                                   ),
@@ -71,7 +70,7 @@ class ReimburstmentTile extends StatelessWidget {
                                   subTitle,
                                   style: TextStyle(
                                     color: isDarkMode ? const Color.fromARGB(255, 255, 255, 255) : const Color.fromARGB(255, 0, 0, 0),
-                                    fontSize: 15.0,
+                                    fontSize: 17.0,
                                     fontWeight: FontWeight.w200,
                                     fontFamily: 'Urbanist',
                                   ),

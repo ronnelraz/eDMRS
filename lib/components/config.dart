@@ -45,6 +45,7 @@ class App {
   static const double card_height = 170.0;
   static const double card_textsize = 13;
   static const double elevation = 1.0;
+  
 
 
 static const String welfareNote = '''
@@ -63,6 +64,12 @@ Welfare Claim Procedure:
   static const String Auth = "Auth";
  
 }
+
+const Color colorGreen = Color(0xFF00964E);
+const Color colorBlue = Color(0xFF01539F);
+const Color colorWhite = Color(0xFFFFFFFF);
+const Color colorDarkBlue = Color(0xFF2E4A70);
+const Color colorOrange = Color(0xFFCF8A40);
 
 
 String getGreeting() {

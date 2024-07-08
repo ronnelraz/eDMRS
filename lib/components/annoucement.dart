@@ -12,8 +12,7 @@ class AnnoucementTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      width: double.infinity, // adjust width as needed
+    return Container( // adjust width as needed
       height: 210, // adjust height as needed
       child:  CustomCarouselSlider(
         items: itemList,
@@ -22,9 +21,10 @@ class AnnoucementTile extends StatelessWidget {
         width: MediaQuery.of(context).size.width * .9,
         autoplay: true,
         animationCurve: Curves.ease,
-        autoplayDuration: const Duration(seconds: 8),
-        animationDuration: const Duration(seconds: 2),
-        indicatorPosition: IndicatorPosition.insidePicture,
+        autoplayDuration: const Duration(seconds: 3),
+        animationDuration: const Duration(milliseconds: 300),
+        // animationDuration: const Duration(seconds: 0),
+        // indicatorPosition: IndicatorPosition.insidePicture,
       ),
     );
   }

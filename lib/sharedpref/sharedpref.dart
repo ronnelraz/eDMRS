@@ -20,17 +20,34 @@ const String BU_CODE = "BU_CODE";
 const String BUSINESS_UNIT = "BUSINESS_UNIT";
 const String EMAIL = "EMAIL";
 const String CONTACT_NUMBER = "CONTACT_NUMBER";
+const String DEP_ID = "DEP_ID";
+const String ACCOUNT_TYPE = "ACCOUNT_TYPE";
+const String REGULAR = "REGULAR";
 
 const String LOCATION_CODE = "LOCATION_CODE";
 const String LOCATION_NAME = "LOCATION_NAME";
 const String LOCATION_BU_CODE = "LOCATION_BU_CODE";
 
 
-Future<bool> saveEmployeeInfo(Map<String, String> employeeInfo) async {
+Future<bool> saveEmployeeInfo(Map<String, dynamic> employeeInfo) async {
   SharedPreferences prefs = await SharedPreferences.getInstance();
-  employeeInfo.forEach((key, value) async {
-    await prefs.setString(key, value);
-  });
+  
+  for (var entry in employeeInfo.entries) {
+    if (entry.value is String) {
+      await prefs.setString(entry.key, entry.value);
+    } else if (entry.value is bool) {
+      await prefs.setBool(entry.key, entry.value);
+    } else if (entry.value is int) {
+      await prefs.setInt(entry.key, entry.value);
+    } else if (entry.value is double) {
+      await prefs.setDouble(entry.key, entry.value);
+    } else if (entry.value is List<String>) {
+      await prefs.setStringList(entry.key, entry.value);
+    } else {
+      throw UnsupportedError('Unsupported value type: ${entry.value.runtimeType}');
+    }
+  }
+  
   return true;
 }
 
@@ -41,6 +58,18 @@ Future<String?> getBUCode() async {
   return buCode;
 }
 
+Future<String?> getLocationCode() async {
+  SharedPreferences prefs = await SharedPreferences.getInstance();
+  String? locCode = prefs.getString(LOCATION_CODE);
+  return locCode;
+}
+
+Future<bool> ifRegular() async {
+  SharedPreferences prefs = await SharedPreferences.getInstance();
+  final bool? regular = prefs.getBool(REGULAR);
+  return regular ?? false; // Return false if regular is null
+}
+
 
 Future<Map<String, String>> getEmployeeInfo() async {
   SharedPreferences prefs = await SharedPreferences.getInstance();
@@ -48,7 +77,7 @@ Future<Map<String, String>> getEmployeeInfo() async {
 
   // Add all the keys you want to retrieve here
   List<String> keys = [
-    EMPID, EMPL_NAME, DEPARTMENT, COUNTRY, POSITION, BU_CODE, BUSINESS_UNIT, EMAIL, CONTACT_NUMBER
+    EMPID, EMPL_NAME, DEPARTMENT, COUNTRY, POSITION, BU_CODE, BUSINESS_UNIT, EMAIL, CONTACT_NUMBER,LOCATION_CODE,LOCATION_NAME
   ];
 
   for (String key in keys) {

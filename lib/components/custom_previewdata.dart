@@ -24,7 +24,7 @@ class _CustomPreviewDataState extends State<CustomPreviewData> {
           widget.labelText,
           style: const TextStyle(
             fontWeight: FontWeight.bold,
-            fontSize: 15,
+            fontSize: 18,
           ),
         ),
         const SizedBox(width: 2), // Add some space between label and value
@@ -32,7 +32,7 @@ class _CustomPreviewDataState extends State<CustomPreviewData> {
           child: Text(
             widget.data,
             style: const TextStyle(
-              fontSize: 15,
+              fontSize: 16,
             ),
             overflow: TextOverflow.clip, // Ensure text wraps to the next line
             softWrap: true,

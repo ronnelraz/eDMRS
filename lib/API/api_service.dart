@@ -123,7 +123,7 @@ Future<http.Response> balance(String url, Map<String, dynamic> body) async {
     String encodedCredentials = localStorage.getItem(App.Auth) ?? '';
     Map<String, String> headers = {
       'authorization': 'Basic $encodedCredentials',
-      'Content-Type': 'application/json', // Specify the content type as JSON
+      'Content-Type': 'application/json', 
     };
 
     var response = await http.post(

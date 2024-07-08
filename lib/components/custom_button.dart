@@ -34,18 +34,19 @@ class CustomButtonWithIcon extends StatelessWidget {
         : SizedBox(); // Use SizedBox if icon is null
 
     return Material(
-      elevation: 5,
-      borderRadius: BorderRadius.circular(brnRadius ?? 10.00),
+      elevation: 1,
+      borderRadius: BorderRadius.circular(brnRadius ?? 8.00),
       child: Ink(
+        height: 45,
         decoration: BoxDecoration(
           color: color,
-          borderRadius: BorderRadius.circular(brnRadius ?? 10.00),
+          borderRadius: BorderRadius.circular(brnRadius ?? 8.00),
         ),
         child: InkWell(
           onTap: () {
             onPressed();
           },
-          borderRadius: BorderRadius.circular(brnRadius ?? 10.00),
+          borderRadius: BorderRadius.circular(brnRadius ?? 8.00),
           child: Container(
             padding: EdgeInsets.all(10),
             child: Row(
@@ -58,7 +59,7 @@ class CustomButtonWithIcon extends StatelessWidget {
                   label,
                   style: TextStyle(
                     color: iconColor,
-                    fontSize: 13,
+                    fontSize: 18,
                     fontWeight: FontWeight.bold,
                   ),
                 ),

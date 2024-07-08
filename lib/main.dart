@@ -150,9 +150,21 @@ class LoginPage extends State<MyHomePage> {
             items = data.map((item) {
               return CarouselItem(
                 image: NetworkImage(item['path']),
+                 boxDecoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    begin: FractionalOffset.bottomCenter,
+                    end: FractionalOffset.topCenter,
+                    colors: [
+                      Colors.black.withOpacity(.5),
+                      Colors.black.withOpacity(.1),
+                    ],
+                    stops: const [0.0, 1.0],
+                  ),
+                ),
                 title: item['title'],
                 titleTextStyle: const TextStyle(fontSize: 12, color: Colors.white),
                 leftSubtitle: item['sub_title'],
+                
                 onImageTap: (i) {},
               );
             }).toList();
@@ -184,19 +196,7 @@ class LoginPage extends State<MyHomePage> {
   Widget build(BuildContext context) {
     return Scaffold(
       resizeToAvoidBottomInset: false,
-      appBar: AppBar(
-        // title: Text(widget.title),
-        automaticallyImplyLeading: false,
-        // actions: [
-        // Padding(
-        //     padding: const EdgeInsets.all(8.0), // Adjust the margin as needed
-        //     child: IconButton(
-        //       icon: Icon(widget.isDarkMode ? Icons.nights_stay : Icons.wb_sunny),
-        //       onPressed: widget.toggleTheme,
-        //     ),
-        //   ),
-        // ],
-      ),
+  
       body: SingleChildScrollView(
         child: Padding(
           padding: EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom),
@@ -204,9 +204,7 @@ class LoginPage extends State<MyHomePage> {
             children: [
               Padding(
                 padding: const EdgeInsets.only(
-                  top: 10,
-                  left: 40,
-                  right: 40
+                  top: 80,
                 ),
                 child: isLoading
                     ? Center(child: SpinKitDoubleBounce(
@@ -282,6 +280,9 @@ class LoginPage extends State<MyHomePage> {
                               child: CustomButtonWithIcon(
                                 // icon: 'assets/login.svg',
                                 label: 'Login',
+                                  color: colorBlue,
+                                iconColor: Colors.white,
+                                brnRadius: 8.0,
                                 onPressed: () async {
                                   String enteredUsername = username.text;
                                   String enteredPassword = password.text;
@@ -350,7 +351,7 @@ class LoginPage extends State<MyHomePage> {
                                           String contactNumber = employee['CONTACT_NUMBER'];
               
                                           // Create a map for each employee
-                                          Map<String, String> employeeInfo = {
+                                          Map<String, dynamic> employeeInfo = {
                                             EMPID: empId,
                                             EMPL_NAME: name,
                                             DEPARTMENT: department,
@@ -359,7 +360,10 @@ class LoginPage extends State<MyHomePage> {
                                             BU_CODE: bu_code,
                                             BUSINESS_UNIT: businessUnit,
                                             EMAIL: email,
-                                            CONTACT_NUMBER: contactNumber
+                                            CONTACT_NUMBER: contactNumber,
+                                            DEP_ID: employee['DEP_ID'],
+                                            ACCOUNT_TYPE: employee['ACCOUNT_TYPE'],
+                                            REGULAR:  employee['REGULAR']
                                           };
               
                                           // Save employeeInfo
@@ -445,8 +449,7 @@ class LoginPage extends State<MyHomePage> {
               
                                   }
                                 },
-                                color: widget.isDarkMode ? Color.fromARGB(255, 12, 167, 71) : App.primaryButton,
-                                iconColor: Colors.white,
+                              
                               ),
                             ),
                             const SizedBox(height: 50),

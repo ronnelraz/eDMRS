@@ -62,7 +62,7 @@ class _CustomTextFieldState extends State<CustomTextField> {
       keyboardType: widget.keyboard,
       obscureText: _obscureText,
       readOnly: widget.readonly?? false,
-      style: TextStyle(fontSize: 18, color: textColor), // Change as per your requirements
+      style: TextStyle(fontSize: 20, color: textColor), // Change as per your requirements
       focusNode: widget.focusNode,
       decoration: InputDecoration(
         labelText: widget.labelText,
@@ -77,7 +77,7 @@ class _CustomTextFieldState extends State<CustomTextField> {
         filled: true,
         fillColor: fillColor, // Change as per your requirements
         hintText: widget.hintText,
-        hintStyle: TextStyle(fontSize: 14, color: textColor.withOpacity(0.6)), // Change as per your requirements
+        hintStyle: TextStyle(fontSize: 20, color: textColor.withOpacity(0.6)), // Change as per your requirements
         prefixIcon: widget.prefixIcon,
         suffixIcon: widget.isPassword!
             ? GestureDetector(
@@ -103,7 +103,7 @@ class _CustomTextFieldState extends State<CustomTextField> {
           borderRadius: BorderRadius.circular(widget.customerRadius ?? 10.0),
           borderSide: BorderSide(
             color: focusedBorderColor, // Change the color when focused
-            width: 1.0,
+            width: 2.0,
           ),
         ),
         enabledBorder: OutlineInputBorder(

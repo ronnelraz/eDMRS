@@ -55,7 +55,25 @@ class _MenuState extends State<Menu> {
   void initState() {
     super.initState();
     _initializeData();
+   initializeEmployeeStatus();
+
+  
   }
+
+void initializeEmployeeStatus() async {
+  bool isRegular = await isRegularEmployee();
+  // Use the retrieved status here or set state if needed
+  if (isRegular) {
+    log("Employee is regular.");
+  } else {
+    log("Employee is not regular.");
+  }
+}
+
+Future<bool> isRegularEmployee() async {
+  bool regular = await ifRegular();
+  return regular;
+}
 
  @override
   void dispose() {
@@ -88,6 +106,8 @@ class _MenuState extends State<Menu> {
     }
     _refreshController.loadComplete();
   }
+
+ 
 
   Future<void> _loadEmployeeInfo() async {
     try {
@@ -130,6 +150,7 @@ class _MenuState extends State<Menu> {
         'year': getCurrentYear().toString(),
         'empid': _employeeInfo['EMPID'] ?? '',
       };
+
 
       var response = await balance('getBalance', body);
       if (response.statusCode == 200) {
@@ -214,7 +235,7 @@ class _MenuState extends State<Menu> {
       child: Scaffold(
         backgroundColor: widget.isDarkMode ? Colors.black87 : Colors.white,
         appBar: AppBar(
-           backgroundColor: const Color.fromARGB(255, 64, 113, 187),
+           backgroundColor: const Color.fromARGB(255, 1, 83, 159),
           title: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -246,7 +267,8 @@ class _MenuState extends State<Menu> {
 
             ],
           ),
-          leading: buildImage('assets/logo.png', 40, 40, Alignment.centerRight), // Icon
+          automaticallyImplyLeading:false,
+          // leading: buildImage('assets/logo.png', 40, 40, Alignment.centerRight), // Icon
           actions: [
           // IconButton(
           //   icon: Icon(widget.isDarkMode ? Icons.nights_stay : Icons.wb_sunny),
@@ -286,7 +308,10 @@ class _MenuState extends State<Menu> {
         body: SmartRefresher(
            enablePullDown: true,
           enablePullUp: true,
-          header: const WaterDropHeader(),
+          header: const 	MaterialClassicHeader(
+            backgroundColor: colorBlue,
+            color: colorWhite,
+          ),
           controller: _refreshController,
           onRefresh: _onRefresh,
           onLoading: _onLoading,
@@ -401,56 +426,85 @@ Widget buildFourColumnGrid(BoxConstraints constraints, double cardWidth, int cro
                 padding: const EdgeInsets.all(8.0),
                 child: InkWell(
                     borderRadius: BorderRadius.circular(20.0),
-                    splashColor: Colors.blue.withOpacity(0.5),
-                    highlightColor: Colors.blue.withOpacity(0.5),
-                    onTap: () {
+                    splashColor: colorBlue.withOpacity(0.5),
+                    highlightColor: colorBlue.withOpacity(0.5),
+                    onTap: () async {
                      if (index == 0) {
-                      PanaraConfirmDialog.showAnimatedGrow(
-                        context,
-                        barrierDismissible: false,
-                        title: "IMPORTANT NOTICE",
-                        message: "This accredited hospital request form is specifically designed for employees who have availed the hospitalization benefit at our affiliated hospitals. Please do not use this form for your Medical Expense Reimbursement.",
-                        confirmButtonText: "Ok",
-                        cancelButtonText: "Cancel",
-                        onTapCancel: () {
-                          Navigator.pop(context);
-                        },
-                        onTapConfirm: () {
-                          Navigator.of(context, rootNavigator: true).pop();
-                          if(loadBalanceData){
-                            Navigator.of(context).push(
-                              PageRouteBuilder(
-                                 transitionDuration: const Duration(seconds: 1),
-                                reverseTransitionDuration: const Duration(seconds: 1),
-                                pageBuilder: (context, animation, secondaryAnimation) {
-                                  final curvedAnimation = CurvedAnimation(
-                                    parent: animation,
-                                    curve: const Interval(0.1, 1, curve: Curves.linear),
-                                  );
+                       bool isRegular = await isRegularEmployee();
+                       
 
-                                  return FadeTransition(
-                                    opacity: curvedAnimation,
-                                    child: 
-                                    Submenu(
-                                      toggleTheme: widget.toggleTheme,
-                                      isDarkMode: widget.isDarkMode,
-                                      menuType: Menutitle[index],
-                                      animation: animation,
-                                      empName:  _employeeInfo[EMPL_NAME] ?? '',
-                                      balanceName: _bal_name,
-                                      balanceAmount: _bal_amount,
-                                      welfareCode: 'WG01',
-                                    ), 
+                       if(!isRegular){
+                         PanaraConfirmDialog.showAnimatedGrow(
+                            mounted ? context : context,
+                            barrierDismissible: false,
+                            color: colorDarkBlue,
+                            textColor: colorDarkBlue,
+                            title: "Sorry",
+                            message: "You are not yet a regular employee.",
+                            confirmButtonText: "Ok",
+                            cancelButtonText: "Cancel",
+                            onTapCancel: () {
+                              Navigator.pop(context);
+                            },
+                            onTapConfirm: () {
+                              Navigator.pop(context);
+                            },
+                            panaraDialogType: PanaraDialogType.error,
+                          );
+                       }
+                       else{
+                           PanaraConfirmDialog.showAnimatedGrow(
+                            mounted ? context : context,
+                            barrierDismissible: false,
+                            color: colorDarkBlue,
+                            textColor: colorDarkBlue,
+                            title: "IMPORTANT NOTICE",
+                            message: "This accredited hospital request form is specifically designed for employees who have availed the hospitalization benefit at our affiliated hospitals. Please do not use this form for your Medical Expense Reimbursement.",
+                            confirmButtonText: "Ok",
+                            cancelButtonText: "Cancel",
+                            onTapCancel: () {
+                              Navigator.pop(context);
+                            },
+                            onTapConfirm: () {
+                              Navigator.of(context, rootNavigator: true).pop();
+                                if(loadBalanceData){
+                                  Navigator.of(context).push(
+                                    PageRouteBuilder(
+                                      transitionDuration: const Duration(seconds: 1),
+                                      reverseTransitionDuration: const Duration(seconds: 1),
+                                      pageBuilder: (context, animation, secondaryAnimation) {
+                                        final curvedAnimation = CurvedAnimation(
+                                          parent: animation,
+                                          curve: const Interval(0.1, 1, curve: Curves.linear),
+                                        );
+
+                                        return FadeTransition(
+                                          opacity: curvedAnimation,
+                                          child: 
+                                          Submenu(
+                                            toggleTheme: widget.toggleTheme,
+                                            isDarkMode: widget.isDarkMode,
+                                            menuType: Menutitle[index],
+                                            animation: animation,
+                                            empName:  _employeeInfo[EMPL_NAME] ?? '',
+                                            balanceName: _bal_name,
+                                            balanceAmount: _bal_amount,
+                                            welfareCode: 'WG01',
+                                          ), 
+                                        );
+                                      },
+                                    ),
                                   );
-                                },
-                              ),
+                                  //  Navigator.pushNamed(context, '/Admission');
+                                }
+
+                              },
+                              panaraDialogType: PanaraDialogType.normal,
                             );
-                             //  Navigator.pushNamed(context, '/Admission');
-                          }
+                       }  
+                       
 
-                        },
-                        panaraDialogType: PanaraDialogType.normal,
-                      );
+                     
                  
                     }
                     else if(index == 1){
@@ -512,11 +566,10 @@ Widget buildFourColumnGrid(BoxConstraints constraints, double cardWidth, int cro
                     }
                     },
                     child: Card(
-                      elevation: 4,
-                      color: widget.isDarkMode ? const Color.fromARGB(255, 81, 81, 81) : const Color.fromARGB(255, 255, 255, 255),
+                      color: colorWhite,
                       shape:  RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(20.0),
-                        side: const BorderSide(width: 0.8, color: Colors.blue)
+                        side: const BorderSide(width: 1, color: colorDarkBlue)
                       ),
                       child: Padding(
                         padding: const EdgeInsets.all(18.0),
@@ -558,7 +611,7 @@ Widget buildLeftColumn(double cardwidth) {
               Container(
                   height: 120.0,
                   decoration: const BoxDecoration(
-                    color: Color.fromARGB(255, 64, 113, 187),
+                    color: Color.fromARGB(255, 1, 83, 159),
                     borderRadius: BorderRadius.only(
                       bottomLeft: Radius.circular(50.0),
                       bottomRight: Radius.circular(50.0),
@@ -571,10 +624,10 @@ Widget buildLeftColumn(double cardwidth) {
               width: cardwidth, // Set the width here
               child: Stack(
                 children: [
-                  
+                
                   Card(
                   elevation: 3,
-                  color: widget.isDarkMode ? const Color.fromARGB(255, 81, 81, 81) : Colors.blue[500],
+                  color: colorDarkBlue,
                   shadowColor: widget.isDarkMode ? const Color.fromARGB(255, 109, 109, 109) : const Color.fromARGB(255, 67, 67, 67),
                   borderOnForeground: true,
                   margin: const EdgeInsets.only(top:10.0,left: 15.0, right:25.0),
@@ -663,7 +716,7 @@ Widget buildLeftColumn(double cardwidth) {
                                 mainAxisAlignment: MainAxisAlignment.center,
                                 mainAxisSize: MainAxisSize.min,
                                 children: [
-                                  Hero(
+                                  const Hero(
                                     tag: 'icon-1',
                                     child: CustomIcon(
                                       width: 50.0,
@@ -671,7 +724,7 @@ Widget buildLeftColumn(double cardwidth) {
                                       icon: FontAwesomeIcons.person,
                                       iconSize: 20.0,
                                       iconColor: Colors.white,
-                                      bgColor: Colors.white.withOpacity(0.2),
+                                      bgColor: colorOrange,
                                                             ),
                                   ),
                                     const SizedBox(height: 2,),
@@ -726,7 +779,7 @@ Widget buildLeftColumn(double cardwidth) {
                                 mainAxisAlignment: MainAxisAlignment.center,
                                 mainAxisSize: MainAxisSize.min,
                                 children: [
-                                  Hero(
+                                  const Hero(
                                     tag: 'icon-2',
                                     child: CustomIcon(
                                       width: 50.0,
@@ -734,7 +787,7 @@ Widget buildLeftColumn(double cardwidth) {
                                       icon: Icons.family_restroom_rounded,
                                       iconSize: 20.0,
                                       iconColor: Colors.white,
-                                      bgColor: Colors.white.withOpacity(0.2),
+                                      bgColor: colorOrange,
                                                             ),
                                   ),
                                     _isloadingBal 
@@ -788,7 +841,7 @@ Widget buildLeftColumn(double cardwidth) {
                                 mainAxisAlignment: MainAxisAlignment.center,
                                 mainAxisSize: MainAxisSize.min,
                                 children: [
-                                  Hero(
+                                  const Hero(
                                     tag: 'icon-3',
                                     child: CustomIcon(
                                       width: 50.0,
@@ -796,8 +849,8 @@ Widget buildLeftColumn(double cardwidth) {
                                       icon: FontAwesomeIcons.carBurst,
                                       iconSize: 20.0,
                                       iconColor: Colors.white,
-                                      bgColor: Colors.white.withOpacity(0.2),
-                                                            ),
+                                      bgColor: colorOrange,
+                                    ),
                                   ),
                                     _isloadingBal 
                                     ? 

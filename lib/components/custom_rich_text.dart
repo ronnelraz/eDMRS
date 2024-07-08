@@ -28,14 +28,23 @@ class CustomRichText extends StatelessWidget {
       children: [
         if (icon != null) // Only show the card if an icon is provided
           Card(
-            color: bgColor,
-            elevation: 4,
-            shadowColor: Colors.black26,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(5),
-            ),
-            child: Padding(
+            child: Container(
               padding: const EdgeInsets.all(3.0),
+               decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(8),
+             gradient: const LinearGradient(
+                begin: Alignment.topLeft,  // Adjust the gradient begin point
+                end: Alignment.bottomRight, 
+                stops: [
+                  0.0,
+                  0.7,
+                ],
+                colors: [
+                  Color(0xFF8721F3),
+                  Color(0xFF309CFB),
+                ],
+              )
+            ),
               child: Center(
                 child: Icon(
                   icon,

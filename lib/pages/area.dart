@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:developer';
 
 import 'package:welfare_claim_system/API/api_service.dart';
 import 'package:welfare_claim_system/pages/menu.dart';
@@ -53,7 +54,7 @@ class _AreaState extends State<Area> {
 
         if (success) {
           try {
-              List<dynamic> data = responseData['data'];
+            List<dynamic> data = responseData['data'];
             List<String> locations = data.map((item) => item['location_name'].toString()).toList();
             List<String> location_code = data.map((item) => item['location_code'].toString()).toList();
             List<String> bu_code = data.map((item) => item['bu_code'].toString()).toList();
@@ -170,10 +171,10 @@ class _AreaState extends State<Area> {
                 Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Container(
+                  SizedBox(
                     width: 150, // Set the desired width
                     child: CustomButtonWithIcon(
-                      icon: 'assets/icon_toast/check-circle.svg',
+                      // icon: 'assets/icon_toast/check-circle.svg',
                       label: 'Continue',
                       onPressed: () async {
                         if (_selectedArea != null) {
@@ -190,6 +191,8 @@ class _AreaState extends State<Area> {
                               LOCATION_NAME: _getSelectedLocCode,
                               LOCATION_BU_CODE: _getSeletedLocBuCode
                             };
+
+                            log(location.toString());
 
                             // Save employeeInfo
                             bool success = await saveSelectedLocation(location);
@@ -208,10 +211,10 @@ class _AreaState extends State<Area> {
                               context,
                               "Location Selection Required",
                               "Oops! It seems like you haven't selected a location yet. Please choose one to continue. Thank you!",
-                              toastificationType: ToastificationType.info,
+                              toastificationType: ToastificationType.error,
                               toastificationStyle: ToastificationStyle.fillColored,
                               descTextColor: Colors.white,
-                              icon: const Icon(Icons.info),
+                              icon: const Icon(Icons.error),
                             );
                           } catch (e) {
                             // Handle any errors that might occur during the toast notification
@@ -219,15 +222,15 @@ class _AreaState extends State<Area> {
                           }
                         } 
                       },
-                      color: widget.isDarkMode ? Color.fromARGB(255, 38, 130, 196) : App.primaryButton,
+                      color: colorBlue,
                       iconColor: Colors.white,
                     ),
                   ),
                   SizedBox(width: 20), // Add some spacing between buttons
-                  Container(
+                  SizedBox(
                     width: 150, // Set the desired width
                     child: CustomButtonWithIcon(
-                      icon: 'assets/icon_toast/logout.svg',
+                      // icon: 'assets/icon_toast/logout.svg',
                       label: 'Logout',
                       onPressed: () async {
                         WidgetsFlutterBinding.ensureInitialized();
@@ -235,7 +238,7 @@ class _AreaState extends State<Area> {
                         String? user = localStorage.getItem(App.Auth);
                         logout(context);
                       },
-                      color: widget.isDarkMode ? Colors.grey : Colors.blueGrey,
+                      color: Colors.red,
                       iconColor: Colors.white,
                     ),
                   ),

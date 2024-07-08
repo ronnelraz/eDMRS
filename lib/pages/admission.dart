@@ -162,6 +162,9 @@ class _AdmissionState extends State<Admission> {
           } else {
               PanaraInfoDialog.showAnimatedGrow(
                   context,
+                  color: colorDarkBlue,
+                  textColor: colorDarkBlue,
+                  barrierDismissible: false,
                   title: "Dependent",
                   message: "Sorry, no dependent is set up in your account. Please Contact HR to add dependents to continue.",
                   buttonText: "Ok",
@@ -230,9 +233,9 @@ class _AdmissionState extends State<Admission> {
   @override
   Widget build(BuildContext context) {
     return   Scaffold(
-      backgroundColor: Colors.blue,
+      backgroundColor: colorBlue,
       appBar: AppBar(
-        backgroundColor: Colors.blue,
+        backgroundColor: colorBlue,
         automaticallyImplyLeading: false, // Disable automatic back button
         leading: Row(
           children: <Widget>[
@@ -312,7 +315,7 @@ class _AdmissionState extends State<Admission> {
       ),
       body: Container(
          height: MediaQuery.of(context).size.height,
-         color:  Colors.blue,
+         color:  colorBlue,
         child: Padding(
           padding: const EdgeInsets.only(right:0.0, left: 0.0 ),
           child: Container(
@@ -598,7 +601,7 @@ class _AdmissionState extends State<Admission> {
                               icon: 'assets/icon_toast/check-circle.svg',
                               label: 'Submit',
                               onPressed: saveData,
-                              color: Colors.blue,
+                              color: colorBlue,
                               iconColor: Colors.white,
                             ),
                           ),
@@ -611,7 +614,7 @@ class _AdmissionState extends State<Admission> {
                               icon: 'assets/icon_toast/circle-xmark.svg',
                               label: 'Exit',
                               onPressed: () async {
-                                Navigator.pushNamed(context, '/Menu');
+                                    Navigator.of(context).pop();
                               },
                               color: Colors.red,
                               iconColor: Colors.white,
@@ -794,7 +797,7 @@ void showPreviewModal(Map<String, String> userData) {
                 icon: Icons.person_rounded,
                 iconSize: 18.0,
                 iconColor: Colors.white,
-                bgColor: Color.fromARGB(128, 48, 206, 171),
+                bgColor: Color(0x8030CEAB),
               ),
               CustomPreviewData(labelText:'Employee Name :',  data: userData['empname'] ?? ''),
               CustomPreviewData(labelText:'Department :',  data: userData['dept'] ?? ''),
@@ -846,12 +849,15 @@ void showPreviewModal(Map<String, String> userData) {
          CustomButtonWithIcon(
             // icon: 'assets/icon_toast/check-circle.svg',
             label: 'OK',
+            color: colorBlue,
             onPressed: () async {
               Navigator.of(dialogcontext).pop();
               
                PanaraConfirmDialog.showAnimatedGrow(
                   context,
                   title: "Confirmation",
+                  color: colorDarkBlue,
+                  textColor: colorDarkBlue,
                   message: "Are you sure you want to request submit this form?",
                   confirmButtonText: "Confirm",
                   cancelButtonText: "Cancel",
@@ -875,7 +881,8 @@ void showPreviewModal(Map<String, String> userData) {
                         'hospital_name': selectedHospitalName,
                         'hos_code': selectedHospitalCode,
                         'balance_code': widget.balanceCode,
-                        'balance': widget.balance
+                        'balance': widget.balance,
+                        'location_code': info['LOCATION_NAME']?? ''
                     };
                     log(payload.toString());
 

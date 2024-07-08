@@ -125,7 +125,7 @@ class _SubmenuState extends State<Submenu> {
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
-        backgroundColor: const Color.fromARGB(255, 64, 113, 187),
+        backgroundColor: colorBlue,
         automaticallyImplyLeading: false,
         leading: IconButton(
           tooltip: "Back to menu",
@@ -159,13 +159,6 @@ class _SubmenuState extends State<Submenu> {
             ],
           ),
         actions: [
-          // IconButton(
-          //   icon: Icon(widget.isDarkMode ? Icons.nights_stay : Icons.wb_sunny),
-          //   color: widget.isDarkMode
-          //       ? const Color.fromARGB(255, 37, 37, 37)
-          //       : Colors.yellow[600],
-          //   onPressed: widget.toggleTheme,
-          // ),
           TextButton(
             onPressed: () {
               logout(context);
@@ -203,7 +196,7 @@ class _SubmenuState extends State<Submenu> {
                 Container(
                   height: 120.0,
                   decoration: const BoxDecoration(
-                    color: Color.fromARGB(255, 64, 113, 187),
+                    color: colorBlue,
                     borderRadius: BorderRadius.only(
                       bottomLeft: Radius.circular(50.0),
                       bottomRight: Radius.circular(50.0),
@@ -214,12 +207,8 @@ class _SubmenuState extends State<Submenu> {
                   padding: const EdgeInsets.only(left: 0, right: 0),
                   child: Card(
                     elevation: 3,
-                    color: widget.isDarkMode
-                        ? const Color.fromARGB(255, 81, 81, 81)
-                        : Colors.blue[500],
-                    shadowColor: widget.isDarkMode
-                        ? const Color.fromARGB(255, 109, 109, 109)
-                        : const Color.fromARGB(255, 67, 67, 67),
+                    color: colorDarkBlue,
+                    shadowColor: colorDarkBlue,
                     borderOnForeground: true,
                      margin: const EdgeInsets.only(top:10.0,left: 15.0, right:25.0),
                     shape: RoundedRectangleBorder(

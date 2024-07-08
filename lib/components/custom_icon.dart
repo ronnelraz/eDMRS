@@ -32,26 +32,45 @@ class _CustomIcon extends State<CustomIcon> {
     return  SizedBox(
         width: widget.width,  // Set the width of the SizedBox
         height: widget.height,  // Set the height of the SizedBox
-        child: Card(
-          color: widget.bgColor,
-          elevation: 4,
-          shadowColor: Colors.black26,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(13),
-          ),
-          child: Padding(
-            padding: const EdgeInsets.all(3.0),
-            child: Center(
-              child: FaIcon(
-                widget.icon,
-                size: widget.iconSize,
-                color: widget.iconColor,
+        child: Container(
+          child: Card(
+            color: widget.bgColor,
+            elevation: 4,
+            shadowColor: Colors.black26,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(13),
+            ),
+            child: Container(
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(13),
+             gradient: const LinearGradient(
+                begin: Alignment.topLeft,  // Adjust the gradient begin point
+                end: Alignment.bottomRight, 
+                stops: [
+                  0.0,
+                  0.7,
+                ],
+                colors: [
+                  Color(0xFF8721F3),
+                  Color(0xFF309CFB),
+                ],
+              )
+            ),
+              child: Padding(
+                padding: const EdgeInsets.all(3.0),
+                child: Center(
+                  child: FaIcon(
+                    widget.icon,
+                    size: widget.iconSize,
+                    color: widget.iconColor,
+                  ),
+                  //  Icon(
+                  //   icon,
+                  //   size: iconSize,
+                  //   color: iconColor,
+                  // ),
+                ),
               ),
-              //  Icon(
-              //   icon,
-              //   size: iconSize,
-              //   color: iconColor,
-              // ),
             ),
           ),
         ),
